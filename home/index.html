@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <script>
+  // Si hay ?code= en la URL y estamos en la PWA del kiosko → redirigir al scanner
+  // Si estamos en browser normal → dejar que home.js lo maneje (muestra ficha del alumno)
+  (function() {
+      const code = new URLSearchParams(window.location.search).get('code');
+      if (!code) return;
+      const isKiosko = window.matchMedia('(display-mode: standalone)').matches
+                    || window.navigator.standalone === true;
+      if (isKiosko) {
+          window.location.replace('/scanner?code=' + encodeURIComponent(code));
+      }
+      // Si NO es kiosko: NO redirigir — home.js lee el ?code= y muestra la ficha
+  })();
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+  <title>JR Stars | Portal del Atleta</title>
+  <meta name="description" content="Consulta el estatus de tu atleta en JR Stars Academia Deportiva, Cajamarca.">
+  <link rel="icon" href="/static/img/logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/home/home.css">
+  <script src="https://unpkg.com/html5-qrcode"></script>
+</head>
+
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tl">
+      <img src="/static/img/logo.png" alt="JR Stars"
+        onerror="this.style.display='none';this.parentElement.textContent='⭐'">
+    </div>
+    <div class="tn">JR <span>STARS</span></div>
+  </header>
+
+  <!-- PANEL 1: BÚSQUEDA POR DNI -->
+  <section id="p1">
+    <img src="/static/img/logo.png" alt="JR Stars" class="hero-logo" onerror="this.style.display='none'">
+
+    <div class="divider-rg"></div>
+    <h1 class="hero-h">INGRESA DNI<br><span>DEL ATLETA</span></h1>
+    <p class="hero-sub">// Academia JR Stars · Cajamarca</p>
+
+    <div class="sbox">
+      <input type="tel" id="dni" class="dni-in" placeholder="76543210" maxlength="8" inputmode="numeric"
+        autocomplete="off">
+      <button id="btnC" class="btn-cta" onclick="buscar()">⚽ CONSULTAR ESTATUS</button>
+
+      <div style="text-align:center;margin-top:1rem;margin-bottom:0.5rem">
+        <button class="btn-outline" style="font-size:0.8rem;padding:0.4rem 0.8rem" onclick="toggleScanner()">📷 Escanear
+          Código QR</button>
+      </div>
+      <div class="scan-hint" style="color:var(--gray);text-align:center;font-size:0.8rem;font-family:var(--font-cond)">o
+        acerque su medallón a su celular</div>
+
+      <div id="scanner-container" class="hidden"
+        style="margin-top:1rem;background:var(--card);padding:0.5rem;border:1px solid var(--border);border-radius:8px;">
+        <div id="reader" style="width:100%"></div>
+        <button class="btn-outline" style="width:100%;margin-top:0.5rem;font-size:0.8rem"
+          onclick="toggleScanner()">Cerrar Escáner</button>
+      </div>
+
+      <div id="ld" class="ld-row hidden">
+        <div class="sp"></div><span>Extrayendo datos...</span>
+      </div>
+      <div id="err" class="err-card hidden">
+        <div class="err-tag">// resultado</div>
+        <div class="err-h">ATLETA NO<br>REGISTRADO.</div>
+        <p class="err-p">¿Tu hijo tiene el nivel para el ranking de JR Stars? Las vacantes son limitadas.</p>
+        <a href="https://wa.me/51955515693?text=Hola,%20me%20podrian%20brindar%20informacion%20sobre%20la%20academia?"
+          target="_blank" class="btn-wa">💬 POSTULAR A LA ACADEMIA</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 2: FICHA DEL ATLETA -->
+  <section id="p2" class="hidden">
+    <button class="back-btn" onclick="volver()">← NUEVA CONSULTA</button>
+    <div id="card-wrap"></div>
+  </section>
+
+  <!-- PANEL 3: ECOSISTEMA (Kiosko + Ranking) -->
+  <section id="p3" class="hidden">
+
+    <div class="eco-sec">
+      <span class="eco-tag">// Nutrición post-entreno</span>
+      <h2 class="eco-h">KIOSKO <span>JR</span></h2>
+      <div class="k-card">
+        <div class="k-energy">
+          <div class="k-energy-lbl"><span>🔋 MONITOREO DE ENERGÍA</span><span>25% — BAJO</span></div>
+          <div class="k-bar">
+            <div class="k-fill"></div>
+          </div>
+        </div>
+        <div class="k-body">
+          <span class="k-lbl">Saldo actual</span>
+          <div class="k-bal">0 CRÉDITOS</div>
+          <p class="k-desc">Desgaste físico detectado tras las últimas sesiones. Asegura la recuperación muscular.</p>
+          <button class="btn-rec" onclick="document.getElementById('modal-yape').classList.add('open')">
+            ⚡ RECARGAR 4 CRÉDITOS (S/20)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="eco-sec">
+      <span class="eco-tag">// Élite de disciplina</span>
+      <h2 class="eco-h">TOP 5 <span>DE HIERRO</span></h2>
+      <div class="rk-card">
+        <div class="rk-head">
+          <div class="rk-title">🏆 ESTE MES</div>
+          <div class="rk-sub">Atletas con mayor racha activa de asistencia</div>
+        </div>
+        <div id="ranking"></div>
+      </div>
+      <div class="ft-block">
+        <div class="ft-links">
+          <a href="https://maps.google.com/maps?q=cajamarca+peru" target="_blank">📍 Cajamarca, Perú</a>
+          <a href="https://facebook.com" target="_blank">📘 Facebook</a>
+          <a href="https://instagram.com" target="_blank">📸 Instagram</a>
+        </div>
+        <div class="ft-copy">
+          JR Stars Academia © 2026 &nbsp;·&nbsp; <a href="tel:+51955515693">955 515 693</a>
+          <br><a href="/admin/login">Administrador</a>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- MODAL YAPE / PLIN -->
+  <div id="modal-yape" class="modal-overlay">
+    <div class="modal-card">
+      <button class="m-close" onclick="document.getElementById('modal-yape').classList.remove('open')">✕</button>
+      <div class="m-title">YAPE / PLIN</div>
+      <p class="m-sub">Escanea el QR y envía tu comprobante por WhatsApp.</p>
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=955515693&color=0a0a0a&bgcolor=D4A017"
+        alt="QR Yape" class="m-qr">
+      <div class="m-num">955 515 693</div>
+      <a href="https://wa.me/51955515693?text=Yapé%20S/20%20para%20créditos%20de%20kiosko."
+        target="_blank" class="btn-wa">📲 ENVIAR COMPROBANTE</a>
+    </div>
+  </div>
+
+  <script src="/static/home/home.js"></script>
+</body>
+
+</html>

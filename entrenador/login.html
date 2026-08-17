@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JR Stars — Acceso Entrenador</title>
+    <link rel="stylesheet" href="/static/theme.css">
+    <link rel="stylesheet" href="/static/entrenador/login.css">
+    <link rel="icon" href="/static/favicon-entrenador.ico" type="image/x-icon">
+</head>
+
+<body>
+    <div class="access-box">
+        <div class="access-logo">
+            <img src="/static/img/logo.png" alt="logo" onload="this.classList.add('loaded')">
+            <span>🏃</span>
+        </div>
+        <div class="access-title">JR <span>STARS</span></div>
+        <div class="access-sub">// Panel Entrenador</div>
+
+        <div class="spinner" id="spinner"></div>
+        <div class="status-msg" id="status-msg">Verificando acceso...</div>
+        <div class="no-access" id="no-access">
+            Este enlace es inválido o fue revocado.<br>
+            Solicita un nuevo acceso al administrador.
+        </div>
+    </div>
+
+    <script src="/static/entrenador/login.js"></script>
+</body>
+
+</html>
