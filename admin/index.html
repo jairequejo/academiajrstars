@@ -5,10 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JR Stars — Admin Panel</title>
-  <link rel="stylesheet" href="/static/theme.css">
-  <link rel="stylesheet" href="/static/admin/admin.css">
-  <link rel="icon" href="/static/favicon-admin.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="icon" href="/favicon-admin.ico" type="image/x-icon">
   <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabaseClient.js"></script>
 </head>
 
 <body>
@@ -18,9 +20,7 @@
     </button>
     <a href="/" class="topbar-brand">
       <div class="topbar-logo-circle">
-        <img src="/static/img/logo.png" alt="logo" onload="this.classList.add('loaded')"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-        <span class="logo-fallback">⭐</span>
+        <img src="/img/escudo.png" alt="logo" style="width: 40px; height: auto; filter: drop-shadow(0 0 8px var(--red-glow));">
       </div>
       <span class="topbar-name">JR <span>STARS</span></span>
     </a>
@@ -656,7 +656,7 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="/static/admin/admin.js"></script>
+  <script src="/js/admin.js"></script>
 </body>
 
 </html>

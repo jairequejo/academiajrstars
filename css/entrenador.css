@@ -1,0 +1,704 @@
+/* css/entrenador.css — Awwwards-Worthy Dark E-Sports Aesthetic */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700&family=Barlow:wght@400;600;700;900&display=swap');
+
+:root {
+  /* Colors */
+  --bg-gradient: radial-gradient(circle at top, #2b0b0a 0%, #08080a 70%, #000000 100%);
+  --bg-surface: rgba(15, 15, 18, 0.6);
+  --bg-glass: rgba(10, 10, 12, 0.45);
+  --text: #ffffff;
+  --text-dim: #8b8b99;
+  
+  --accent: #ff2a2a;
+  --accent-glow: rgba(255, 42, 42, 0.6);
+  --accent-gold: #ffbe0b;
+  
+  --border: rgba(255, 42, 42, 0.15);
+  --border-glass: rgba(255, 255, 255, 0.05);
+  
+  /* Status Colors */
+  --status-present: #00ff55;
+  --status-present-glow: rgba(0, 255, 85, 0.5);
+  --status-absent: #4f4f5a;
+  --status-warning: #ffbe0b;
+  --status-warning-glow: rgba(255, 190, 11, 0.5);
+  --status-debe: #ff003c;
+  --status-debe-glow: rgba(255, 0, 60, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: #000;
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html { overflow-x: hidden; }
+
+/* ---------------- TOPBAR ---------------- */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 90px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border-bottom: 1px solid var(--border-glass);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 -2px 0 var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: 1000;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  text-decoration: none;
+}
+
+.topbar-logo-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+  border-radius: 50%;
+  padding: 8px;
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.topbar-logo-circle img {
+  width: 44px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+
+.topbar-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.4rem;
+  letter-spacing: 2px;
+  color: #fff;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+.topbar-name span {
+  color: var(--accent);
+  text-shadow: 0 0 15px var(--accent-glow);
+}
+
+.topbar-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.topbar-role-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  color: #000;
+  background: var(--accent-gold);
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 0.85rem;
+  box-shadow: 0 0 15px var(--status-warning-glow);
+}
+
+.topbar-email {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-top: 0.3rem;
+  font-weight: 600;
+}
+
+
+/* ---------------- LAYOUT ---------------- */
+.coach-layout {
+  margin-top: 90px;
+  padding: 2rem 1.2rem 130px;
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+.tab-page {
+  display: none;
+}
+
+.tab-page.active {
+  display: block;
+  animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.page-header {
+  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  color: #fff;
+  letter-spacing: 2px;
+  text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+}
+
+.page-title span {
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+
+/* ---------------- SCANNER ---------------- */
+.scanner-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+}
+
+.scanner-box::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,42,42,0.03) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+#reader {
+  width: 100%;
+  border: 2px dashed var(--accent);
+  border-radius: 12px;
+  position: relative;
+  z-index: 1;
+  background: rgba(0,0,0,0.4);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+
+.scan-hint {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px var(--status-warning-glow);
+  position: relative;
+  z-index: 1;
+}
+
+
+/* ---------------- HISTORY ---------------- */
+.history-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.2rem;
+  border-bottom: 2px solid var(--border-glass);
+  padding-bottom: 0.8rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+
+#scan-history {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.history-item:active {
+  transform: scale(0.98);
+}
+
+.h-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.history-item.success .h-dot {
+  background: var(--status-present);
+  box-shadow: 0 0 15px var(--status-present-glow), 0 0 5px #fff;
+}
+
+.history-item.warning .h-dot {
+  background: var(--status-warning);
+  box-shadow: 0 0 15px var(--status-warning-glow), 0 0 5px #fff;
+}
+
+.history-item.debe .h-dot {
+  background: var(--status-debe);
+  box-shadow: 0 0 15px var(--status-debe-glow), 0 0 5px #fff;
+}
+
+.h-name {
+  flex: 1;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+}
+
+.h-time {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
+
+/* ---------------- ASISTENCIA STATS ---------------- */
+.asistencia-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  text-align: center;
+  padding: 1.8rem 0.5rem;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.stat-pill-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;
+  line-height: 1;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.stat-pill-num.green {
+  color: var(--status-present);
+  text-shadow: 0 0 20px var(--status-present-glow);
+}
+
+.stat-pill-num.red {
+  color: var(--status-debe);
+  text-shadow: 0 0 20px var(--status-debe-glow);
+}
+
+.stat-pill-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+
+/* ---------------- ASISTENCIA FILTROS ---------------- */
+.asistencia-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+}
+
+.chip {
+  flex: 1;
+  min-width: 90px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  color: var(--text-dim);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  padding: 1rem 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.chip.active {
+  background: rgba(255, 42, 42, 0.15);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow), inset 0 0 10px rgba(255, 42, 42, 0.2);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.chip.chip-rojo.active {
+  background: rgba(255, 0, 60, 0.15);
+  border-color: var(--status-debe);
+  color: #fff;
+  box-shadow: 0 0 20px var(--status-debe-glow), inset 0 0 10px rgba(255, 0, 60, 0.2);
+}
+
+
+/* ---------------- ALUMNO CARDS ---------------- */
+.alumno-card {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem;
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  background: var(--bg-surface);
+  margin-bottom: 0.8rem;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.alumno-card.presente {
+  border-left: 6px solid var(--status-present);
+  background: linear-gradient(90deg, rgba(0,255,85,0.05) 0%, rgba(0,0,0,0) 100%), var(--bg-surface);
+}
+
+.alumno-card.debe {
+  border-left: 6px solid var(--status-debe);
+  background: linear-gradient(90deg, rgba(255,0,60,0.05) 0%, rgba(0,0,0,0) 100%), var(--bg-surface);
+}
+
+.alumno-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid var(--border-glass);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #fff;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+}
+
+.alumno-card.presente .alumno-avatar {
+  border-color: var(--status-present);
+  box-shadow: 0 0 15px var(--status-present-glow);
+}
+
+.alumno-card.debe .alumno-avatar {
+  border-color: var(--status-debe);
+  box-shadow: 0 0 15px var(--status-debe-glow);
+}
+
+.alumno-info {
+  flex: 1;
+}
+
+.alumno-nombre {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.6rem;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+  margin-bottom: 0.2rem;
+}
+
+.alumno-meta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.alumno-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.badge-presente {
+  background: rgba(0, 255, 85, 0.15);
+  color: var(--status-present);
+  border: 1px solid rgba(0, 255, 85, 0.3);
+  text-shadow: 0 0 8px var(--status-present-glow);
+  box-shadow: 0 0 10px rgba(0, 255, 85, 0.1);
+}
+
+.badge-debe {
+  background: rgba(255, 0, 60, 0.15);
+  color: var(--status-debe);
+  border: 1px solid rgba(255, 0, 60, 0.3);
+  text-shadow: 0 0 8px var(--status-debe-glow);
+  box-shadow: 0 0 10px rgba(255, 0, 60, 0.1);
+}
+
+
+/* ---------------- BOTTOM NAV - MASSIVE ---------------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 100px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  display: flex;
+  border-top: 1px solid var(--border-glass);
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px); /* iPhone notch support */
+}
+
+.bnav-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--border-glass);
+  color: var(--text-dim);
+  font-size: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.bnav-btn:last-child {
+  border-right: none;
+}
+
+.bnav-btn:active {
+  background: rgba(255,255,255,0.05);
+}
+
+.bnav-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 1.5px;
+  margin-top: 0.5rem;
+  text-transform: uppercase;
+}
+
+.bnav-btn.active {
+  color: var(--accent);
+  background: radial-gradient(circle at bottom, rgba(255, 42, 42, 0.15) 0%, transparent 70%);
+  text-shadow: 0 0 15px var(--accent-glow);
+}
+
+.bnav-btn.active i {
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+  transform: translateY(-2px);
+}
+
+
+/* ---------------- FLASH OVERLAY ---------------- */
+.flash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5,5,8,0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 2rem;
+  text-align: center;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.flash-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+  animation: pulseFlash 0.3s ease-out;
+}
+
+@keyframes pulseFlash {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.flash-icon {
+  font-size: 8rem;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));
+}
+
+.flash-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 1rem;
+  color: #fff;
+  text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+  letter-spacing: 2px;
+}
+
+.flash-status {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.flash-overlay.success .flash-icon { color: var(--status-present); text-shadow: 0 0 40px var(--status-present-glow); }
+.flash-overlay.success .flash-status { color: var(--status-present); text-shadow: 0 0 20px var(--status-present-glow); }
+
+.flash-overlay.debe .flash-icon { color: var(--status-debe); text-shadow: 0 0 40px var(--status-debe-glow); }
+.flash-overlay.debe .flash-status { color: var(--status-debe); text-shadow: 0 0 20px var(--status-debe-glow); }
+
+.flash-bar {
+  width: 100%;
+  max-width: 400px;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  margin-top: 3rem;
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.flash-bar::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; height: 100%;
+  width: 100%;
+  animation: shrink 3s linear forwards;
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.flash-overlay.success .flash-bar::after { background: var(--status-present); box-shadow: 0 0 15px var(--status-present-glow); }
+.flash-overlay.debe .flash-bar::after { background: var(--status-debe); box-shadow: 0 0 15px var(--status-debe-glow); }
+
+
+/* ---------------- FORMS & BUTTONS ---------------- */
+.btn {
+  padding: 1.2rem 2rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  background: var(--accent);
+  color: #FFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(255, 42, 42, 0.4), inset 0 2px 0 rgba(255,255,255,0.2);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.btn:active {
+  transform: translateY(2px) scale(0.98);
+  box-shadow: 0 4px 15px rgba(255, 42, 42, 0.4);
+}
+
+.btn-outline {
+  background: rgba(255, 42, 42, 0.1);
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 15px rgba(255, 42, 42, 0.2);
+}
+
+.btn-outline:active {
+  background: rgba(255, 42, 42, 0.3);
+}
+
+.input-jr, .select-jr {
+  width: 100%;
+  padding: 1.2rem;
+  font-family: 'Barlow', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  outline: none;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.input-jr:focus, .select-jr:focus {
+  border-color: var(--accent);
+  background: rgba(0,0,0,0.8);
+  box-shadow: 0 0 0 4px rgba(255, 42, 42, 0.15), inset 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.input-jr::placeholder {
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+

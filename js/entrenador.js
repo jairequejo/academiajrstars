@@ -7,7 +7,7 @@ const EMAIL_KEY = 'jr_entrenador_email';
 const SIGNING_KEY_SK = 'jr_signing_key';     // localStorage
 
 const token = localStorage.getItem(TOKEN_KEY);
-if (!token) window.location.href = '/entrenador/login';
+if (!token) window.location.href = '/entrenador/login.html';
 
 document.addEventListener('DOMContentLoaded', () => {
     const nameEl = document.getElementById('coach-email');
@@ -20,7 +20,7 @@ let pendingCount = 0;
 
 function initSyncWorker() {
     if (!window.Worker) return;
-    syncWorker = new Worker('/static/entrenador/sync-worker.js');
+    syncWorker = new Worker('/entrenador/sync-worker.js');
     syncWorker.postMessage({ type: 'set_token', token });
     syncWorker.postMessage({ type: 'count' });
 
@@ -248,11 +248,11 @@ async function handleScan(decodedText) {
 
         // Si hay conexión, también llamar al servidor para dedup inmediato
         if (navigator.onLine) {
-            fetch('/attendance/scan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code })
-            }).catch(() => { });  // ignorar errores — ya está en cola
+            window.supabaseClient.from('attendance').insert({
+                student_id: parsed.student_id,
+                created_at: new Date().toISOString(),
+                source: 'scanner'
+            }).then(() => {}).catch(() => {});
         }
 
         scheduleResume(); return;
@@ -266,27 +266,105 @@ async function handleScan(decodedText) {
         scheduleResume(); return;
     }
 
-    // Online: petición normal al servidor
+    // Online: petición normal a Supabase
     try {
-        const res = await fetch('/attendance/scan', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code })
+        let student_id = null;
+        let nombre_final = "Desconocido";
+        let valid_until = null;
+        let is_active = true;
+        let credential_id = null;
+
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(code);
+        if (isUuid) {
+            const { data } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').eq('id', code).maybeSingle();
+            if (data) { student_id = data.id; nombre_final = data.full_name; valid_until = data.valid_until; is_active = data.is_active; }
+        } else if (code.length === 8 && /^[0-9a-fA-F]+$/.test(code)) {
+            const { data } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').ilike('id', `${code}%`).maybeSingle();
+            if (data) {
+                student_id = data.id; nombre_final = data.full_name; valid_until = data.valid_until; is_active = data.is_active;
+            } else {
+                const { data: cred } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true).maybeSingle();
+                if (cred) {
+                    student_id = cred.student_id; credential_id = cred.id;
+                    const st = cred.students;
+                    if (st) {
+                        const s = Array.isArray(st) ? st[0] : st;
+                        nombre_final = s.full_name; valid_until = s.valid_until; is_active = s.is_active;
+                    }
+                }
+            }
+        } else {
+            const { data: cred } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true).maybeSingle();
+            if (cred) {
+                student_id = cred.student_id; credential_id = cred.id;
+                const st = cred.students;
+                if (st) {
+                    const s = Array.isArray(st) ? st[0] : st;
+                    nombre_final = s.full_name; valid_until = s.valid_until; is_active = s.is_active;
+                }
+            }
+        }
+
+        if (!student_id) {
+            playError();
+            showFlash('error', 'INVÁLIDO', 'Alumno o credencial no encontrada.');
+            scheduleResume(); return;
+        }
+
+        if (is_active === false) {
+            playDebe();
+            showFlash('debe', nombre_final, 'Este alumno está marcado como inactivo.');
+            addHistory('debe', nombre_final);
+            scheduleResume(); return;
+        }
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        let debe = false;
+        let detalle = '';
+        if (valid_until) {
+            const [y, m, d] = valid_until.split('-');
+            const fv = new Date(y, m - 1, d);
+            if (fv < hoy) {
+                debe = true;
+                const diffDays = Math.ceil(Math.abs(hoy - fv) / (1000 * 60 * 60 * 24));
+                detalle = `Venció hace ${diffDays} día(s).`;
+            }
+        }
+
+        if (debe) {
+            playDebe();
+            showFlash('debe', nombre_final, 'Mensualidad vencida. ' + detalle);
+            addHistory('debe', nombre_final);
+            scheduleResume(); return;
+        }
+
+        const todayStartUTC = new Date();
+        todayStartUTC.setUTCHours(0,0,0,0);
+        const { data: attData } = await window.supabaseClient.from('attendance')
+            .select('id').eq('student_id', student_id).gte('created_at', todayStartUTC.toISOString()).limit(1);
+
+        if (attData && attData.length > 0) {
+            playWarning();
+            showFlash('warning', nombre_final, 'Este alumno ya marcó asistencia hoy.');
+            addHistory('warning', nombre_final);
+            scheduleResume(); return;
+        }
+
+        await window.supabaseClient.from('attendance').insert({
+            student_id: student_id,
+            credential_id: credential_id,
+            created_at: new Date().toISOString(),
+            source: 'scanner'
         });
-        const data = await res.json();
-        const nombre = data.student_name || 'Desconocido';
-        const estado = data.status || 'error';
 
-        if (estado === 'success') playSuccess();
-        else if (estado === 'warning') playWarning();
-        else if (estado === 'debe') playDebe();
-        else playError();
-
-        showFlash(estado, nombre, data.detalle || '');
-        addHistory(estado, nombre);
-    } catch {
+        playSuccess();
+        showFlash('success', nombre_final, '');
+        addHistory('success', nombre_final);
+    } catch (e) {
+        console.error(e);
         playError();
-        showFlash('error', 'SIN CONEXIÓN', '');
+        showFlash('error', 'ERROR', 'Fallo al procesar QR.');
     }
 
     scheduleResume();
@@ -404,13 +482,54 @@ async function loadAsistencia() {
     if (listEl) listEl.innerHTML = '<div class="loading-msg">Cargando...</div>';
 
     try {
-        const res = await fetch('/entrenador/asistencia/hoy', {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const todayStart = new Date();
+        todayStart.setUTCHours(0, 0, 0, 0);
+        const startIso = todayStart.toISOString();
+
+        const [stRes, attRes] = await Promise.all([
+            window.supabaseClient.from('students')
+                .select('id, full_name, horario, turno, valid_until, sede, grupo')
+                .eq('is_active', true)
+                .order('full_name'),
+            window.supabaseClient.from('attendance')
+                .select('student_id, created_at')
+                .gte('created_at', startIso)
+        ]);
+
+        if (stRes.error) throw stRes.error;
+        if (attRes.error) throw attRes.error;
+
+        const attendedIds = {};
+        for (const r of attRes.data) {
+            attendedIds[r.student_id] = r.created_at;
+        }
+
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        asistenciaData = stRes.data.map(student => {
+            let debe = false;
+            if (student.valid_until) {
+                const [y, m, d] = student.valid_until.split('-');
+                const fechaVenc = new Date(y, m - 1, d);
+                if (fechaVenc < hoy) debe = true;
+            }
+            return {
+                id: student.id,
+                full_name: student.full_name,
+                horario: student.horario || "",
+                turno: student.turno || "",
+                sede: student.sede || "",
+                grupo: student.grupo || "",
+                present: !!attendedIds[student.id],
+                time: attendedIds[student.id],
+                debe,
+                valid_until: student.valid_until
+            };
         });
-        if (!res.ok) throw new Error();
-        asistenciaData = await res.json();
         renderAsistencia();
-    } catch {
+    } catch (e) {
+        console.error(e);
         if (listEl) listEl.innerHTML = '<div class="loading-msg" style="color:var(--red2)">Error al cargar. ¿Hay conexión?</div>';
     }
 }
@@ -495,6 +614,43 @@ function renderAsistencia() {
             <div class="alumno-info">
                 <div class="alumno-nombre">${a.full_name}</div>
                 <div class="alumno-meta" style="font-size:0.7rem">${meta}</div>
-            </div>${badge}</div>`;
+            </div>
+            <button onclick="abrirBiometria('${a.id}', '${a.full_name.replace(/'/g, "\\'")}')" style="background:#ffff00; border:none; padding:5px 10px; border-radius:5px; font-weight:bold; cursor:pointer;">⏱</button>
+            ${badge}</div>`;
     }).join('')}</div>`;
+}
+
+function abrirBiometria(id, nombre) {
+    document.getElementById('bio-student-id').value = id;
+    document.getElementById('bio-student-name').innerText = nombre;
+    document.getElementById('bio-talla').value = '';
+    document.getElementById('bio-peso').value = '';
+    document.getElementById('bio-sprint').value = '';
+    document.getElementById('modal-biometria').classList.add('show');
+}
+
+async function guardarBiometria() {
+    const id = document.getElementById('bio-student-id').value;
+    const talla = parseFloat(document.getElementById('bio-talla').value) || null;
+    const peso = parseFloat(document.getElementById('bio-peso').value) || null;
+    const sprint = parseFloat(document.getElementById('bio-sprint').value) || null;
+    
+    if (!id) return;
+    
+    // Asumimos que tiempo_sprint y agilidad ya están en DB (o se ignoran sin error si el backend lo permite)
+    // Para MVP, lo enviamos. Supabase ignorará columnas faltantes si insertas por API o fallará, 
+    // pero el usuario tiene el SQL de ALTER TABLE.
+    const { error } = await window.supabaseClient.from('biometria').insert({
+        student_id: id,
+        talla: talla,
+        peso: peso,
+        tiempo_sprint: sprint
+    });
+    
+    if (error) {
+        alert("Error al guardar: " + error.message + " (Recuerde ejecutar el ALTER TABLE)");
+    } else {
+        alert("Biometría guardada correctamente");
+        document.getElementById('modal-biometria').classList.remove('show');
+    }
 }

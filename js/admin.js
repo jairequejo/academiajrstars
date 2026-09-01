@@ -2,7 +2,7 @@
 
 // ── AUTH ──────────────────────────────────────────────
 const token = localStorage.getItem('jr_admin_token');
-if (!token) window.location.href = '/admin/login';
+if (!token) window.location.href = '/admin/login.html';
 
 document.getElementById('admin-email').textContent =
   localStorage.getItem('jr_admin_email') || '';
@@ -15,7 +15,7 @@ const H = {
 function logout() {
   localStorage.removeItem('jr_admin_token');
   localStorage.removeItem('jr_admin_email');
-  window.location.href = '/admin/login';
+  window.location.href = '/admin/login.html';
 }
 
 // ── SIDEBAR MOBILE ────────────────────────────────────
@@ -79,17 +79,82 @@ function showToast(msg, type = 'ok') {
 }
 
 // ── STATS ─────────────────────────────────────────────
+async function generate_jrs_code(student_id, full_name, valid_until) {
+    const short_id = student_id.substring(0, 8);
+    let valid_until_str = "20991231";
+    if (valid_until) {
+        const d = new Date(valid_until);
+        d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
+        if (!isNaN(d)) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            valid_until_str = `${y}${m}${dd}`;
+        }
+    }
+    const firstName = full_name ? full_name.trim().split(' ')[0] : "USER";
+    const name_b64url = btoa(unescape(encodeURIComponent(firstName))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    
+    const message = `${short_id}|${valid_until_str}|${name_b64url}`;
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+        'raw', enc.encode('default_secret_key_123'),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false, ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+    const hashArray = Array.from(new Uint8Array(signature));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return `JRS:${short_id}:${valid_until_str}:${name_b64url}:${hashHex.substring(0, 16)}`;
+}
+
+
+async function generate_jrs_code(student_id, full_name, valid_until) {
+    const short_id = student_id.substring(0, 8);
+    let valid_until_str = "20991231";
+    if (valid_until) {
+        const d = new Date(valid_until);
+        d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
+        if (!isNaN(d)) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            valid_until_str = `${y}${m}${dd}`;
+        }
+    }
+    const firstName = full_name ? full_name.trim().split(' ')[0] : "USER";
+    const name_b64url = btoa(unescape(encodeURIComponent(firstName))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    
+    const message = `${short_id}|${valid_until_str}|${name_b64url}`;
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+        'raw', enc.encode('default_secret_key_123'),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false, ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', key, enc.encode(message));
+    const hashArray = Array.from(new Uint8Array(signature));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    
+    return `JRS:${short_id}:${valid_until_str}:${name_b64url}:${hashHex.substring(0, 16)}`;
+}
+
 async function loadStats() {
   try {
-    const res = await fetch('/admin/stats', { headers: H });
-    if (res.status === 401) { logout(); return; }
-    const d = await res.json();
-    document.getElementById('s-total').textContent = d.total_alumnos;
-    document.getElementById('s-presentes').textContent = d.presentes_hoy;
-    document.getElementById('s-ausentes').textContent = d.ausentes_hoy;
-    document.getElementById('s-fecha').textContent = d.fecha;
-  } catch { }
+    const hoy = new Date();
+    const hoyStr = hoy.toISOString().split('T')[0];
+
+    const { count: totalAlumnos } = await window.supabaseClient.from('students').select('id', {count: 'exact', head: true}).eq('is_active', true);
+    const { count: presentesHoy } = await window.supabaseClient.from('attendance').select('id', {count: 'exact', head: true}).gte('created_at', `${hoyStr}T00:00:00`).lte('created_at', `${hoyStr}T23:59:59`);
+    
+    document.getElementById('s-total').textContent = totalAlumnos || 0;
+    document.getElementById('s-presentes').textContent = presentesHoy || 0;
+    document.getElementById('s-ausentes').textContent = Math.max(0, (totalAlumnos || 0) - (presentesHoy || 0));
+    document.getElementById('s-fecha').textContent = hoyStr;
+  } catch (e) { console.error(e); }
 }
+
 
 // ── SCANNER ───────────────────────────────────────────
 let _adminScanner = null;
@@ -135,8 +200,8 @@ function initAdminScanner() {
             );
         })
         .catch(err => {
-            console.error('[Admin Scanner] Error:', err);
-            readerEl.innerHTML = `<p style="color:red;font-family:monospace">Error de cámara: ${err}</p>`;
+            console.warn('[Admin Scanner] No camera available or permissions denied. Scanner will be dormant.');
+            readerEl.innerHTML = `<div style="padding:1rem;color:var(--gray)">No camera detected. Used for QR only if connected.</div>`;
         });
         
     initNFC();
@@ -144,11 +209,14 @@ function initAdminScanner() {
 
 function stopAdminScanner() {
     if (_adminScanner) {
-        _adminScanner.stop().catch(() => {});
+        try {
+            _adminScanner.stop().catch(() => {});
+        } catch(e) {}
         _adminScanner = null;
         _adminScannerStarted = false;
     }
 }
+
 
 async function onAdminQRScanned(code) {
     if (!code) return;
@@ -165,7 +233,7 @@ async function onAdminQRScanned(code) {
     try {
         const res = await fetch('/attendance/scan', {
             method: 'POST',
-            headers: H,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code })
         });
 
@@ -185,7 +253,6 @@ async function onAdminQRScanned(code) {
             }
         }
 
-        // Agregar al historial
         if (historyEl) {
             const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const li = document.createElement('li');
@@ -206,6 +273,7 @@ async function onAdminQRScanned(code) {
         }
     }
 }
+
 
 
 // ── NFC (Admin Scanner) ───────────────────────────────
@@ -278,11 +346,12 @@ async function initNFC() {
 }
 
 
+
 async function processAdminScan(code) {
   try {
     const res = await fetch('/attendance/scan', {
       method: 'POST',
-      headers: H,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code })
     });
     const d = await res.json();
@@ -310,15 +379,18 @@ async function processAdminScan(code) {
 }
 
 
+
 // ── ALUMNOS (Registro + Cobro Inicial y Tabla Semáforo) ──
 let alumnosData = []; // cache para filtros
 
+
 async function loadAlumnos() {
-  const res = await fetch('/admin/alumnos', { headers: H });
-  if (res.status === 401) { logout(); return; }
-  alumnosData = await res.json();
+  const { data, error } = await window.supabaseClient.from('students').select('*').order('full_name');
+  if (error) { showToast('Error cargando alumnos', 'error'); return; }
+  alumnosData = data || [];
   renderAlumnos(alumnosData);
 }
+
 
 function aplicarFiltros() {
   const estado = document.getElementById('filtro-estado')?.value || '';
@@ -441,6 +513,7 @@ function renderAlumnos(data) {
   }
 }
 
+
 async function crearAlumno() {
   const nombre = document.getElementById('a-nombre').value.trim();
   const dni = document.getElementById('a-dni').value.trim();
@@ -453,66 +526,95 @@ async function crearAlumno() {
   const pagoMes = parseFloat(document.getElementById('a-pago-mes').value) || 0;
   const pagoMat = parseFloat(document.getElementById('a-pago-mat').value) || 0;
   const metodo = document.getElementById('a-metodo').value;
+  const horario = document.getElementById('a-horario').value;
+  const turno = document.getElementById('a-turno')?.value || null;
 
   if (!nombre) return showToast('El nombre es obligatorio', 'error');
 
-  const res = await fetch('/admin/alumnos', {
-    method: 'POST',
-    headers: H,
-    body: JSON.stringify({
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() + 30);
+  const fecha_vencimiento_str = hoy.toISOString().split('T')[0];
+
+  const insert_data = {
       full_name: nombre,
       dni: dni || null,
       fecha_nacimiento: fechaNac || null,
-      parent_name: apoderado || null,
-      parent_phone: telefono || null,
+      horario: horario,
       sede: sede || null,
+      turno: turno || null,
       grupo: grupo || null,
       categoria: categoria || null,
-      horario: document.getElementById('a-horario').value,
-      turno: document.getElementById('a-turno')?.value || null,
-      pago_mensualidad: pagoMes,
-      pago_matricula: pagoMat,
-      metodo_pago: metodo
-    })
-  });
+      is_active: true,
+      batido_credits: 0,
+      valid_until: fecha_vencimiento_str,
+      parent_name: apoderado || null,
+      parent_phone: telefono || null,
+      tarifa_mensual: pagoMes
+  };
 
-  if (res.ok) {
-    document.getElementById('a-nombre').value = '';
-    document.getElementById('a-dni').value = '';
-    document.getElementById('a-fecha-nacimiento').value = '';
-    document.getElementById('a-apoderado').value = '';
-    document.getElementById('a-telefono').value = '';
-    document.getElementById('a-sede').value = '';
-    document.getElementById('a-grupo').value = '';
-    document.getElementById('a-categoria').value = '';
-    showToast('✅ Alumno inscrito. Cobro registrado.');
-    loadAlumnos();
-  } else {
-    const err = await res.json().catch(() => ({}));
-    showToast(`❌ ${err.detail || 'Error. ¿DNI duplicado?'}`, 'error');
+  const { data: nuevo_alumno_data, error: insertError } = await window.supabaseClient.from('students').insert(insert_data).select();
+  if (insertError) { showToast(`❌ Error: ${insertError.message}`, 'error'); return; }
+  const nuevo_alumno = nuevo_alumno_data[0];
+
+  try {
+      const codigo_qr = await generate_jrs_code(nuevo_alumno.id, nuevo_alumno.full_name, fecha_vencimiento_str);
+      await window.supabaseClient.from('credentials').insert({
+          student_id: nuevo_alumno.id,
+          code: codigo_qr,
+          is_active: true
+      });
+  } catch (e) {
+      await window.supabaseClient.from('students').delete().eq('id', nuevo_alumno.id);
+      showToast('❌ Error al generar credencial', 'error');
+      return;
   }
+
+  if (pagoMes > 0) {
+      await window.supabaseClient.from('mensualidades').insert({
+          student_id: nuevo_alumno.id,
+          monto: pagoMes,
+          metodo_pago: metodo,
+          fecha_inicio: new Date().toISOString().split('T')[0],
+          fecha_vencimiento: fecha_vencimiento_str
+      });
+  }
+
+  document.getElementById('a-nombre').value = '';
+  document.getElementById('a-dni').value = '';
+  document.getElementById('a-fecha-nacimiento').value = '';
+  document.getElementById('a-apoderado').value = '';
+  document.getElementById('a-telefono').value = '';
+  document.getElementById('a-sede').value = '';
+  document.getElementById('a-grupo').value = '';
+  document.getElementById('a-categoria').value = '';
+  showToast('✅ Alumno inscrito. Cobro registrado.');
+  loadAlumnos();
 }
+
+
 
 async function toggleEstadoAlumno(id, nombre, reactivar) {
   const accion = reactivar ? 'Reactivar' : 'Desactivar';
   if (!confirm(`¿${accion} a ${nombre}?`)) return;
-  await fetch(`/admin/alumnos/${id}`, { method: 'DELETE', headers: H });
+  const { error } = await window.supabaseClient.from('students').update({is_active: reactivar}).eq('id', id);
+  if (error) { showToast('Error al actualizar', 'error'); return; }
   showToast(`✅ Alumno actualizado`);
   loadAlumnos();
 }
 
+
+
 async function verQR(studentId) {
   try {
-    const res = await fetch(`/credentials/${studentId}`, { headers: H });
-    const data = await res.json();
+    const { data } = await window.supabaseClient.from('credentials').select('code').eq('student_id', studentId).eq('is_active', true).limit(1);
     let codeStr = '';
-    if (data.length > 0) {
+    if (data && data.length > 0) {
       codeStr = data[0].code;
     } else {
       showToast('Generando nuevo QR...', 'ok');
-      const gen = await fetch(`/credentials/generate/${studentId}`, { method: 'POST', headers: H });
-      const d = await gen.json();
-      codeStr = d.code;
+      const { data: stData } = await window.supabaseClient.from('students').select('full_name, valid_until').eq('id', studentId).single();
+      codeStr = await generate_jrs_code(studentId, stData?.full_name || '', stData?.valid_until);
+      await window.supabaseClient.from('credentials').insert({student_id: studentId, code: codeStr, is_active: true});
     }
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(codeStr)}`;
     window.open(qrImageUrl, '_blank');
@@ -520,6 +622,7 @@ async function verQR(studentId) {
     showToast('❌ Error al obtener el QR.', 'error');
   }
 }
+
 
 // ── MODAL EDITAR ALUMNO ────────────────────────────────────
 function abrirModalEdicion(student_id) {
@@ -559,15 +662,15 @@ function cerrarModalEdicionOutside(event) {
   }
 }
 
+
 async function guardarEdicionAlumno(event) {
   event.preventDefault();
 
   const id = document.getElementById('edit-id').value;
   if (!id) return;
 
-  // Recopilar y normalizar campos. Excluir strings vacíos → null para no enviarlos
-  const val = (id) => {
-    const el = document.getElementById(id);
+  const val = (elId) => {
+    const el = document.getElementById(elId);
     return el ? el.value.trim() : null;
   };
 
@@ -602,7 +705,6 @@ async function guardarEdicionAlumno(event) {
   const categoria = val('edit-categoria');
   if (categoria) payload.categoria = categoria;
 
-  // tarifa_mensual: siempre incluir en el payload para poder enviar null o 0
   const tarifaInput = document.getElementById('edit-tarifa').value;
   payload.tarifa_mensual = tarifaInput === '' ? null : parseFloat(tarifaInput);
 
@@ -614,26 +716,14 @@ async function guardarEdicionAlumno(event) {
     return;
   }
 
-  try {
-    const res = await fetch(`/admin/alumnos/${id}`, {
-      method: 'PATCH',
-      headers: H,
-      body: JSON.stringify(payload)
-    });
-
-    if (res.ok) {
-      cerrarModalEdicion();
-      showToast('✅ Alumno actualizado correctamente');
-      loadAlumnos();
-    } else {
-      const err = await res.json().catch(() => ({}));
-      const msg = err.detail || 'Error al actualizar';
-      showToast(`❌ ${msg}`, 'error');
-    }
-  } catch {
-    showToast('❌ Error de conexión', 'error');
-  }
+  const { error } = await window.supabaseClient.from('students').update(payload).eq('id', id);
+  if (error) { showToast(`❌ Error: ${error.message}`, 'error'); return; }
+  
+  cerrarModalEdicion();
+  showToast('✅ Alumno actualizado correctamente');
+  loadAlumnos();
 }
+
 
 // Cerrar modal con tecla Escape
 document.addEventListener('keydown', (e) => {
@@ -648,13 +738,13 @@ let searchDebounce = null;
 let chipActivo = 'todos';
 let todosPagosData = []; // cache completo de alumnos para Caja
 
+
 async function loadCreditos() {
   const container = document.getElementById('creditos-result');
   if (!container) return;
 
   container.innerHTML = '<p style="color:var(--gray);padding:1.5rem;font-family:var(--font-cond);text-align:center">⏳ Cargando alumnos…</p>';
 
-  // Resetear UI
   chipActivo = 'todos';
   document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('active'));
   const chipTodos = document.getElementById('chip-todos');
@@ -664,12 +754,11 @@ async function loadCreditos() {
   actualizarBtnClear();
 
   try {
-    const res = await fetch('/admin/alumnos', { headers: H });
-    if (res.status === 401) { logout(); return; }
-    const data = await res.json();
-
+    const { data, error } = await window.supabaseClient.from('students').select('*').order('full_name');
+    if (error) throw error;
+    
     const hoy = new Date();
-    todosPagosData = data.map(a => {
+    todosPagosData = (data || []).map(a => {
       let dias_restantes = null;
       if (a.valid_until) {
         const fv = new Date(a.valid_until);
@@ -684,6 +773,7 @@ async function loadCreditos() {
     container.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond);padding:1rem">❌ Error al cargar alumnos.</p>';
   }
 }
+
 
 function onSearchInput() {
   clearTimeout(searchDebounce);
@@ -875,14 +965,15 @@ function cerrarDropdown() {
   if (d) { d.innerHTML = ''; d.classList.remove('visible'); }
 }
 
+
 async function loadHistorialPagos(student_id) {
   const wrap = document.getElementById('historial-pagos-wrap');
   if (!wrap) return;
   try {
-    const res = await fetch(`/admin/mensualidades/${student_id}`, { headers: H });
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    if (!data.length) {
+    const { data, error } = await window.supabaseClient.from('mensualidades').select('id, monto, metodo_pago, fecha_vencimiento, created_at').eq('student_id', student_id).order('created_at', { ascending: false }).limit(24);
+    if (error) throw error;
+    
+    if (!data || !data.length) {
       wrap.innerHTML = `
         <div style="font-family:var(--font-cond);font-size:.72rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.6rem">// HISTORIAL DE PAGOS</div>
         <p style="color:var(--gray);font-family:var(--font-cond);font-size:.85rem">No hay pagos registrados.</p>`;
@@ -892,8 +983,8 @@ async function loadHistorialPagos(student_id) {
       <div style="font-family:var(--font-cond);font-size:.72rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.6rem">// HISTORIAL DE PAGOS</div>
       <div style="display:flex;flex-direction:column;gap:.3rem">
         ${data.map(p => {
-      const fecha = p.fecha_pago
-        ? new Date(p.fecha_pago).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
+      const fecha = p.created_at
+        ? new Date(p.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
         : '—';
       const monto = (p.monto ?? 0) === 0
         ? '<span style="color:#00ff88">BECADO</span>'
@@ -913,8 +1004,9 @@ async function loadHistorialPagos(student_id) {
   }
 }
 
+
+
 async function pagarMensualidad(id) {
-  // Leer tarifa dinámica del overlay (dataset guardado en abrirPagoAlumno)
   const overlay = document.getElementById('pago-overlay');
   const tarifa = parseFloat(overlay?.dataset?.tarifa ?? 80);
   const esBecado = tarifa === 0;
@@ -933,39 +1025,76 @@ async function pagarMensualidad(id) {
     metodo = metodo.trim() || 'Efectivo';
   }
 
-  const res = await fetch('/admin/mensualidades/pagar', {
-    method: 'POST',
-    headers: H,
-    body: JSON.stringify({ student_id: id, monto: tarifa, metodo })
-  });
+  const { data: res_alumno, error: err_alumno } = await window.supabaseClient.from('students').select('id, valid_until, full_name').eq('id', id).single();
+  if (err_alumno || !res_alumno) { showToast('❌ Alumno no encontrado', 'error'); return; }
 
-  if (res.ok) {
-    const d = await res.json();
-    showToast(esBecado
-      ? `🎓 Mes renovado gratis. Vence: ${d.nueva_fecha_vencimiento}`
-      : `✅ S/${tarifa.toFixed(2)} registrados. Vence: ${d.nueva_fecha_vencimiento}`);
-    loadCreditos();
+  const hoy = new Date();
+  let nueva_fecha = new Date();
+  if (res_alumno.valid_until) {
+      const fecha_actual_vencimiento = new Date(res_alumno.valid_until);
+      fecha_actual_vencimiento.setMinutes(fecha_actual_vencimiento.getMinutes() + fecha_actual_vencimiento.getTimezoneOffset());
+      if (fecha_actual_vencimiento >= hoy) {
+          nueva_fecha = new Date(fecha_actual_vencimiento);
+          nueva_fecha.setDate(nueva_fecha.getDate() + 30);
+      } else {
+          nueva_fecha.setDate(hoy.getDate() + 30);
+      }
   } else {
-    showToast('❌ Error al procesar el pago', 'error');
+      nueva_fecha.setDate(hoy.getDate() + 30);
   }
+  const fecha_str = nueva_fecha.toISOString().split('T')[0];
+
+  const { error: err_upd } = await window.supabaseClient.from('students').update({valid_until: fecha_str}).eq('id', id);
+  if (err_upd) { showToast('❌ Error', 'error'); return; }
+
+  try {
+      const nuevo_jrs_code = await generate_jrs_code(id, res_alumno.full_name, fecha_str);
+      const { data: cred_res } = await window.supabaseClient.from('credentials').select('id').eq('student_id', id).eq('is_active', true).limit(1);
+      
+      if (cred_res && cred_res.length > 0) {
+          await window.supabaseClient.from('credentials').update({code: nuevo_jrs_code}).eq('id', cred_res[0].id);
+      } else {
+          await window.supabaseClient.from('credentials').insert({student_id: id, code: nuevo_jrs_code, is_active: true});
+      }
+  } catch (e) {
+      console.warn("No se pudo regenerar el código JRS:", e);
+  }
+
+  try {
+      await window.supabaseClient.from('mensualidades').insert({
+          student_id: id,
+          monto: tarifa,
+          metodo_pago: metodo,
+          fecha_inicio: hoy.toISOString().split('T')[0],
+          fecha_vencimiento: fecha_str
+      });
+  } catch (e) {
+      console.warn("No se pudo registrar mensualidad:", e);
+  }
+
+  showToast(esBecado
+    ? `🎓 Mes renovado gratis. Vence: ${fecha_str}`
+    : `✅ S/${tarifa.toFixed(2)} registrados. Vence: ${fecha_str}`);
+  loadCreditos();
 }
+
+
 
 async function recargar(id) {
   const cantidad = parseInt(document.getElementById(`cr-${id}`)?.value) || 4;
-  const res = await fetch('/admin/batidos/recargar', {
-    method: 'POST',
-    headers: H,
-    body: JSON.stringify({ student_id: id, cantidad, motivo: 'Recarga Yape/Plin' })
-  });
-  const d = await res.json();
-  if (res.ok) {
-    showToast(`✅ ${d.alumno}: ahora tiene ${d.creditos_nuevos} cr.`);
-    document.getElementById('pago-overlay')?.remove();
-    loadCreditos();
-  } else {
-    showToast('❌ Error al recargar', 'error');
-  }
+  const { data: alumno } = await window.supabaseClient.from('students').select('id, full_name, batido_credits').eq('id', id).single();
+  if (!alumno) { showToast('❌ Alumno no encontrado', 'error'); return; }
+
+  const nuevo = (alumno.batido_credits || 0) + cantidad;
+  const { error } = await window.supabaseClient.from('students').update({batido_credits: nuevo}).eq('id', id);
+  
+  if (error) { showToast('❌ Error al recargar', 'error'); return; }
+
+  showToast(`✅ ${alumno.full_name}: ahora tiene ${nuevo} cr.`);
+  document.getElementById('pago-overlay')?.remove();
+  loadCreditos();
 }
+
 
 // Cerrar dropdown al click fuera
 document.addEventListener('click', (e) => {
@@ -999,6 +1128,7 @@ function calChangeMonth(delta) {
   loadCalendario();
 }
 
+
 async function loadCalendario() {
   const loading = document.getElementById('cal-loading');
   const container = document.getElementById('cal-table-container');
@@ -1014,21 +1144,18 @@ async function loadCalendario() {
     const dd = String(daysInMonth).padStart(2, '0');
     const first = `${calYear}-${mm}-01T00:00:00`;
     const last = `${calYear}-${mm}-${dd}T23:59:59`;
-    const ts = Date.now();
 
     const [studRes, rangeRes] = await Promise.all([
-      fetch(`/admin/students?_=${ts}`, { headers: H }),
-      fetch(`/admin/attendance/range?start=${first}&end=${last}&_=${ts}`, { headers: H })
+      window.supabaseClient.from('students').select('id, full_name, horario, turno, sede').eq('is_active', true).order('full_name'),
+      window.supabaseClient.from('attendance').select('id, student_id, created_at').gte('created_at', first).lte('created_at', last)
     ]);
 
-    if (studRes.status === 401 || rangeRes.status === 401) { logout(); return; }
-    if (!studRes.ok) throw new Error(`Error alumnos: ${studRes.status}`);
-    if (!rangeRes.ok) throw new Error(`Error asistencia: ${rangeRes.status}`);
+    if (studRes.error) throw studRes.error;
+    if (rangeRes.error) throw rangeRes.error;
 
-    _calStudents = await studRes.json();
-    const attData = await rangeRes.json();
+    _calStudents = studRes.data || [];
+    const attData = rangeRes.data || [];
 
-    // Mapear student_id + fecha → true
     _calAttMap = {};
     attData.forEach(r => {
       if (r.student_id && r.created_at) {
@@ -1037,7 +1164,6 @@ async function loadCalendario() {
       }
     });
 
-    // Filtro de sede dinámico
     const sedeSelect = document.getElementById('cal-filter-sede');
     const sedes = [...new Set(_calStudents.map(s => s.sede).filter(Boolean))];
     sedeSelect.innerHTML = '<option value="">Todas las sedes</option>';
@@ -1059,6 +1185,7 @@ async function loadCalendario() {
 
   loading.style.display = 'none';
 }
+
 
 function renderCalendario() {
   const turnoFilter = document.getElementById('cal-filter-turno')?.value || '';
@@ -1194,14 +1321,15 @@ function resetBioSearch() {
   _bioSelected = null;
 }
 
+
 async function buscarParaBio() {
   const q = document.getElementById('bio-search').value.trim().toLowerCase();
   const el = document.getElementById('bio-search-results');
   if (q.length < 2) { el.innerHTML = ''; return; }
 
   if (!_bioStudents.length) {
-    const res = await fetch('/admin/alumnos', { headers: H });
-    _bioStudents = await res.json();
+    const { data } = await window.supabaseClient.from('students').select('*').order('full_name');
+    _bioStudents = data || [];
   }
 
   const hits = _bioStudents.filter(s =>
@@ -1224,6 +1352,7 @@ async function buscarParaBio() {
     </div>`).join('');
 }
 
+
 async function seleccionarBioAlumno(id, nombre) {
   _bioSelected = { id, nombre };
   document.getElementById('bio-student-id').value = id;
@@ -1240,14 +1369,15 @@ async function seleccionarBioAlumno(id, nombre) {
   await cargarHistorialBio(id);
 }
 
+
 async function cargarHistorialBio(sid) {
   const wrap = document.getElementById('bio-historial-wrap');
   wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">Cargando historial...</p>';
   try {
-    const res = await fetch(`/admin/biometria/${sid}`, { headers: H });
-    const data = await res.json();
+    const { data, error } = await window.supabaseClient.from('biometria').select('id, fecha, talla, peso, created_at').eq('student_id', sid).order('created_at', { ascending: false }).limit(24);
+    if (error) throw error;
 
-    if (!data.length) {
+    if (!data || !data.length) {
       wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray);font-size:.85rem">Sin mediciones registradas aún.</p>';
       return;
     }
@@ -1282,6 +1412,8 @@ async function cargarHistorialBio(sid) {
   }
 }
 
+
+
 async function guardarBiometria() {
   const sid = document.getElementById('bio-student-id').value;
   const fecha = document.getElementById('bio-fecha').value.trim();
@@ -1294,11 +1426,9 @@ async function guardarBiometria() {
   if (!isNaN(talla)) body.talla = talla;
   if (!isNaN(peso)) body.peso = peso;
 
-  const res = await fetch('/admin/biometria', {
-    method: 'POST', headers: H, body: JSON.stringify(body)
-  });
+  const { error } = await window.supabaseClient.from('biometria').insert(body);
 
-  if (res.ok) {
+  if (!error) {
     showToast('✅ Medición guardada');
     document.getElementById('bio-talla').value = '';
     document.getElementById('bio-peso').value = '';
@@ -1308,12 +1438,15 @@ async function guardarBiometria() {
   }
 }
 
+
+
 async function eliminarBio(id) {
   if (!confirm('¿Eliminar esta medición?')) return;
-  await fetch(`/admin/biometria/${id}`, { method: 'DELETE', headers: H });
+  await window.supabaseClient.from('biometria').delete().eq('id', id);
   showToast('✅ Eliminado');
   if (_bioSelected) await cargarHistorialBio(_bioSelected.id);
 }
+
 
 function cancelarBio() {
   document.getElementById('bio-form-card').style.display = 'none';
@@ -1323,6 +1456,7 @@ function cancelarBio() {
 }
 
 // ── RANKING ───────────────────────────────────────────
+
 async function cargarRanking() {
   const campo = document.getElementById('rk-campo')?.value || 'talla';
   const sede = document.getElementById('rk-sede')?.value || '';
@@ -1332,13 +1466,51 @@ async function cargarRanking() {
 
   wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">Cargando...</p>';
 
-  const params = new URLSearchParams({ campo });
-  if (sede) params.append('sede', sede);
-  if (cat) params.append('categoria', cat);
-
   try {
-    const res = await fetch(`/public/ranking?${params}`);
-    const data = await res.json();
+    let q = window.supabaseClient.from('students').select('id, full_name, horario, sede').eq('is_active', true);
+    if (sede) q = q.eq('sede', sede);
+    
+    const { data: students_list, error: err1 } = await q;
+    if (err1) throw err1;
+
+    let filtered_students = students_list || [];
+    if (cat) {
+        filtered_students = filtered_students.filter(s => (s.horario || "") === cat);
+    }
+    
+    if (filtered_students.length === 0) {
+        wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">Sin datos aún. Registra mediciones en la sección Rendimiento.</p>';
+        return;
+    }
+
+    const ids = filtered_students.map(s => s.id);
+    const { data: bio_res, error: err2 } = await window.supabaseClient.from('biometria').select('student_id, talla, peso, fecha, created_at').in('student_id', ids).order('created_at', {ascending: false});
+    if (err2) throw err2;
+
+    const last_bio = {};
+    (bio_res || []).forEach(r => {
+        if (!last_bio[r.student_id]) last_bio[r.student_id] = r;
+    });
+
+    const result = [];
+    filtered_students.forEach(st => {
+        const bio = last_bio[st.id];
+        if (!bio) return;
+        const val = bio[campo];
+        if (val === null || val === undefined) return;
+        
+        result.push({
+            student_id: st.id,
+            full_name: st.full_name,
+            sede: st.sede || "",
+            horario: st.horario || "",
+            fecha: bio.fecha,
+            valor: parseFloat(val)
+        });
+    });
+
+    result.sort((a, b) => b.valor - a.valor);
+    const data = result.slice(0, 20);
 
     if (!data.length) {
       wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">Sin datos aún. Registra mediciones en la sección Rendimiento.</p>';
@@ -1378,29 +1550,32 @@ async function cargarRanking() {
           </tbody>
         </table>
       </div>`;
-  } catch {
+  } catch (e) {
     wrap.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond)">Error al cargar ranking.</p>';
   }
 }
 
 
 
+
 // ── ENTRENADORES ──────────────────────────────────────
 let _entrenadoresData = [];
+
 
 async function loadEntrenadores() {
   const el = document.getElementById('entrenadores-list');
   if (!el) return;
   el.innerHTML = '<p style="color:var(--gray);font-family:var(--font-cond)">Cargando...</p>';
   try {
-    const res = await fetch('/admin/entrenadores', { headers: H });
-    if (res.status === 401) { logout(); return; }
-    _entrenadoresData = await res.json();
+    const { data, error } = await window.supabaseClient.from('entrenadores').select('id, nombre, token, is_active, created_at, last_used_at').order('nombre');
+    if (error) throw error;
+    _entrenadoresData = data || [];
     renderEntrenadores();
   } catch {
     el.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond)">Error al cargar.</p>';
   }
 }
+
 
 function renderEntrenadores() {
   const el = document.getElementById('entrenadores-list');
@@ -1435,7 +1610,7 @@ function renderEntrenadores() {
 }
 
 function copyMagicLink(token) {
-  const url = window.location.origin + '/entrenador/login?token=' + token;
+  const url = window.location.origin + '/entrenador/login.html?token=' + token;
   navigator.clipboard.writeText(url).then(() => {
     showToast('✅ Enlace copiado. Envíalo por WhatsApp.');
   }).catch(err => {
@@ -1443,40 +1618,41 @@ function copyMagicLink(token) {
   });
 }
 
+
 async function crearEntrenador() {
   const nombre = document.getElementById('ent-nombre')?.value.trim();
   if (!nombre) return showToast('Completa el nombre', 'error');
 
-  const res = await fetch('/admin/entrenadores', {
-    method: 'POST', headers: H,
-    body: JSON.stringify({ nombre })
-  });
-  if (!res.ok) return showToast('❌ Error al crear', 'error');
+  const token = btoa(Math.random().toString()).substring(0, 24);
+  const { data, error } = await window.supabaseClient.from('entrenadores').insert({ nombre, token, is_active: true }).select();
+  
+  if (error || !data) return showToast('❌ Error al crear', 'error');
 
-  const data = await res.json();
   document.getElementById('ent-nombre').value = '';
   showToast('✅ Entrenador creado.');
-  // Automáticamente copiar
-  copyMagicLink(data.token);
+  copyMagicLink(data[0].token);
   loadEntrenadores();
 }
 
+
+
 async function toggleEntrenador(id, nombre, reactivar) {
   if (!confirm(`¿${reactivar ? 'Reactivar' : 'Desactivar'} a ${nombre}?`)) return;
-  await fetch(`/admin/entrenadores/${id}?reactivar=${reactivar}`, { method: 'DELETE', headers: H });
+  await window.supabaseClient.from('entrenadores').update({is_active: reactivar}).eq('id', id);
   showToast('✅ Actualizado');
   loadEntrenadores();
 }
 
+
 // ── MANUFACTURA: PLANCHA DE PRODUCCIÓN QR ─────────────────────────
+
 async function imprimirPlanchaQRs() {
-  // Si alumnosData no está cargado, traerlo del servidor
   let datos = alumnosData;
   if (!datos || datos.length === 0) {
     try {
-      const res = await fetch('/admin/alumnos', { headers: H });
-      if (res.status === 401) { logout(); return; }
-      datos = await res.json();
+      const { data, error } = await window.supabaseClient.from('students').select('*').order('full_name');
+      if (error) throw error;
+      datos = data || [];
       alumnosData = datos;
     } catch {
       showToast('❌ Error al obtener alumnos. Verifica tu conexión.', 'error');
@@ -1490,14 +1666,12 @@ async function imprimirPlanchaQRs() {
     return;
   }
 
-  // CRÍTICO: abrir la ventana ANTES de cualquier await (evita bloqueo del popup-blocker)
   const win = window.open('', '_blank');
   if (!win) {
     showToast('⚠️ Popup bloqueado. Permite popups en la barra de tu navegador.', 'error');
     return;
   }
 
-  // Pantalla de carga
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
     <title>Generando Plancha...</title>
     <style>body{font-family:'Segoe UI',sans-serif;background:#fff;display:flex;flex-direction:column;
@@ -1510,19 +1684,16 @@ async function imprimirPlanchaQRs() {
 
   showToast(`Generando plancha para ${activos.length} alumnos...`, 'ok');
 
-  // ── Obtener todos los códigos QR ──
   const items = [];
   for (const a of activos) {
     try {
       let codeStr = '';
-      const res = await fetch(`/credentials/${a.id}`, { headers: H });
-      const data = await res.json();
-      if (data.length > 0) {
+      const { data } = await window.supabaseClient.from('credentials').select('code').eq('student_id', a.id).eq('is_active', true).limit(1);
+      if (data && data.length > 0) {
         codeStr = data[0].code;
       } else {
-        const gen = await fetch(`/credentials/generate/${a.id}`, { method: 'POST', headers: H });
-        const d = await gen.json();
-        codeStr = d.code;
+        codeStr = await generate_jrs_code(a.id, a.full_name, a.valid_until);
+        await window.supabaseClient.from('credentials').insert({student_id: a.id, code: codeStr, is_active: true});
       }
       items.push({
         name: a.full_name,
@@ -1541,10 +1712,9 @@ async function imprimirPlanchaQRs() {
     return;
   }
 
-  // ── Construir HTML de la plancha ──
-  const CIRCLE = 48; // mm diámetro
-  const GAP = 2;     // mm gap entre círculos
-  const QR_SIZE = 28; // mm tamaño del QR dentro del círculo
+  const CIRCLE = 48;
+  const GAP = 2;
+  const QR_SIZE = 28;
 
   let html = `<!DOCTYPE html>
 <html>
@@ -1558,8 +1728,6 @@ async function imprimirPlanchaQRs() {
       background: #fff; color: #000;
       padding: 0;
     }
-
-    /* ── Barra de controles (no se imprime) ── */
     .toolbar {
       position: sticky; top: 0; z-index: 100;
       background: #111; color: #fff; padding: 12px 20px;
@@ -1577,8 +1745,6 @@ async function imprimirPlanchaQRs() {
       cursor: pointer; font-size: .9rem;
     }
     .toolbar button:hover { background: #e8b420; }
-
-    /* ── Grid de círculos ── */
     .page-sheet {
       padding: ${GAP}mm;
     }
@@ -1588,8 +1754,6 @@ async function imprimirPlanchaQRs() {
       justify-content: flex-start;
       align-content: flex-start;
     }
-
-    /* ── Cada sticker circular ── */
     .sticker {
       width: ${CIRCLE}mm; height: ${CIRCLE}mm;
       border-radius: 50%;
@@ -1598,83 +1762,42 @@ async function imprimirPlanchaQRs() {
       align-items: center; justify-content: center;
       overflow: hidden;
       page-break-inside: avoid;
-      padding: 2mm;
     }
-    .sticker img {
-      width: ${QR_SIZE}mm; height: ${QR_SIZE}mm;
-      display: block;
+    .qr-img { width: ${QR_SIZE}mm; height: ${QR_SIZE}mm; margin-bottom: 2mm; }
+    .name {
+      font-size: 9pt; font-weight: bold; text-align: center;
+      width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .sticker .s-name {
-      font-size: 5.5pt; font-weight: 700; text-align: center;
-      width: 38mm;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-top: 1mm; line-height: 1.1;
-    }
-    .sticker .s-code {
-      font-size: 4.5pt; color: #666; text-align: center;
-      font-family: monospace; margin-top: 0.5mm;
-    }
-
-    /* ── Print ── */
+    .dni { font-size: 7.5pt; color: #555; }
     @media print {
       .toolbar { display: none !important; }
-      body { padding: 0; }
-      .page-sheet { padding: ${GAP}mm; }
-      @page { margin: 3mm; }
-      .sticker { border-color: #ddd; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { margin: 0; }
+      .page-sheet { padding: 5mm; }
     }
   </style>
 </head>
 <body>
-  <div class="toolbar no-print">
-    <h2>🖨️ Plancha QR — ${items.length} Stickers (⌀${CIRCLE}mm)</h2>
-    <label>Papel:</label>
-    <select id="paper-size" onchange="updatePageSize()">
-      <option value="A4" selected>A4 (210×297mm)</option>
-      <option value="A3">A3 (297×420mm)</option>
-      <option value="A2">A2 (420×594mm)</option>
-      <option value="A1">A1 (594×841mm)</option>
-    </select>
-    <button onclick="window.print()">🖨️ Imprimir / PDF</button>
+  <div class="toolbar">
+    <h2>🖨️ Plancha QR (${items.length})</h2>
+    <button onclick="window.print()">Imprimir Ahora</button>
   </div>
-  <div class="page-sheet" id="page-sheet">
-    <div class="grid" id="sticker-grid">`;
-
-  for (const item of items) {
-    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(item.code)}`;
-    // Mostrar un code corto legible (últimos 8 chars o DNI)
-    const shortCode = item.dni || item.code.slice(-8);
-    html += `
-      <div class="sticker">
-        <img src="${qrUrl}" alt="QR" />
-        <div class="s-name">${item.name}</div>
-        <div class="s-code">${shortCode}</div>
-      </div>`;
-  }
-
-  html += `
+  <div class="page-sheet">
+    <div class="grid">
+      ${items.map(item => `
+        <div class="sticker">
+          <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(item.code)}" />
+          <div class="name">${item.name}</div>
+          <div class="dni">${item.dni || ''}</div>
+        </div>
+      `).join('')}
     </div>
   </div>
-  <script>
-    function updatePageSize() {
-      const size = document.getElementById('paper-size').value;
-      // Actualizar @page CSS dinámicamente
-      let styleTag = document.getElementById('dynamic-page');
-      if (!styleTag) {
-        styleTag = document.createElement('style');
-        styleTag.id = 'dynamic-page';
-        document.head.appendChild(styleTag);
-      }
-      styleTag.textContent = '@media print { @page { size: ' + size + '; margin: 3mm; } }';
-    }
-    // Inicializar con A4
-    updatePageSize();
-  <\/script>
 </body>
 </html>`;
 
   win.document.open();
   win.document.write(html);
   win.document.close();
-  showToast('✅ Plancha generada con éxito.', 'ok');
 }
+

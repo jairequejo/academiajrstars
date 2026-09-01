@@ -404,60 +404,146 @@ function _armSafety() {
     }, 10000);
 }
 
-function _doOnlineScan(code) {
+async function _doOnlineScan(code) {
     isProcessing = true;
     _armSafety();
     _dbg('SCAN: ' + code.slice(0, 30));
     const statusEl = document.getElementById('status-text');
     if (statusEl) statusEl.textContent = 'Procesando...';
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 3000);
-    fetch('/attendance/scan', {
-        method: 'POST', headers: getScannerHeaders(),
-        body: JSON.stringify({ code }), signal: ctrl.signal
-    })
-        .then(r => { clearTimeout(tid); _dbg('HTTP:' + r.status); return r.text(); })
-        .then(raw => {
-            _dbg('RSP:' + raw.slice(0, 80));
-            let data;
-            try { data = JSON.parse(raw); }
-            catch { playError(); showFlash('error', 'ERROR', 'Conexión fallida'); resume(); return; }
-            // El servidor siempre devuelve student_name cuando es una respuesta válida.
-            // Solo devuelve {detail: "..."} sin student_name en errores HTTP (400, 404, etc.)
-            const nombre = data.student_name || data.name || '';
-            const estado = data.status || '';
-            const msg    = data.message || data.detail || '';
 
-            // Sin student_name → error HTTP real (credencial inválida, no encontrado, etc.)
-            if (!nombre) {
-                playError();
-                showFlash('error', 'RECHAZADO', msg || 'Error del servidor');
-                resume();
-                return;
+    try {
+        let student_id = null;
+        let nombre_final = "Desconocido";
+        let valid_until = null;
+        let is_active = true;
+        let cred_id = null;
+
+        if (code.startsWith("JRS:")) {
+            const parsed = await validateJRS(code);
+            if (!parsed) {
+                playError(); showFlash('error', 'QR INVÁLIDO', 'Firma incorrecta.'); resume(); return;
             }
+            const short_id = parsed.short_id;
+            nombre_final = parsed.name;
 
-            // Respuesta válida con student_name → mostrar según status
-            if (estado === 'success') {
-                playSuccess();
-                showFlash('success', nombre, msg);
-                addHistory('success', nombre);
-            } else if (estado === 'warning') {
-                playWarning();
-                showFlash('warning', nombre, msg);
-                addHistory('warning', nombre);
-            } else if (estado === 'debe') {
-                playWarning();
-                showFlash('debe', nombre, msg);
-                addHistory('debe', nombre);
+            const { data: creds } = await window.supabaseClient.from('credentials').select('student_id').like('code', `JRS:${short_id}:%`).eq('is_active', true).limit(1);
+            if (!creds || creds.length === 0) {
+                playError(); showFlash('error', 'RECHAZADO', 'Credencial JRS no registrada'); resume(); return;
+            }
+            student_id = creds[0].student_id;
+
+            const { data: st } = await window.supabaseClient.from('students').select('id, is_active, valid_until, full_name').eq('id', student_id);
+            if (!st || st.length === 0) {
+                playError(); showFlash('error', 'RECHAZADO', 'Alumno no encontrado'); resume(); return;
+            }
+            valid_until = st[0].valid_until;
+            is_active = st[0].is_active;
+            nombre_final = st[0].full_name || nombre_final;
+
+        } else {
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (uuidRegex.test(code)) {
+                const { data: st } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').eq('id', code);
+                if (!st || st.length === 0) {
+                    playError(); showFlash('error', 'RECHAZADO', 'Alumno no encontrado (por UUID)'); resume(); return;
+                }
+                student_id = st[0].id;
+                nombre_final = st[0].full_name || 'Sin Nombre';
+                valid_until = st[0].valid_until;
+                is_active = st[0].is_active;
+            } else if (code.length === 8) {
+                const { data: st } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').ilike('id', `${code}%`);
+                if (st && st.length > 0) {
+                    student_id = st[0].id;
+                    nombre_final = st[0].full_name || 'Sin Nombre';
+                    valid_until = st[0].valid_until;
+                    is_active = st[0].is_active;
+                } else {
+                    const { data: creds } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true);
+                    if (!creds || creds.length === 0) {
+                        playError(); showFlash('error', 'RECHAZADO', 'Credencial inválida'); resume(); return;
+                    }
+                    student_id = creds[0].student_id;
+                    cred_id = creds[0].id;
+                    const stData = creds[0].students;
+                    if (Array.isArray(stData) && stData.length > 0) {
+                        nombre_final = stData[0].full_name || 'Sin Nombre';
+                        valid_until = stData[0].valid_until;
+                        is_active = stData[0].is_active;
+                    } else if (stData) {
+                        nombre_final = stData.full_name || 'Sin Nombre';
+                        valid_until = stData.valid_until;
+                        is_active = stData.is_active;
+                    }
+                }
             } else {
-                // status desconocido pero tenemos nombre → warning por las dudas
-                playWarning();
-                showFlash('warning', nombre, msg);
-                addHistory('warning', nombre);
+                const { data: creds } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true);
+                if (!creds || creds.length === 0) {
+                    playError(); showFlash('error', 'RECHAZADO', 'Credencial inválida'); resume(); return;
+                }
+                student_id = creds[0].student_id;
+                cred_id = creds[0].id;
+                const stData = creds[0].students;
+                if (Array.isArray(stData) && stData.length > 0) {
+                    nombre_final = stData[0].full_name || 'Sin Nombre';
+                    valid_until = stData[0].valid_until;
+                    is_active = stData[0].is_active;
+                } else if (stData) {
+                    nombre_final = stData.full_name || 'Sin Nombre';
+                    valid_until = stData.valid_until;
+                    is_active = stData.is_active;
+                }
             }
-            resume();
-        })
-        .catch(() => processOfflineScan(code));
+        }
+
+        if (!is_active) {
+            playWarning(); showFlash('debe', nombre_final, `${nombre_final} — Alumno inactivo`); addHistory('debe', nombre_final); resume(); return;
+        }
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        let debe = false;
+        let dias_vencido = 0;
+        if (valid_until) {
+            const parts = valid_until.split('-');
+            const validDate = new Date(parts[0], parts[1]-1, parts[2]);
+            if (validDate < hoy) {
+                debe = true;
+                const diffTime = Math.abs(hoy - validDate);
+                dias_vencido = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+            }
+        } else {
+            debe = true;
+        }
+
+        if (debe) {
+            playWarning(); showFlash('debe', nombre_final, `Mensualidad vencida. Venció hace ${dias_vencido} días.`); addHistory('debe', nombre_final); resume(); return;
+        }
+
+        const startDay = new Date();
+        startDay.setHours(0,0,0,0);
+        const { data: att } = await window.supabaseClient.from('attendance').select('id').eq('student_id', student_id).gte('created_at', startDay.toISOString()).limit(1);
+
+        if (att && att.length > 0) {
+            playWarning(); showFlash('warning', nombre_final, `Ya registrado hoy: ${nombre_final}`); addHistory('warning', nombre_final); resume(); return;
+        }
+
+        await window.supabaseClient.from('attendance').insert({
+            student_id: student_id,
+            credential_id: cred_id,
+            source: 'scanner',
+            created_at: new Date().toISOString()
+        });
+
+        playSuccess();
+        showFlash('success', nombre_final, `¡Bienvenido, ${nombre_final}!`);
+        addHistory('success', nombre_final);
+        resume();
+
+    } catch (err) {
+        console.error("Online scan error:", err);
+        processOfflineScan(code);
+    }
 }
 
 function handleScan(decodedText) {

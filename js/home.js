@@ -25,10 +25,10 @@ async function buscar() {
     const ldEl  = $('ld');
     if (!dniEl) return;
 
-    const dni = dniEl.value.trim();
+    const dni_or_id = dniEl.value.trim();
     if (errEl) errEl.classList.add('hidden');
 
-    if (dni.length < 8) {
+    if (dni_or_id.length < 8) {
         dniEl.style.borderBottomColor = 'var(--red)';
         setTimeout(() => dniEl.style.borderBottomColor = '', 900);
         return;
@@ -38,9 +38,39 @@ async function buscar() {
     if (ldEl) ldEl.classList.remove('hidden');
 
     try {
-        const res = await fetch(`/public/student/${encodeURIComponent(dni)}/info`);
-
-        if (res.status === 404) {
+        let student_id_resolved = null;
+        if (dni_or_id.startsWith("JRS:")) {
+            const parts = dni_or_id.split(":");
+            if (parts.length >= 2) {
+                const short_id = parts[1];
+                const { data: creds } = await window.supabaseClient
+                    .from('credentials')
+                    .select('student_id')
+                    .like('code', `JRS:${short_id}:%`)
+                    .eq('is_active', true)
+                    .limit(1);
+                if (creds && creds.length > 0) student_id_resolved = creds[0].student_id;
+            }
+        }
+        
+        let query = window.supabaseClient
+            .from('students')
+            .select('id, full_name, valid_until, horario, sede, batido_credits')
+            .eq('is_active', true);
+            
+        if (student_id_resolved) {
+            query = query.eq('id', student_id_resolved);
+        } else {
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dni_or_id);
+            if (isUUID) {
+                query = query.eq('id', dni_or_id);
+            } else {
+                query = query.eq('dni', dni_or_id);
+            }
+        }
+        
+        const { data: stData, error: stErr } = await query;
+        if (!stData || stData.length === 0) {
             if (ldEl) ldEl.classList.add('hidden');
             if (btn) btn.disabled = false;
             if (errEl) {
@@ -49,10 +79,96 @@ async function buscar() {
             }
             return;
         }
-
-        if (!res.ok) throw new Error('server');
-
-        const data = await res.json();
+        
+        const student = stData[0];
+        const sid = student.id;
+        
+        const hoy = new Date();
+        let debe = true;
+        if (student.valid_until) {
+            const parts = student.valid_until.split('-');
+            const fecha_venc = new Date(parts[0], parts[1] - 1, parts[2]);
+            fecha_venc.setHours(23, 59, 59, 999);
+            debe = fecha_venc < hoy;
+        }
+        
+        const noventa_dias = new Date();
+        noventa_dias.setDate(noventa_dias.getDate() - 90);
+        
+        const { data: attData } = await window.supabaseClient
+            .from('attendance')
+            .select('created_at')
+            .eq('student_id', sid)
+            .gte('created_at', noventa_dias.toISOString())
+            .order('created_at', { ascending: false });
+            
+        let racha = 0;
+        if (attData && attData.length > 0) {
+            const fechas_vistas = new Set();
+            const fechas_ord = [];
+            for (const r of attData) {
+                const date = new Date(r.created_at);
+                const localDateStr = date.toLocaleDateString();
+                if (!fechas_vistas.has(localDateStr)) {
+                    fechas_vistas.add(localDateStr);
+                    fechas_ord.push(new Date(date.getFullYear(), date.getMonth(), date.getDate()));
+                }
+            }
+            if (fechas_ord.length > 0) {
+                racha = 1;
+                for (let i = 1; i < fechas_ord.length; i++) {
+                    const diff = (fechas_ord[i - 1] - fechas_ord[i]) / (1000 * 60 * 60 * 24);
+                    if (diff <= 4) racha++;
+                    else break;
+                }
+            }
+        }
+        
+        const { data: bioData } = await window.supabaseClient
+            .from('biometria')
+            .select('fecha, talla, peso')
+            .eq('student_id', sid)
+            .order('created_at', { ascending: false })
+            .limit(12);
+            
+        let historial = [];
+        let talla_actual = null;
+        let peso_actual = null;
+        let delta_talla = null;
+        
+        if (bioData && bioData.length > 0) {
+            const ultimo = bioData[0];
+            talla_actual = ultimo.talla != null ? `${ultimo.talla}m` : null;
+            peso_actual = ultimo.peso != null ? `${ultimo.peso}kg` : null;
+            
+            if (bioData.length >= 2) {
+                const anterior = bioData[1];
+                if (ultimo.talla != null && anterior.talla != null) {
+                    const diff = parseFloat(ultimo.talla) - parseFloat(anterior.talla);
+                    const diffCm = Math.round(diff * 100);
+                    delta_talla = diff >= 0 ? `+${diffCm}cm` : `${diffCm}cm`;
+                }
+            }
+            
+            historial = bioData.map(r => ({
+                fecha: r.fecha,
+                talla: r.talla != null ? `${r.talla}m` : "—",
+                peso: r.peso != null ? `${r.peso}kg` : "—"
+            }));
+        }
+        
+        const data = {
+            full_name: student.full_name,
+            category: student.sede ? `Sede ${student.sede}` : `Entreno ${student.horario || 'LMV'}`,
+            img_url: null,
+            debe,
+            racha,
+            talla_actual,
+            peso_actual,
+            delta_talla,
+            historial_biometrico: historial
+        };
+        
         if (ldEl) ldEl.classList.add('hidden');
         if (btn) btn.disabled = false;
 
@@ -61,7 +177,8 @@ async function buscar() {
         dniEl.value = '';
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    } catch {
+    } catch (e) {
+        console.error(e);
         if (ldEl) ldEl.classList.add('hidden');
         if (btn) btn.disabled = false;
         alert('Error de conexión. Verifica tu internet.');
@@ -294,13 +411,47 @@ async function loadRanking() {
     const el = $('ranking');
     if (!el) return;
     try {
-        const res = await fetch('/public/leaderboard/month');
-        const data = res.ok ? await res.json() : [];
-        if (!data.length) {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        const { data: atts, error: errAtt } = await window.supabaseClient
+            .from('attendance')
+            .select('student_id')
+            .gte('created_at', firstDay);
+            
+        if (errAtt || !atts || !atts.length) {
             el.innerHTML = '<div class="rk-empty">Datos disponibles próximamente.</div>';
             return;
         }
-        el.innerHTML = data.map((item, i) => `
+        
+        const counts = {};
+        for (const r of atts) counts[r.student_id] = (counts[r.student_id] || 0) + 1;
+        
+        const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+        if (!sorted.length) {
+            el.innerHTML = '<div class="rk-empty">Datos disponibles próximamente.</div>';
+            return;
+        }
+        
+        const ids = sorted.map(x=>x[0]);
+        const { data: stds, error: errStds } = await window.supabaseClient
+            .from('students')
+            .select('id, full_name')
+            .in('id', ids);
+            
+        const stMap = {};
+        if (stds) stds.forEach(s => stMap[s.id] = s);
+        
+        const result = sorted.map(([sid, count]) => {
+            const st = stMap[sid];
+            let short = sid;
+            if (st) {
+                const parts = st.full_name.split(' ');
+                short = parts[0] + (parts.length > 1 ? ' ' + parts[1][0] + '.' : '');
+            }
+            return { student_id: sid, name: short, score: count };
+        });
+        
+        el.innerHTML = result.map((item, i) => `
           <div class="rk-item${i === 0 ? ' first' : ''}">
             <div class="rk-pos">${i + 1}</div>
             <div class="rk-name">${item.name}</div>

@@ -9,32 +9,34 @@ async function init() {
     // Si llegó un token nuevo en la URL, guardarlo y limpiar la URL
     if (urlToken) {
         localStorage.setItem(TOKEN_KEY, urlToken);
-        history.replaceState({}, '', '/entrenador/login');
+        history.replaceState({}, '', '/entrenador/login.html');
     }
 
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return showNoAccess();
 
-    // Verificar el token con el backend
+    // Verificar el token consultando a Supabase
     try {
-        const res = await fetch('/entrenador/verify', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const { data, error } = await window.supabaseClient
+            .from('entrenadores')
+            .select('nombre, is_active')
+            .eq('token', token)
+            .single();
 
-        if (res.ok) {
-            const data = await res.json();
-            // Guardar clave de firma y nombre para el panel
-            if (data.signing_key) localStorage.setItem('jr_signing_key', data.signing_key);
-            sessionStorage.setItem('jr_nombre', data.nombre || '');
-            document.getElementById('status-msg').textContent = `¡Hola, ${data.nombre}! Abriendo scanner...`;
-            setTimeout(() => { window.location.href = '/entrenador'; }, 600);
-        } else {
+        if (error || !data || !data.is_active) {
             // Token inválido o revocado
             localStorage.removeItem(TOKEN_KEY);
-            showNoAccess();
+            return showNoAccess();
         }
-    } catch {
-        // Sin conexión
+
+        // Acceso permitido
+        sessionStorage.setItem('jr_nombre', data.nombre || '');
+        document.getElementById('status-msg').textContent = `¡Hola, ${data.nombre}! Abriendo scanner...`;
+        setTimeout(() => { window.location.href = '/entrenador/index.html'; }, 600);
+        
+    } catch (e) {
+        // Sin conexión o error
+        console.error(e);
         document.getElementById('status-msg').textContent = 'Sin conexión. Reintenta en un momento.';
         document.getElementById('status-msg').classList.add('error');
         document.getElementById('spinner').style.display = 'none';

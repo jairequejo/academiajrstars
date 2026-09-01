@@ -7,8 +7,8 @@
   <title>Caja Registradora - JR Stars</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="/static/caja/caja.css">
-  <link rel="icon" href="/static/favicon-caja.ico" type="image/x-icon">
+  <link rel="stylesheet" href="/css/caja.css">
+  <link rel="icon" href="/favicon-caja.ico" type="image/x-icon">
 </head>
 
 <body>
@@ -31,7 +31,7 @@
       <div class="pin-btn" onclick="addPin('7')">7</div>
       <div class="pin-btn" onclick="addPin('8')">8</div>
       <div class="pin-btn" onclick="addPin('9')">9</div>
-      <div class="pin-btn" onclick="clearPin()" style="background: #CC1616; border:none; font-size: 1rem;">BORRAR</div>
+      <div class="pin-btn btn-borrar" onclick="clearPin()">BORRAR</div>
       <div class="pin-btn" onclick="addPin('0')">0</div>
     </div>
   </div>
@@ -73,8 +73,10 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="/js/supabaseClient.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="/static/caja/caja.js"></script>
+  <script src="/js/caja.js"></script>
 </body>
 
 </html>

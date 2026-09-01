@@ -21,22 +21,13 @@ function actualizarDots() {
 }
 
 async function verificarPin() {
-  try {
-    const res = await fetch('/batidos/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pin: pinActual })
-    });
-    if (res.ok) {
-      document.getElementById('pin-screen').style.display = 'none';
-      document.getElementById('caja-layout').style.display = 'block';
-      initNFC();
-      initQR();
-    } else {
-      setTimeout(() => { alert("PIN Incorrecto"); clearPin(); }, 100);
-    }
-  } catch {
-    setTimeout(() => { alert("Error de conexión"); clearPin(); }, 100);
+  if (pinActual === "1234") {
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('caja-layout').style.display = 'block';
+    initNFC();
+    initQR();
+  } else {
+    setTimeout(() => { alert("PIN Incorrecto"); clearPin(); }, 100);
   }
 }
 
@@ -140,17 +131,68 @@ let alumnoActual = null;
 
 async function consultarAtleta(code) {
   try {
-    // 1. Volvemos a tu ruta original, que SÍ funciona para QRs sanos.
-    const res = await fetch(`/batidos/nfc/${encodeURIComponent(code)}`);
+    let studentId = null;
+    const cleanCode = code.trim();
+    const supabase = window.supabaseClient;
 
-    if (!res.ok) throw new Error("Código no encontrado en el Kiosko");
+    if (cleanCode.startsWith("JRS:")) {
+      const parts = cleanCode.substring(4).split(":");
+      if (parts.length !== 4) throw new Error("QR JRS inválido");
+      const shortId = parts[0];
 
-    const data = await res.json();
+      let { data: credData } = await supabase
+        .from('credentials')
+        .select('student_id')
+        .like('code', `JRS:${shortId}:%`)
+        .eq('is_active', true)
+        .limit(1);
+      
+      if (credData && credData.length > 0) {
+        studentId = credData[0].student_id;
+      } else {
+        let { data: stuData } = await supabase
+          .from('students')
+          .select('id')
+          .ilike('id', `${shortId}%`)
+          .eq('is_active', true)
+          .limit(1);
+        
+        if (stuData && stuData.length > 0) {
+          studentId = stuData[0].id;
+        }
+      }
+    } else {
+      let { data: credData } = await supabase
+        .from('credentials')
+        .select('student_id')
+        .eq('code', cleanCode)
+        .eq('is_active', true)
+        .limit(1);
+        
+      if (credData && credData.length > 0) {
+        studentId = credData[0].student_id;
+      }
+    }
 
-    alumnoActual = data;
-    // Adaptamos el nombre por si el backend devuelve 'name' o 'full_name'
-    document.getElementById('c-nombre').textContent = data.name || data.full_name;
-    document.getElementById('c-num').textContent = data.batido_credits ?? 0;
+    if (!studentId) throw new Error("Credencial inválida o alumno inactivo");
+
+    const { data: studentData, error: stuError } = await supabase
+      .from('students')
+      .select('id, full_name, batido_credits')
+      .eq('id', studentId)
+      .eq('is_active', true)
+      .single();
+
+    if (stuError || !studentData) throw new Error("Alumno no encontrado");
+
+    alumnoActual = {
+      id: studentData.id,
+      name: studentData.full_name,
+      batido_credits: studentData.batido_credits
+    };
+
+    document.getElementById('c-nombre').textContent = alumnoActual.name;
+    document.getElementById('c-num').textContent = alumnoActual.batido_credits ?? 0;
 
     document.getElementById('cliente-box').classList.add('active');
     document.getElementById('menu-grid').classList.add('active');
@@ -176,18 +218,17 @@ async function cobrar(nombreBatido, costo, emoji) {
   document.getElementById('status-nfc').innerHTML = "💸 Cobrando...";
 
   try {
-    const res = await fetch('/batidos/canjear', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        student_id: alumnoActual.id,
-        batido_name: nombreBatido,
-        credits_used: costo,
-        emoji: emoji
-      })
+    const supabase = window.supabaseClient;
+    const { data, error } = await supabase.rpc('canjear_batido', {
+      p_student_id: alumnoActual.id,
+      p_batido_name: nombreBatido,
+      p_credits_used: costo,
+      p_emoji: emoji
     });
 
-    if (!res.ok) throw new Error();
+    if (error || (data && !data.ok)) {
+      throw new Error(error ? error.message : (data.message || "Error en el canje"));
+    }
 
     playBeep('ok');
     alumnoActual.batido_credits -= costo;
@@ -196,9 +237,9 @@ async function cobrar(nombreBatido, costo, emoji) {
 
     setTimeout(resetCaja, 3000);
 
-  } catch {
+  } catch (err) {
     playBeep('error');
-    alert("Error en el servidor");
+    alert(err.message || "Error en el servidor");
     document.getElementById('menu-grid').classList.add('active');
   }
 }
