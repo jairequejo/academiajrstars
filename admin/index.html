@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="../css/admin_original.css?v=20260903">
   <link rel="stylesheet" href="../css/admin.css?v=20260903-pagos-legibles">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260903-sedes">
+  <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260903">
   <meta name="theme-color" content="#E30D13">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -558,6 +559,14 @@
           </div>
         </div>
 
+        <section class="edit-estado-section" aria-labelledby="edit-estado-title">
+          <div>
+            <h3 id="edit-estado-title">Estado del alumno</h3>
+            <p id="edit-estado-description"></p>
+          </div>
+          <button type="button" class="btn btn-outline" id="edit-estado-btn">Desactivar alumno</button>
+        </section>
+
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" onclick="cerrarModalEdicion()">Cancelar</button>
           <button type="submit" class="btn btn-gold"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#save"></use></svg> Guardar Cambios</button>
@@ -565,6 +574,34 @@
       </form>
     </div>
   </div>
+
+  <dialog id="alumno-ficha" class="alumno-dialog" aria-labelledby="ficha-title">
+    <header class="alumno-dialog-header">
+      <div><p class="ficha-eyebrow">JR Stars · Alumnos</p><h2 id="ficha-title">Ficha del alumno</h2></div>
+      <button type="button" class="alumno-dialog-close" data-cerrar-ficha aria-label="Cerrar ficha"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#close"></use></svg></button>
+    </header>
+    <div class="alumno-dialog-content" id="ficha-content"></div>
+    <footer class="alumno-dialog-footer">
+      <button type="button" class="btn btn-gold" id="ficha-ver-qr"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#qr"></use></svg> Ver QR</button>
+      <button type="button" class="btn btn-outline" data-cerrar-ficha>Cerrar</button>
+    </footer>
+  </dialog>
+
+  <dialog id="alumno-estado-confirmacion" class="alumno-dialog alumno-confirmacion" aria-labelledby="estado-confirm-title" aria-describedby="estado-confirm-description">
+    <form id="estado-confirm-form">
+      <header class="alumno-dialog-header"><h2 id="estado-confirm-title">Desactivar alumno</h2></header>
+      <div class="alumno-dialog-content">
+        <p class="estado-confirm-name" id="estado-confirm-name"></p>
+        <p id="estado-confirm-description"></p>
+        <label class="estado-confirm-check" id="estado-confirm-check-wrap"><input type="checkbox" id="estado-confirm-check" required> Entiendo que el alumno quedará inactivo.</label>
+        <p class="estado-confirm-error" id="estado-confirm-error" role="alert" hidden></p>
+      </div>
+      <footer class="alumno-dialog-footer">
+        <button type="button" class="btn btn-outline" id="estado-confirm-cancel" autofocus>Cancelar</button>
+        <button type="submit" class="btn btn-danger-soft" id="estado-confirm-submit" disabled>Sí, desactivar alumno</button>
+      </footer>
+    </form>
+  </dialog>
 
   <dialog class="inscripcion-dialog" id="inscripcion-dialog" aria-labelledby="inscripcion-title" aria-describedby="inscripcion-subtitle">
     <div class="inscripcion-header">
@@ -723,7 +760,8 @@
 
   <script src="../js/admin-icons.js?v=20260903"></script>
   <script src="../js/admin-sedes.js?v=20260903"></script>
-  <script src="../js/admin.js?v=20260903-pagos-legibles"></script>
+  <script src="../js/admin.js?v=20260903-ficha"></script>
+  <script src="../js/alumno-ficha.js?v=20260903"></script>
   <script src="../js/inscripcion.js?v=20260903-sedes"></script>
 </body>
 

@@ -436,6 +436,12 @@ function aplicarFiltros() {
   renderAlumnos(filtrados);
 }
 
+function accionesAlumno(a) {
+  const id = encodeURIComponent(a.id);
+  return `<button class="btn btn-outline" type="button" data-alumno-action="editar" data-alumno-id="${id}">${adminIcon("edit")} Editar</button>
+    <button class="btn btn-gold" type="button" data-alumno-action="ver" data-alumno-id="${id}">${adminIcon("user")} Ver</button>`;
+}
+
 function renderAlumnos(data) {
   const container = document.getElementById('alumnos-list');
   if (!data.length) {
@@ -471,14 +477,7 @@ function renderAlumnos(data) {
           <span class="badge badge-gold">${a.horario || 'LMV'}</span>
           <span style="font-family:var(--font-mono);font-size:.8rem;color:var(--gray)">Vence: ${vencimiento}</span>
         </div>
-        <div class="alumno-card-actions">
-          <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem" onclick="verQR('${a.id}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#qr"></use></svg> QR</button>
-          <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem;border-color:var(--gold);color:var(--gold)" onclick="abrirModalEdicion('${a.id}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#edit"></use></svg> Editar</button>
-          ${a.is_active
-          ? `<button class="btn btn-red" style="font-size:.75rem;padding:.3rem .9rem" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', false)">Desactivar</button>`
-          : `<button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem;border-color:#00ff88;color:#00ff88" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', true)">Reactivar</button>`
-        }
-        </div>
+        <div class="alumno-card-actions alumno-actions">${accionesAlumno(a)}</div>
       </div>`;
     }).join('');
   } else {
@@ -504,14 +503,7 @@ function renderAlumnos(data) {
             <td><span style="color:${estadoColor};font-weight:bold;font-size:.85rem">${estadoTexto}</span></td>
             <td style="font-family:var(--font-mono);font-size:.85rem">${vencimiento}</td>
             <td><span class="badge badge-gold">${a.horario || 'LMV'}</span></td>
-            <td>
-              <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem" onclick="verQR('${a.id}')">QR</button>
-              <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem;margin-left:.3rem;border-color:var(--gold);color:var(--gold)" onclick="abrirModalEdicion('${a.id}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#edit"></use></svg> Editar</button>
-              ${a.is_active
-          ? `<button class="btn btn-red" style="font-size:.75rem;padding:.3rem .7rem;margin-left:.3rem" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', false)">Desactivar</button>`
-          : `<button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem;margin-left:.3rem;border-color:#00ff88;color:#00ff88" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', true)">Reactivar</button>`
-        }
-            </td>
+            <td><div class="alumno-actions">${accionesAlumno(a)}</div></td>
           </tr>`;
     }).join('')}
       </tbody>
@@ -610,38 +602,32 @@ async function crearAlumno() {
 
 
 
-async function toggleEstadoAlumno(id, nombre, reactivar) {
-  const accion = reactivar ? 'Reactivar' : 'Desactivar';
-  if (!confirm(`¿${accion} a ${nombre}?`)) return;
-  try {
-    const { error } = await window.supabaseClient.from('students').update({is_active: reactivar}).eq('id', id);
-    if (error) throw error;
-    showToast(`${reactivar ? 'Reactivado' : 'Desactivado'}`);
-    loadAlumnos();
-  } catch(e) {
-    console.error(e);
-    showToast('Error al actualizar', 'error');
-  }
+function toggleEstadoAlumno(id, nombre, reactivar) {
+  window.adminAlumnoUI.confirmarEstado(id, reactivar);
 }
 
 
-
-async function verQR(studentId) {
+async function verQR(studentId, inline = false) {
   try {
-    const { data } = await window.supabaseClient.from('credentials').select('code').eq('student_id', studentId).eq('is_active', true).limit(1);
+    const { data, error } = await window.supabaseClient.from('credentials').select('code').eq('student_id', studentId).eq('is_active', true).limit(1);
+    if (error) throw error;
     let codeStr = '';
     if (data && data.length > 0) {
       codeStr = data[0].code;
     } else {
       showToast('Generando nuevo QR...', 'ok');
-      const { data: stData } = await window.supabaseClient.from('students').select('full_name, valid_until').eq('id', studentId).single();
+      const { data: stData, error: stError } = await window.supabaseClient.from('students').select('full_name, valid_until').eq('id', studentId).single();
+      if (stError) throw stError;
       codeStr = await generate_jrs_code(studentId, stData?.full_name || '', stData?.valid_until);
-      await window.supabaseClient.from('credentials').insert({student_id: studentId, code: codeStr, is_active: true});
+      const { error: credError } = await window.supabaseClient.from('credentials').insert({student_id: studentId, code: codeStr, is_active: true});
+      if (credError) throw credError;
     }
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(codeStr)}`;
-    window.open(qrImageUrl, '_blank');
+    if (!inline) window.open(qrImageUrl, '_blank');
+    return qrImageUrl;
   } catch {
     showToast('Error al obtener el QR.', 'error');
+    return null;
   }
 }
 
@@ -668,6 +654,7 @@ function abrirModalEdicion(student_id) {
   document.getElementById('edit-tarifa').value = tarifaRaw !== null && tarifaRaw !== undefined ? tarifaRaw : '';
   document.getElementById('edit-codigo-legacy').value = a.codigo_legacy || '';
 
+  window.adminAlumnoUI.actualizarEstado(a);
   document.getElementById('modal-editar-alumno').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
@@ -753,7 +740,7 @@ async function guardarEdicionAlumno(event) {
 
 // Cerrar modal con tecla Escape
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
+  if (e.key === 'Escape' && !document.querySelector('dialog[open]')) {
     const modal = document.getElementById('modal-editar-alumno');
     if (modal && !modal.classList.contains('hidden')) cerrarModalEdicion();
   }

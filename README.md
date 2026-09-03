@@ -1,6 +1,6 @@
 # JR Stars — Frontend
 
-Sitio y paneles de la academia JR Stars, desarrollados con HTML, CSS y JavaScript. Esta carpeta es la raíz del repositorio y del sitio: no requiere compilación ni instalación de paquetes para servir las páginas.
+Sitio y paneles de la academia JR Stars, desarrollados con HTML, CSS y JavaScript. La carpeta `academiajrstars` es la raíz del repositorio y del sitio: no requiere compilación ni instalación de paquetes para servir las páginas.
 
 ## Desarrollo local
 
@@ -36,6 +36,10 @@ Abre `http://127.0.0.1:5501/`. Utiliza HTTP; los iconos SVG y algunas funciones 
 `js/supabaseClient.js` contiene la URL y la clave pública del proyecto Supabase. La autorización de datos depende de las políticas del servicio. No se deben incluir claves privadas o `service_role` en el frontend.
 
 Los scripts `seed.mjs` y `transform.js` son utilidades de mantenimiento existentes; no forman parte del arranque del sitio. `seed.mjs` escribe datos de prueba en Supabase.
+
+La ficha consulta la fecha de registro de `students.created_at` y cuenta días distintos de asistencia en `attendance.created_at`, según la zona horaria de Perú. Un día con varios escaneos cuenta una sola vez. Si falla la consulta, se muestra que la asistencia no está disponible.
+
+`migrations/20260903_datos_alumno.sql` prepara los campos de nacimiento, apoderado, grupo, categoría, tarifa y código del alumno que faltan en el esquema actual. Debe aplicarse en el SQL Editor de Supabase para guardar esos campos; añadir el archivo al repositorio no ejecuta la migración. Mientras no haya datos, la ficha muestra «Sin registrar».
 
 ## Publicación
 

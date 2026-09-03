@@ -1,0 +1,74 @@
+/* Ficha y confirmación de estado: superficies claras e iconos locales. */
+.alumno-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+.alumno-actions .btn, .alumno-dialog .btn, .edit-estado-section .btn { font-family: var(--font-body); font-size: 15px !important; letter-spacing: 0; text-transform: none; line-height: 1.4; }
+.alumno-actions .btn { padding: .65rem 1rem !important; }
+.alumno-dialog { width: min(900px, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); margin: auto; padding: 0; overflow: hidden; border: 1px solid #e2e8f0; border-radius: 22px !important; background: #fff; color: #202938; box-shadow: 0 24px 80px #0f172a33; }
+.alumno-dialog[open], .alumno-confirmacion form { display: flex; flex-direction: column; min-height: 0; }
+.alumno-dialog::backdrop { background: #0f172a88; backdrop-filter: blur(3px); }
+.alumno-dialog [hidden] { display: none !important; }
+.alumno-dialog-header, .alumno-dialog-footer { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-shrink: 0; padding: 1.1rem 1.5rem; }
+.alumno-dialog-header { border-bottom: 1px solid #e8ecf1; }
+.alumno-dialog-header h2 { margin: .2rem 0 0; font: 800 22px/1.3 var(--font-body); letter-spacing: 0; text-transform: none; }
+.ficha-eyebrow { color: #b42329; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.alumno-dialog-close { display: grid; place-items: center; width: 42px; height: 42px; flex-shrink: 0; border: 1px solid #dce1e8; border-radius: 50% !important; background: #f8fafc; color: #596579; cursor: pointer; font-size: 18px; }
+.alumno-dialog-close:focus-visible, .ficha-retry:focus-visible { outline: 2px solid #da1212; outline-offset: 3px; }
+.alumno-dialog-content { padding: 1.5rem; overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.alumno-dialog-footer { border-top: 1px solid #e8ecf1; background: #fff; }
+.ficha-hero { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.4rem; }
+.ficha-avatar { display: grid; place-items: center; width: 64px; height: 64px; flex-shrink: 0; border-radius: 18px !important; background: #fff0f0; color: #b42329; font-size: 23px; font-weight: 800; }
+.ficha-identity { min-width: 0; }
+.ficha-identity h3 { font: 800 24px/1.3 var(--font-body); text-transform: none; letter-spacing: 0; overflow-wrap: anywhere; margin: 0 0 .5rem; }
+.ficha-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ficha-tag { display: inline-flex; align-items: center; padding: .3rem .65rem; background: #f1f5f9; color: #475569; border-radius: 999px !important; font-size: 12px; }
+.ficha-tag.is-active { background: #e7f7ee; color: #087f43; }
+.ficha-tag.is-inactive { background: #fff0f0; color: #b42329; }
+.ficha-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-bottom: 1.25rem; }
+.ficha-stat { padding: 1rem; border: 1px solid #e6e9ee; border-radius: 14px !important; background: #f8fafc; min-width: 0; }
+.ficha-stat-label { display: block; color: #596579; font-size: 12px; font-weight: 600; }
+.ficha-stat-value { display: block; margin: .55rem 0 .25rem; color: #202938; font-size: 26px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+.ficha-stat-value.is-date { font-size: 18px; line-height: 1.3; }
+.ficha-stat-note { color: #596579; font-size: 11px; line-height: 1.5; }
+.ficha-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.ficha-section { min-width: 0; padding: 1.1rem; border: 1px solid #e6e9ee; border-radius: 14px !important; }
+.ficha-section h3 { display: flex; align-items: center; gap: .5rem; margin: 0 0 1rem; font: 700 16px/1.4 var(--font-body); text-transform: none; letter-spacing: 0; color: #202938; }
+.ficha-section dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .85rem 1rem; }
+.ficha-section dl > div { min-width: 0; }
+.ficha-section dt { color: #596579; font-size: 12px; margin-bottom: .25rem; font-weight: 400; }
+.ficha-section dd { color: #202938; font-size: 14px; line-height: 1.5; font-weight: 600; overflow-wrap: anywhere; }
+.ficha-chart { margin-bottom: 1rem; }
+.ficha-chart-row { display: grid; grid-template-columns: 76px minmax(0, 1fr) 26px; gap: .65rem; align-items: center; margin: .65rem 0; color: #596579; font-size: 12px; }
+.ficha-chart-row strong { color: #202938; text-align: right; }
+.ficha-bar-track { height: 10px; background: #f1f5f9; border-radius: 999px !important; overflow: hidden; }
+.ficha-bar-track span { display: block; height: 100%; background: #da1212; border-radius: 999px !important; }
+.ficha-chart-note, .ficha-message { color: #596579; font-size: 13px; font-weight: 400; line-height: 1.6; }
+.ficha-error { color: #b42329; }
+.ficha-retry { padding: .45rem .7rem; margin-top: .6rem; border: 1px solid #dce1e8; background: #fff; color: #202938; border-radius: 8px !important; cursor: pointer; font: 600 13px var(--font-body); }
+.ficha-qr { margin-top: 1rem; text-align: center; }
+.ficha-qr h3 { justify-content: center; }
+.ficha-qr img { display: block; width: 240px; max-width: 100%; height: auto; margin: 1rem auto; padding: .5rem; background: #fff; }
+.ficha-qr a { color: #b42329; font-size: 14px; }
+.edit-estado-section { margin-top: 1.5rem; padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid #f0d2d4; background: #fffafa; border-radius: 14px !important; }
+.edit-estado-section h3 { margin: 0 0 .35rem; font: 700 16px var(--font-body); text-transform: none; }
+.edit-estado-section p { color: #596579; font-size: 13px; line-height: 1.5; }
+.btn.btn-danger-soft, #edit-estado-btn[data-action="desactivar"] { color: #b42329 !important; background: #fff0f0; border-color: #efc6c6 !important; }
+.btn.btn-danger-soft:hover { background: #ffe3e3; }
+.alumno-confirmacion { max-width: 480px; }
+.alumno-confirmacion .alumno-dialog-content { line-height: 1.6; font-size: 14px; color: #475569; }
+.estado-confirm-name { color: #202938; font-size: 18px; font-weight: 800; margin-bottom: .7rem; overflow-wrap: anywhere; }
+.estado-confirm-check { display: flex; align-items: flex-start; gap: .65rem; padding: .85rem; margin-top: 1.2rem; background: #f8fafc; border: 1px solid #e6e9ee; border-radius: 10px !important; cursor: pointer; }
+.estado-confirm-check input { margin-top: .2rem; width: 18px; height: 18px; flex-shrink: 0; accent-color: #b42329; }
+.estado-confirm-error { color: #b42329; margin-top: .8rem; }
+.alumno-confirmacion .alumno-dialog-footer { justify-content: flex-end; flex-wrap: wrap; }
+@media (max-width: 700px) {
+  .alumno-actions .btn { flex: 1; min-height: 44px; }
+  .alumno-dialog { width: calc(100vw - 1rem); max-height: calc(100dvh - 1rem); border-radius: 18px !important; }
+  .alumno-dialog-header, .alumno-dialog-footer, .alumno-dialog-content { padding: 1rem; }
+  .alumno-dialog-header h2 { font-size: 20px; }
+  .ficha-identity h3 { font-size: 20px; }
+  .ficha-avatar { width: 50px; height: 50px; font-size: 20px; }
+  .ficha-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+  .ficha-stat { padding: .85rem; }
+  .ficha-grid { grid-template-columns: minmax(0, 1fr); }
+  .edit-estado-section { flex-direction: column; align-items: stretch; }
+  .alumno-dialog-footer .btn { flex: 1; padding-inline: .75rem !important; white-space: normal; }
+}
