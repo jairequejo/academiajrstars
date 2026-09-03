@@ -1,112 +1,251 @@
-/* css/caja.css — Ultra-modern Brutalist Dark Terminal POS */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700&family=Barlow:wght@400;600;700&display=swap');
+/* ═══════════════════════════════════════════
+   CAJA.CSS — Light Sport POS | JR Stars
+   Paleta: blanco clínico + carbón + rojo #da1212
+═══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap');
 
-:root {
-  --bg: #050505;
-  --bg-surface: #121212;
-  --text: #F0F0F0;
-  --text-dim: #888888;
-  --accent: #E60000;
-  --accent-gold: #FFC000;
-  --accent-gold-glow: rgba(255, 192, 0, 0.4);
-  --border: #2A2A2A;
-  --error: #FF3333;
-}
+/* ── RESET ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: hidden; font-size: 16px; }
+@media (max-width: 480px) { html { font-size: 14px; } }
 
 body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: 'Barlow', sans-serif;
+  background: #ffffff;
+  color: #111111;
+  font-family: 'Inter', system-ui, sans-serif;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-html { overflow-x: hidden; }
-
-body::before {
-  content: "";
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: -1;
-}
-
+/* ── PIN SCREEN ─────────────────────────────── */
 .pin-screen {
-  position: fixed; inset: 0; background: var(--bg); z-index: 999;
+  position: fixed; inset: 0;
+  background: #ffffff;
+  z-index: 999;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border: 10px solid var(--border); box-sizing: border-box;
+  border-left: 6px solid #da1212;
 }
+
 .pin-title {
-  font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: var(--accent-gold); letter-spacing: 4px; margin-bottom: 2rem;
-  text-shadow: 0 0 15px var(--accent-gold-glow);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.5rem; color: #111111;
+  letter-spacing: 4px; margin-bottom: 0.5rem;
   text-transform: uppercase;
 }
-.pin-dots { display: flex; gap: 1.5rem; margin-bottom: 3.5rem; }
-.pin-dot { width: 20px; height: 20px; border-radius: 0; border: 2px solid var(--border); background: transparent; }
-.pin-dot.filled { background: var(--accent-gold); border-color: var(--accent-gold); box-shadow: 0 0 10px var(--accent-gold-glow); }
-.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
-.pin-btn {
-  width: 90px; height: 90px; border-radius: 0;
-  background: var(--bg-surface); border: 2px solid var(--border);
-  color: var(--text); font-size: 2.5rem; font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.1s ease-out;
-}
-.pin-btn:active, .pin-btn:hover { background: var(--text); color: var(--bg); border-color: var(--text); transform: translateY(2px); }
-.pin-btn.btn-borrar { font-size: 1.2rem; color: var(--error); border-color: rgba(255,51,51,0.3); background: rgba(255,51,51,0.05); text-transform: uppercase; }
-.pin-btn.btn-borrar:active, .pin-btn.btn-borrar:hover { background: var(--error); color: #000; border-color: var(--error); }
 
+.pin-dots { display: flex; gap: 1.2rem; margin-bottom: 3rem; }
+.pin-dot {
+  width: 18px; height: 18px;
+  border: 2px solid #e2e8f0;
+  background: transparent;
+}
+.pin-dot.filled {
+  background: #da1212;
+  border-color: #da1212;
+}
+
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.pin-btn {
+  width: 84px; height: 84px;
+  background: #f8f9fa;
+  border: 2px solid #e2e8f0;
+  color: #111111;
+  font-size: 2rem;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.05em;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.1s ease-out;
+}
+.pin-btn:hover { background: #111111; color: #ffffff; border-color: #111111; }
+.pin-btn:active { transform: translateY(2px); }
+
+.pin-btn.btn-borrar {
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  color: #da1212;
+  border-color: #da1212;
+  background: rgba(218, 18, 18, 0.05);
+  letter-spacing: 0.08em;
+}
+.pin-btn.btn-borrar:hover { background: #da1212; color: #ffffff; }
+
+/* ── CAJA LAYOUT ────────────────────────────── */
 .caja-layout {
   display: none;
-  padding: 2rem; max-width: 800px; margin: 0 auto;
+  max-width: 800px;
+  margin: 0 auto;
 }
+
+/* ── TOPBAR ─────────────────────────────────── */
 .caja-header {
-  background: var(--bg-surface); border: 2px solid var(--border); border-radius: 0;
-  padding: 1.5rem; margin-bottom: 2rem; text-align: center;
-  box-shadow: inset 0 0 0 2px var(--bg);
+  position: sticky; top: 0; z-index: 100;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  border-left: 6px solid #da1212;
+  padding: 1rem 1.25rem;
+  display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
 }
-.status-nfc { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--accent-gold); margin-top: 1rem; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--accent-gold-glow); }
 
+.caja-topbar-brand {
+  display: flex; align-items: center; gap: 0.75rem;
+  text-decoration: none; width: 100%;
+}
+.caja-topbar-brand img { height: 36px; width: 36px; object-fit: contain; }
+.caja-topbar-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem; letter-spacing: 0.06em;
+  color: #111111; flex: 1;
+}
+.caja-topbar-badge {
+  font-size: 0.72rem; font-weight: 800;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  background: #da1212; color: #ffffff;
+  padding: 0.3rem 0.75rem;
+}
+
+.status-nfc {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem; letter-spacing: 0.1em;
+  color: #555555;
+  text-transform: uppercase;
+  text-align: center;
+}
+.status-nfc.active { color: #da1212; }
+
+/* QR reader container */
+#reader-container {
+  margin: 1rem auto 0;
+  max-width: 300px;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  overflow: hidden;
+}
+#reader { width: 100%; }
+#reader button {
+  background: #111111;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  text-transform: uppercase;
+  margin: 12px;
+  transition: background 0.2s;
+}
+#reader button:hover { background: #da1212; }
+
+/* ── CLIENTE BOX ──────────────────────────────── */
 .cliente-box {
-  background: var(--bg-surface); color: var(--text); border: 2px solid var(--accent-gold); border-radius: 0;
-  padding: 2.5rem; margin-bottom: 2rem;
-  display: none; box-shadow: 0 0 20px rgba(255, 192, 0, 0.15);
-  text-align: center; border-left: 10px solid var(--accent-gold);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 6px solid #da1212;
+  padding: 2rem 1.5rem;
+  margin: 1rem;
+  display: none;
+  text-align: center;
+  animation: slideIn 0.25s ease-out;
 }
-.cliente-box.active { display: block; animation: terminalGlitch 0.2s linear; }
-@keyframes terminalGlitch {
-  0% { transform: translate(2px, -2px); opacity: 0.8; }
-  50% { transform: translate(-2px, 2px); opacity: 0.9; }
-  100% { transform: translate(0, 0); opacity: 1; }
-}
-.c-nombre { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; line-height: 1; margin-bottom: 0.5rem; letter-spacing: 1px; color: var(--text); }
-.c-creditos { font-family: 'Barlow Condensed', sans-serif; font-size: 1.4rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; }
-.c-num { font-size: 3.5rem; font-weight: 700; color: var(--accent-gold); margin-left: 15px; text-shadow: 0 0 10px var(--accent-gold-glow); }
+.cliente-box.active { display: block; }
 
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.c-nombre {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.5rem; line-height: 1;
+  margin-bottom: 0.5rem;
+  color: #111111;
+  letter-spacing: 0.02em;
+}
+.c-creditos {
+  font-size: 1rem; font-weight: 600;
+  color: #555555;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.c-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3rem;
+  color: #da1212;
+  margin-left: 0.5rem;
+}
+
+/* ── MENU GRID ────────────────────────────────── */
 .menu-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1.5rem;
-  opacity: 0.2; pointer-events: none; transition: 0.3s;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1px;
+  background: #e2e8f0;
+  border: 1px solid #e2e8f0;
+  margin: 1rem;
+  opacity: 0.25;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
 .menu-grid.active { opacity: 1; pointer-events: all; }
-.item-btn {
-  background: var(--bg-surface); border: 2px solid var(--border); border-radius: 0;
-  padding: 1.5rem 1rem; text-align: center; cursor: pointer;
-  transition: all 0.15s ease;
-}
-.item-btn:hover { border-color: var(--text-dim); }
-.item-btn:active { border-color: var(--accent-gold); transform: translateY(4px); box-shadow: 0 -4px 0 var(--accent-gold) inset; background: rgba(255, 192, 0, 0.05); }
-.i-emoji { font-size: 3.5rem; display: block; margin-bottom: 1rem; filter: drop-shadow(0 0 8px rgba(255,255,255,0.1)); }
-.i-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase; color: var(--text); letter-spacing: 1px; }
-.i-cost { color: var(--bg); font-family: 'Barlow Condensed', sans-serif; font-size: 1.2rem; font-weight: 700; background: var(--accent); padding: 0.3rem 0.8rem; display: inline-block; text-transform: uppercase; letter-spacing: 1px; }
 
-#reader-container { margin: 0 auto; max-width: 320px; border: 2px solid var(--border); background: var(--bg-surface); overflow: hidden; }
-#reader { width: 100%; }
-#reader button { background: var(--text); color: var(--bg); border: none; padding: 12px 24px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.2rem; cursor: pointer; text-transform: uppercase; margin: 15px; transition: 0.2s; }
-#reader button:hover { background: var(--accent-gold); color: var(--bg); }
+.item-btn {
+  background: #ffffff;
+  border: none;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 4px solid transparent;
+  transition: border-color 0.2s, background 0.15s;
+  display: flex; flex-direction: column; align-items: center;
+}
+.item-btn:hover { background: #f8f9fa; border-bottom-color: #da1212; }
+.item-btn:active { transform: translateY(2px); }
+
+.i-emoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+.i-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.05em;
+  color: #111111;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+.i-cost {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #da1212;
+  padding: 0.25rem 0.6rem;
+  display: inline-block;
+}
+
+/* ── MOBILE RESPONSIVE ──────────────────────── */
+@media (max-width: 480px) {
+  .pin-btn { width: 76px; height: 76px; font-size: 1.8rem; }
+  .pin-title { font-size: 2.8rem; }
+  .c-nombre { font-size: 2.8rem; }
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+  .item-btn { padding: 1.25rem 0.75rem; }
+  .i-emoji { font-size: 2.5rem; }
+}
+
+@media (max-width: 360px) {
+  .pin-btn { width: 68px; height: 68px; font-size: 1.6rem; }
+  .pin-pad { gap: 0.5rem; }
+}

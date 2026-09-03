@@ -637,20 +637,20 @@ async function guardarBiometria() {
     
     if (!id) return;
     
-    // Asumimos que tiempo_sprint y agilidad ya están en DB (o se ignoran sin error si el backend lo permite)
-    // Para MVP, lo enviamos. Supabase ignorará columnas faltantes si insertas por API o fallará, 
-    // pero el usuario tiene el SQL de ALTER TABLE.
-    const { error } = await window.supabaseClient.from('biometria').insert({
-        student_id: id,
-        talla: talla,
-        peso: peso,
-        tiempo_sprint: sprint
-    });
-    
-    if (error) {
-        alert("Error al guardar: " + error.message + " (Recuerde ejecutar el ALTER TABLE)");
-    } else {
+    try {
+        const { error } = await window.supabaseClient.from('biometria').insert({
+            student_id: id,
+            talla: talla,
+            peso: peso,
+            tiempo_sprint: sprint
+        });
+
+        if (error) throw error;
+
         alert("Biometría guardada correctamente");
         document.getElementById('modal-biometria').classList.remove('show');
+    } catch (e) {
+        console.error(e);
+        alert("Error al guardar: " + (e.message || "Problema de conexión."));
     }
 }

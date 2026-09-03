@@ -1,0 +1,41 @@
+@theme {
+  --color-brand: #E5191B;
+  --color-brand-glow: rgba(229, 25, 27, 0.4);
+  --font-display: "Bebas Neue", impact, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+body {
+  background-color: #050505;
+  background-image: radial-gradient(circle at top right, rgba(229, 25, 27, 0.1), transparent 400px),
+                    radial-gradient(circle at bottom left, rgba(229, 25, 27, 0.05), transparent 400px);
+  background-attachment: fixed;
+  color: white;
+}
+
+/* Polígonos de corte deportivo (Sport Slant) */
+.slant-btn {
+  transform: skewX(-12deg);
+  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.slant-btn-content {
+  display: block;
+  transform: skewX(12deg); /* Revierte el texto para que no se incline */
+}
+.slant-btn:hover {
+  box-shadow: 0 0 20px var(--color-brand-glow);
+  transform: skewX(-12deg) scale(1.02);
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(24, 24, 27, 0.9) 0%, rgba(9, 9, 11, 0.9) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+}
+
+/* Utilidad para evitar desbordamiento en móviles */
+.no-overflow-x {
+  overflow-x: hidden;
+  width: 100%;
+}

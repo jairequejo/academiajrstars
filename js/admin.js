@@ -73,7 +73,8 @@ function setBottomNav(page) {
 // ── TOAST ─────────────────────────────────────────────
 function showToast(msg, type = 'ok') {
   const t = document.getElementById('toast');
-  t.textContent = msg;
+  t.innerHTML = adminIcon(type === 'error' ? 'error' : 'check');
+  t.appendChild(document.createTextNode(msg));
   t.className = `toast visible ${type === 'error' ? 'error' : ''}`;
   setTimeout(() => t.classList.remove('visible'), 3000);
 }
@@ -245,7 +246,7 @@ async function onAdminQRScanned(code) {
         if (resultEl) {
             resultEl.className = `scan-result ${estado}`;
             if (estado === 'debe') {
-              resultEl.innerHTML = `🚫 <strong>${nombre}</strong><br>
+              resultEl.innerHTML = `<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ban"></use></svg> <strong>${nombre}</strong><br>
                 <span style="color:#ff6ec7;font-size:.85rem">MENSUALIDAD VENCIDA</span><br>
                 <span style="font-size:.8rem;opacity:.8">${data.detalle || ''}</span>`;
             } else {
@@ -268,7 +269,7 @@ async function onAdminQRScanned(code) {
     } catch (e) {
         if (resultEl) {
             resultEl.className = 'scan-result error';
-            resultEl.textContent = '❌ Error de conexión';
+            resultEl.innerHTML = adminIcon('error') + ' Error de conexión';
             setTimeout(() => { resultEl.style.display = 'none'; }, 2000);
         }
     }
@@ -360,7 +361,7 @@ async function processAdminScan(code) {
       el.style.display = 'block';
       el.className = `scan-result ${d.status}`;
       if (d.status === 'debe') {
-        el.innerHTML = `🚫 <strong>${d.student_name}</strong><br>
+        el.innerHTML = `<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ban"></use></svg> <strong>${d.student_name}</strong><br>
           <span style="color:#ff6ec7;font-size:.85rem">MENSUALIDAD VENCIDA</span><br>
           <span style="font-size:.8rem;opacity:.8">${d.detalle || ''}</span>`;
       } else {
@@ -371,7 +372,7 @@ async function processAdminScan(code) {
     const li = document.createElement('li');
     li.style.cssText = 'padding:.5rem 0;border-bottom:1px solid var(--border);font-family:var(--font-cond);font-size:.9rem';
     const color = d.status === 'debe' ? '#e91e8c' : 'var(--gold)';
-    li.innerHTML = `<strong style="color:${color}">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong> 📡 — ${d.student_name || code}`;
+    li.innerHTML = `<strong style="color:${color}">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong> <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#radio"></use></svg> — ${d.student_name || code}`;
     document.getElementById('scan-history')?.prepend(li);
   } catch (e) {
     console.warn('Error procesando NFC en admin:', e);
@@ -385,10 +386,15 @@ let alumnosData = []; // cache para filtros
 
 
 async function loadAlumnos() {
-  const { data, error } = await window.supabaseClient.from('students').select('*').order('full_name');
-  if (error) { showToast('Error cargando alumnos', 'error'); return; }
-  alumnosData = data || [];
-  renderAlumnos(alumnosData);
+  try {
+    const { data, error } = await window.supabaseClient.from('students').select('*').order('full_name');
+    if (error) throw error;
+    alumnosData = data || [];
+    renderAlumnos(alumnosData);
+  } catch(e) {
+    console.error(e);
+    showToast('Error cargando alumnos', 'error');
+  }
 }
 
 
@@ -466,8 +472,8 @@ function renderAlumnos(data) {
           <span style="font-family:var(--font-mono);font-size:.8rem;color:var(--gray)">Vence: ${vencimiento}</span>
         </div>
         <div class="alumno-card-actions">
-          <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem" onclick="verQR('${a.id}')">📱 QR</button>
-          <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem;border-color:var(--gold);color:var(--gold)" onclick="abrirModalEdicion('${a.id}')">✏️ Editar</button>
+          <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem" onclick="verQR('${a.id}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#qr"></use></svg> QR</button>
+          <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem;border-color:var(--gold);color:var(--gold)" onclick="abrirModalEdicion('${a.id}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#edit"></use></svg> Editar</button>
           ${a.is_active
           ? `<button class="btn btn-red" style="font-size:.75rem;padding:.3rem .9rem" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', false)">Desactivar</button>`
           : `<button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem;border-color:#00ff88;color:#00ff88" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', true)">Reactivar</button>`
@@ -500,7 +506,7 @@ function renderAlumnos(data) {
             <td><span class="badge badge-gold">${a.horario || 'LMV'}</span></td>
             <td>
               <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem" onclick="verQR('${a.id}')">QR</button>
-              <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem;margin-left:.3rem;border-color:var(--gold);color:var(--gold)" onclick="abrirModalEdicion('${a.id}')">✏️ Editar</button>
+              <button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem;margin-left:.3rem;border-color:var(--gold);color:var(--gold)" onclick="abrirModalEdicion('${a.id}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#edit"></use></svg> Editar</button>
               ${a.is_active
           ? `<button class="btn btn-red" style="font-size:.75rem;padding:.3rem .7rem;margin-left:.3rem" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', false)">Desactivar</button>`
           : `<button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .7rem;margin-left:.3rem;border-color:#00ff88;color:#00ff88" onclick="toggleEstadoAlumno('${a.id}','${a.full_name.replace(/'/g, "\\'")}', true)">Reactivar</button>`
@@ -529,7 +535,10 @@ async function crearAlumno() {
   const horario = document.getElementById('a-horario').value;
   const turno = document.getElementById('a-turno')?.value || null;
 
-  if (!nombre) return showToast('El nombre es obligatorio', 'error');
+  if (!nombre) {
+    showToast('El nombre es obligatorio', 'error');
+    return false;
+  }
 
   const hoy = new Date();
   hoy.setDate(hoy.getDate() + 30);
@@ -552,43 +561,51 @@ async function crearAlumno() {
       tarifa_mensual: pagoMes
   };
 
-  const { data: nuevo_alumno_data, error: insertError } = await window.supabaseClient.from('students').insert(insert_data).select();
-  if (insertError) { showToast(`❌ Error: ${insertError.message}`, 'error'); return; }
-  const nuevo_alumno = nuevo_alumno_data[0];
-
   try {
-      const codigo_qr = await generate_jrs_code(nuevo_alumno.id, nuevo_alumno.full_name, fecha_vencimiento_str);
-      await window.supabaseClient.from('credentials').insert({
-          student_id: nuevo_alumno.id,
-          code: codigo_qr,
-          is_active: true
-      });
-  } catch (e) {
-      await window.supabaseClient.from('students').delete().eq('id', nuevo_alumno.id);
-      showToast('❌ Error al generar credencial', 'error');
-      return;
-  }
+      const { data: nuevo_alumno_data, error: insertError } = await window.supabaseClient.from('students').insert(insert_data).select();
+      if (insertError) throw insertError;
+      const nuevo_alumno = nuevo_alumno_data[0];
 
-  if (pagoMes > 0) {
-      await window.supabaseClient.from('mensualidades').insert({
-          student_id: nuevo_alumno.id,
-          monto: pagoMes,
-          metodo_pago: metodo,
-          fecha_inicio: new Date().toISOString().split('T')[0],
-          fecha_vencimiento: fecha_vencimiento_str
-      });
-  }
+      try {
+          const codigo_qr = await generate_jrs_code(nuevo_alumno.id, nuevo_alumno.full_name, fecha_vencimiento_str);
+          const { error: credErr } = await window.supabaseClient.from('credentials').insert({
+              student_id: nuevo_alumno.id,
+              code: codigo_qr,
+              is_active: true
+          });
+          if (credErr) throw credErr;
+      } catch (e) {
+          await window.supabaseClient.from('students').delete().eq('id', nuevo_alumno.id);
+          throw new Error('Error al generar credencial');
+      }
 
-  document.getElementById('a-nombre').value = '';
-  document.getElementById('a-dni').value = '';
-  document.getElementById('a-fecha-nacimiento').value = '';
-  document.getElementById('a-apoderado').value = '';
+      if (pagoMes > 0) {
+          const { error: pagoErr } = await window.supabaseClient.from('mensualidades').insert({
+              student_id: nuevo_alumno.id,
+              monto: pagoMes,
+              metodo_pago: metodo,
+              fecha_inicio: new Date().toISOString().split('T')[0],
+              fecha_vencimiento: fecha_vencimiento_str
+          });
+          if (pagoErr) throw pagoErr;
+      }
+
+      document.getElementById('a-nombre').value = '';
+      document.getElementById('a-dni').value = '';
+      document.getElementById('a-fecha-nacimiento').value = '';
+      document.getElementById('a-apoderado').value = '';
+  } catch (err) {
+      console.error(err);
+      showToast(`Error: ${err.message || 'Error de conexión'}`, 'error');
+      return false;
+  }
   document.getElementById('a-telefono').value = '';
   document.getElementById('a-sede').value = '';
   document.getElementById('a-grupo').value = '';
   document.getElementById('a-categoria').value = '';
-  showToast('✅ Alumno inscrito. Cobro registrado.');
+  showToast(pagoMes > 0 ? 'Alumno inscrito. Cobro registrado.' : 'Alumno inscrito.');
   loadAlumnos();
+  return true;
 }
 
 
@@ -596,10 +613,15 @@ async function crearAlumno() {
 async function toggleEstadoAlumno(id, nombre, reactivar) {
   const accion = reactivar ? 'Reactivar' : 'Desactivar';
   if (!confirm(`¿${accion} a ${nombre}?`)) return;
-  const { error } = await window.supabaseClient.from('students').update({is_active: reactivar}).eq('id', id);
-  if (error) { showToast('Error al actualizar', 'error'); return; }
-  showToast(`✅ Alumno actualizado`);
-  loadAlumnos();
+  try {
+    const { error } = await window.supabaseClient.from('students').update({is_active: reactivar}).eq('id', id);
+    if (error) throw error;
+    showToast(`${reactivar ? 'Reactivado' : 'Desactivado'}`);
+    loadAlumnos();
+  } catch(e) {
+    console.error(e);
+    showToast('Error al actualizar', 'error');
+  }
 }
 
 
@@ -619,7 +641,7 @@ async function verQR(studentId) {
     const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(codeStr)}`;
     window.open(qrImageUrl, '_blank');
   } catch {
-    showToast('❌ Error al obtener el QR.', 'error');
+    showToast('Error al obtener el QR.', 'error');
   }
 }
 
@@ -636,7 +658,7 @@ function abrirModalEdicion(student_id) {
   document.getElementById('edit-fecha-nacimiento').value = a.fecha_nacimiento || '';
   document.getElementById('edit-parent-name').value = a.parent_name || '';
   document.getElementById('edit-parent-phone').value = a.parent_phone || '';
-  document.getElementById('edit-sede').value = a.sede || '';
+  window.adminSedes.setValue('edit-sede', a.sede || '');
   document.getElementById('edit-turno').value = a.turno || '';
   document.getElementById('edit-horario').value = a.horario || 'LMV';
   document.getElementById('edit-grupo').value = a.grupo || '';
@@ -716,12 +738,16 @@ async function guardarEdicionAlumno(event) {
     return;
   }
 
-  const { error } = await window.supabaseClient.from('students').update(payload).eq('id', id);
-  if (error) { showToast(`❌ Error: ${error.message}`, 'error'); return; }
-  
-  cerrarModalEdicion();
-  showToast('✅ Alumno actualizado correctamente');
-  loadAlumnos();
+  try {
+    const { error } = await window.supabaseClient.from('students').update(payload).eq('id', id);
+    if (error) throw error;
+    cerrarModalEdicion();
+    showToast('Alumno actualizado correctamente');
+    loadAlumnos();
+  } catch (err) {
+    console.error(err);
+    showToast(`Error: ${err.message || 'Error de conexión'}`, 'error');
+  }
 }
 
 
@@ -743,7 +769,7 @@ async function loadCreditos() {
   const container = document.getElementById('creditos-result');
   if (!container) return;
 
-  container.innerHTML = '<p style="color:var(--gray);padding:1.5rem;font-family:var(--font-cond);text-align:center">⏳ Cargando alumnos…</p>';
+  container.innerHTML = '<p style="color:var(--gray);padding:1.5rem;font-family:var(--font-cond);text-align:center"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#clock"></use></svg> Cargando alumnos…</p>';
 
   chipActivo = 'todos';
   document.querySelectorAll('.filtro-chip').forEach(c => c.classList.remove('active'));
@@ -770,7 +796,7 @@ async function loadCreditos() {
 
     aplicarFiltrosPagos();
   } catch {
-    container.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond);padding:1rem">❌ Error al cargar alumnos.</p>';
+    container.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond);padding:1rem"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#error"></use></svg> Error al cargar alumnos.</p>';
   }
 }
 
@@ -820,7 +846,7 @@ function aplicarFiltrosPagos() {
 function renderListaPagos(lista) {
   const container = document.getElementById('creditos-result');
   if (!lista.length) {
-    container.innerHTML = '<div class="empty-search-state"><div class="empty-icon">🔍</div><p>No hay alumnos con ese filtro.</p></div>';
+    container.innerHTML = '<div class="empty-search-state"><div class="empty-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#search"></use></svg></div><p>No hay alumnos con ese filtro.</p></div>';
     return;
   }
 
@@ -842,19 +868,19 @@ function renderListaPagos(lista) {
       estadoColor = 'var(--red2)';
       borde = 'rgba(255,60,60,.35)';
     } else if (dias <= 7) {
-      estadoTexto = `⚠️ ${dias}d restantes`;
-      estadoColor = '#ff9800';
+      estadoTexto = `<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#alert"></use></svg> ${dias}d restantes`;
+      estadoColor = 'var(--gold)';
       borde = 'rgba(255,152,0,.35)';
     } else {
-      estadoTexto = `✅ ${dias}d restantes`;
-      estadoColor = '#00ff88';
+      estadoTexto = `<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#check"></use></svg> ${dias}d restantes`;
+      estadoColor = 'var(--green)';
       borde = 'rgba(0,255,136,.15)';
     }
 
     const btnCobrar = a.is_active ? `
-      <button class="btn btn-gold" style="font-size:.78rem;padding:.35rem 1rem;flex-shrink:0"
+      <button class="btn btn-gold btn-cobrar" type="button"
         onclick="abrirPagoAlumno('${a.id}', '${a.full_name.replace(/'/g, "\\'")}')">
-        💵 Cobrar
+        <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#cash"></use></svg> Cobrar
       </button>` : '';
 
     return `
@@ -884,11 +910,11 @@ function abrirPagoAlumno(id, nombre) {
   if (tarifaRaw === 0) {
     tarifa = 0;
     esBecado = true;
-    tarifaLabel = `<span style="color:#00ff88;font-weight:700">BECADO (S/ 0.00)</span>`;
+    tarifaLabel = '<span class="pago-becado">Becado · S/ 0.00</span>';
   } else if (tarifaRaw == null) {
     tarifa = 80;
     esBecado = false;
-    tarifaLabel = `S/ 80.00 / mes <span style="color:var(--gray);font-size:.75rem">(Por defecto)</span>`;
+    tarifaLabel = 'S/ 80.00 / mes <span class="pago-tarifa-nota">Tarifa por defecto</span>';
   } else {
     tarifa = tarifaRaw;
     esBecado = false;
@@ -899,49 +925,53 @@ function abrirPagoAlumno(id, nombre) {
   overlay.id = 'pago-overlay';
   overlay.dataset.tarifa = tarifa;  // guardamos para pagarMensualidad
   overlay.dataset.studentId = id;
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:490;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto';
+  overlay.className = 'pago-overlay';
   overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
   overlay.innerHTML = `
-    <div style="background:#111114;border:1px solid rgba(212,160,23,.25);border-radius:12px;padding:2rem;width:100%;max-width:440px;animation:slideUp .2s ease">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem;padding-bottom:.8rem;border-bottom:1px solid rgba(212,160,23,.15)">
-        <div style="font-family:var(--font-display);font-size:1.3rem">💰 <span style="color:var(--gold)">${nombre}</span></div>
-        <button onclick="document.getElementById('pago-overlay').remove()"
-          style="background:none;border:1px solid var(--border);color:var(--gray);width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:.9rem">✕</button>
+    <div class="pago-panel" role="dialog" aria-labelledby="pago-title">
+      <div class="pago-header">
+        <div>
+          <h2 id="pago-title">Registrar pago</h2>
+          <p id="pago-student-name" class="pago-student-name"></p>
+        </div>
+        <button class="pago-close" type="button" aria-label="Cerrar ventana de pago" onclick="document.getElementById('pago-overlay').remove()"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
       </div>
 
-      <div class="pago-opcion" style="cursor:pointer" onclick="pagarMensualidad('${id}'); document.getElementById('pago-overlay').remove()">
-        <div class="pago-opcion-icon">${esBecado ? '🎓' : '💵'}</div>
+      <div class="pago-opcion">
+        <div class="pago-opcion-icon">${esBecado ? '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#school"></use></svg>' : '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#cash"></use></svg>'}</div>
         <div class="pago-opcion-info">
           <div class="pago-opcion-titulo">Mensualidad</div>
           <div class="pago-opcion-precio">${tarifaLabel}</div>
         </div>
-        <button class="btn ${esBecado ? 'btn-outline' : 'btn-gold'} pago-opcion-btn"
-          style="${esBecado ? 'border-color:#00ff88;color:#00ff88' : ''}">
-          ${esBecado ? 'Renovar Gratis' : 'Cobrar'}
+        <button class="btn btn-gold pago-opcion-btn" type="button"
+          onclick="pagarMensualidad('${id}'); document.getElementById('pago-overlay').remove()">
+          ${esBecado ? 'Renovar gratis' : 'Cobrar'}
         </button>
       </div>
 
-      <div class="pago-opcion" style="margin-top:.8rem">
-        <div class="pago-opcion-icon">🥤</div>
+      <div class="pago-opcion">
+        <div class="pago-opcion-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#cup"></use></svg></div>
         <div class="pago-opcion-info">
           <div class="pago-opcion-titulo">Créditos Batidos</div>
           <div class="pago-opcion-precio">${creditos} créditos actuales</div>
         </div>
-        <div style="display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+        <div class="pago-recarga">
+          <label for="cr-${id}">Cantidad a recargar</label>
           <input class="input-jr credit-input" type="number" min="1" max="20" value="4" id="cr-${id}">
-          <button class="btn btn-outline pago-opcion-btn" style="border-color:var(--gold);color:var(--gold)"
+          <button class="btn btn-outline pago-opcion-btn" type="button"
             onclick="recargar('${id}')">+ Recargar</button>
         </div>
       </div>
 
       <!-- Historial de pagos -->
-      <div id="historial-pagos-wrap" style="margin-top:1.2rem;border-top:1px solid rgba(255,255,255,.06);padding-top:1rem">
-        <div style="font-family:var(--font-cond);font-size:.72rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.6rem">// HISTORIAL DE PAGOS</div>
-        <p style="color:var(--gray);font-family:var(--font-cond);font-size:.85rem">Cargando...</p>
+      <div id="historial-pagos-wrap" class="pago-historial">
+        <h3>Historial de pagos</h3>
+        <p class="pago-historial-message">Cargando...</p>
       </div>
     </div>`;
 
+  overlay.querySelector('#pago-student-name').textContent = nombre;
   document.body.appendChild(overlay);
   loadHistorialPagos(id);
 }
@@ -975,32 +1005,32 @@ async function loadHistorialPagos(student_id) {
     
     if (!data || !data.length) {
       wrap.innerHTML = `
-        <div style="font-family:var(--font-cond);font-size:.72rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.6rem">// HISTORIAL DE PAGOS</div>
-        <p style="color:var(--gray);font-family:var(--font-cond);font-size:.85rem">No hay pagos registrados.</p>`;
+        <h3>Historial de pagos</h3>
+        <p class="pago-historial-message">No hay pagos registrados.</p>`;
       return;
     }
     wrap.innerHTML = `
-      <div style="font-family:var(--font-cond);font-size:.72rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.6rem">// HISTORIAL DE PAGOS</div>
-      <div style="display:flex;flex-direction:column;gap:.3rem">
+      <h3>Historial de pagos</h3>
+      <div class="pago-historial-list">
         ${data.map(p => {
       const fecha = p.created_at
         ? new Date(p.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
         : '—';
       const monto = (p.monto ?? 0) === 0
-        ? '<span style="color:#00ff88">BECADO</span>'
-        : `<span style="color:var(--white);font-weight:700">S/ ${Number(p.monto).toFixed(2)}</span>`;
+        ? '<span class="pago-becado">Becado</span>'
+        : `<span class="pago-historial-monto">S/ ${Number(p.monto).toFixed(2)}</span>`;
       const metodo = p.metodo_pago || '—';
-      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.05);font-family:var(--font-cond);font-size:.82rem">
-            <span style="color:var(--gray)">${fecha}</span>
+      return `<div class="pago-historial-row">
+            <span class="pago-historial-fecha">${fecha}</span>
             ${monto}
-            <span style="color:var(--gray2);font-size:.76rem">${metodo}</span>
+            <span class="pago-historial-metodo">${metodo}</span>
           </div>`;
     }).join('')}
       </div>`;
   } catch {
     wrap.innerHTML = `
-      <div style="font-family:var(--font-cond);font-size:.72rem;letter-spacing:.2em;color:var(--gold);margin-bottom:.6rem">// HISTORIAL DE PAGOS</div>
-      <p style="color:var(--gray);font-family:var(--font-cond);font-size:.85rem">Error al cargar historial.</p>`;
+      <h3>Historial de pagos</h3>
+      <p class="pago-historial-message">Error al cargar historial.</p>`;
   }
 }
 
@@ -1025,57 +1055,61 @@ async function pagarMensualidad(id) {
     metodo = metodo.trim() || 'Efectivo';
   }
 
-  const { data: res_alumno, error: err_alumno } = await window.supabaseClient.from('students').select('id, valid_until, full_name').eq('id', id).single();
-  if (err_alumno || !res_alumno) { showToast('❌ Alumno no encontrado', 'error'); return; }
-
-  const hoy = new Date();
-  let nueva_fecha = new Date();
-  if (res_alumno.valid_until) {
-      const fecha_actual_vencimiento = new Date(res_alumno.valid_until);
-      fecha_actual_vencimiento.setMinutes(fecha_actual_vencimiento.getMinutes() + fecha_actual_vencimiento.getTimezoneOffset());
-      if (fecha_actual_vencimiento >= hoy) {
-          nueva_fecha = new Date(fecha_actual_vencimiento);
-          nueva_fecha.setDate(nueva_fecha.getDate() + 30);
-      } else {
-          nueva_fecha.setDate(hoy.getDate() + 30);
-      }
-  } else {
-      nueva_fecha.setDate(hoy.getDate() + 30);
-  }
-  const fecha_str = nueva_fecha.toISOString().split('T')[0];
-
-  const { error: err_upd } = await window.supabaseClient.from('students').update({valid_until: fecha_str}).eq('id', id);
-  if (err_upd) { showToast('❌ Error', 'error'); return; }
-
   try {
-      const nuevo_jrs_code = await generate_jrs_code(id, res_alumno.full_name, fecha_str);
-      const { data: cred_res } = await window.supabaseClient.from('credentials').select('id').eq('student_id', id).eq('is_active', true).limit(1);
-      
-      if (cred_res && cred_res.length > 0) {
-          await window.supabaseClient.from('credentials').update({code: nuevo_jrs_code}).eq('id', cred_res[0].id);
-      } else {
-          await window.supabaseClient.from('credentials').insert({student_id: id, code: nuevo_jrs_code, is_active: true});
-      }
-  } catch (e) {
-      console.warn("No se pudo regenerar el código JRS:", e);
-  }
+    const { data: res_alumno, error: err_alumno } = await window.supabaseClient.from('students').select('id, valid_until, full_name').eq('id', id).single();
+    if (err_alumno || !res_alumno) { showToast('Alumno no encontrado', 'error'); return; }
 
-  try {
-      await window.supabaseClient.from('mensualidades').insert({
-          student_id: id,
-          monto: tarifa,
-          metodo_pago: metodo,
-          fecha_inicio: hoy.toISOString().split('T')[0],
-          fecha_vencimiento: fecha_str
-      });
-  } catch (e) {
-      console.warn("No se pudo registrar mensualidad:", e);
-  }
+    const hoy = new Date();
+    let nueva_fecha = new Date();
+    if (res_alumno.valid_until) {
+        const fecha_actual_vencimiento = new Date(res_alumno.valid_until);
+        fecha_actual_vencimiento.setMinutes(fecha_actual_vencimiento.getMinutes() + fecha_actual_vencimiento.getTimezoneOffset());
+        if (fecha_actual_vencimiento >= hoy) {
+            nueva_fecha = new Date(fecha_actual_vencimiento);
+            nueva_fecha.setDate(nueva_fecha.getDate() + 30);
+        } else {
+            nueva_fecha.setDate(hoy.getDate() + 30);
+        }
+    } else {
+        nueva_fecha.setDate(hoy.getDate() + 30);
+    }
+    const fecha_str = nueva_fecha.toISOString().split('T')[0];
 
-  showToast(esBecado
-    ? `🎓 Mes renovado gratis. Vence: ${fecha_str}`
-    : `✅ S/${tarifa.toFixed(2)} registrados. Vence: ${fecha_str}`);
-  loadCreditos();
+    const { error: err_upd } = await window.supabaseClient.from('students').update({valid_until: fecha_str}).eq('id', id);
+    if (err_upd) throw err_upd;
+
+    try {
+        const nuevo_jrs_code = await generate_jrs_code(id, res_alumno.full_name, fecha_str);
+        const { data: cred_res } = await window.supabaseClient.from('credentials').select('id').eq('student_id', id).eq('is_active', true).limit(1);
+
+        if (cred_res && cred_res.length > 0) {
+            await window.supabaseClient.from('credentials').update({code: nuevo_jrs_code}).eq('id', cred_res[0].id);
+        } else {
+            await window.supabaseClient.from('credentials').insert({student_id: id, code: nuevo_jrs_code, is_active: true});
+        }
+    } catch (e) {
+        console.warn("No se pudo regenerar el código JRS:", e);
+    }
+
+    try {
+        await window.supabaseClient.from('mensualidades').insert({
+            student_id: id,
+            monto: esBecado ? 0 : tarifa,
+            metodo_pago: metodo,
+            fecha_inicio: new Date().toISOString().split('T')[0],
+            fecha_vencimiento: fecha_str
+        });
+    } catch(e) {
+        console.warn("Error al guardar recibo:", e);
+    }
+
+    showToast('Pago registrado con éxito (+30 días)');
+    loadAlumnos();
+    if (typeof loadCreditos === 'function') loadCreditos();
+  } catch (err) {
+      console.error(err);
+      showToast('Error de red o base de datos', 'error');
+  }
 }
 
 
@@ -1083,14 +1117,14 @@ async function pagarMensualidad(id) {
 async function recargar(id) {
   const cantidad = parseInt(document.getElementById(`cr-${id}`)?.value) || 4;
   const { data: alumno } = await window.supabaseClient.from('students').select('id, full_name, batido_credits').eq('id', id).single();
-  if (!alumno) { showToast('❌ Alumno no encontrado', 'error'); return; }
+  if (!alumno) { showToast('Alumno no encontrado', 'error'); return; }
 
   const nuevo = (alumno.batido_credits || 0) + cantidad;
   const { error } = await window.supabaseClient.from('students').update({batido_credits: nuevo}).eq('id', id);
   
-  if (error) { showToast('❌ Error al recargar', 'error'); return; }
+  if (error) { showToast('Error al recargar', 'error'); return; }
 
-  showToast(`✅ ${alumno.full_name}: ahora tiene ${nuevo} cr.`);
+  showToast(`${alumno.full_name}: ahora tiene ${nuevo} cr.`);
   document.getElementById('pago-overlay')?.remove();
   loadCreditos();
 }
@@ -1164,14 +1198,7 @@ async function loadCalendario() {
       }
     });
 
-    const sedeSelect = document.getElementById('cal-filter-sede');
-    const sedes = [...new Set(_calStudents.map(s => s.sede).filter(Boolean))];
-    sedeSelect.innerHTML = '<option value="">Todas las sedes</option>';
-    sedes.forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s; opt.textContent = s;
-      sedeSelect.appendChild(opt);
-    });
+    await window.adminSedes.load();
 
     renderCalendario();
 
@@ -1179,7 +1206,7 @@ async function loadCalendario() {
     if (lu) lu.textContent = `Actualizado: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 
   } catch (e) {
-    loading.innerHTML = `<span style="color:var(--red2);font-family:var(--font-cond)">❌ ${e.message}</span>`;
+    loading.innerHTML = `<span style="color:var(--red2);font-family:var(--font-cond)"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#error"></use></svg> ${e.message}</span>`;
     return;
   }
 
@@ -1294,9 +1321,9 @@ function renderCalendario() {
         workdayCount++;
         if (isPresent) {
           presentCount++;
-          html += `<td><div class="day-cell day-present${todayCls}" title="${dateStr}">✓</div></td>`;
+          html += `<td><div class="day-cell day-present${todayCls}" role="img" aria-label="Presente: ${dateStr}" title="${dateStr}"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#check"></use></svg></div></td>`;
         } else {
-          html += `<td><div class="day-cell day-absent${todayCls}" title="${dateStr}">✗</div></td>`;
+          html += `<td><div class="day-cell day-absent${todayCls}" role="img" aria-label="Ausente: ${dateStr}" title="${dateStr}"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#error"></use></svg></div></td>`;
         }
       }
     });
@@ -1356,7 +1383,8 @@ async function buscarParaBio() {
 async function seleccionarBioAlumno(id, nombre) {
   _bioSelected = { id, nombre };
   document.getElementById('bio-student-id').value = id;
-  document.getElementById('bio-alumno-label').textContent = `📋 ${nombre}`;
+  document.getElementById('bio-alumno-label').textContent = nombre;
+  document.getElementById('bio-alumno-label').insertAdjacentHTML('afterbegin', adminIcon('clipboard') + ' ');
   document.getElementById('bio-search-results').innerHTML = '';
   document.getElementById('bio-search').value = nombre;
 
@@ -1401,7 +1429,7 @@ async function cargarHistorialBio(sid) {
                 <td style="padding:.4rem .6rem;text-align:center;font-size:1rem;font-weight:700;color:var(--white)">${r.talla != null ? r.talla + 'm' : '—'}</td>
                 <td style="padding:.4rem .6rem;text-align:center;font-size:1rem;font-weight:700;color:var(--white)">${r.peso != null ? r.peso + 'kg' : '—'}</td>
                 <td style="padding:.4rem .6rem;text-align:right">
-                  <button onclick="eliminarBio('${r.id}')" style="background:none;border:none;color:var(--red2);cursor:pointer;font-size:.9rem">✕</button>
+                  <button aria-label="Eliminar medición" onclick="eliminarBio('${r.id}')" style="background:none;border:none;color:var(--red2);cursor:pointer;font-size:.9rem"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
                 </td>
               </tr>`).join('')}
           </tbody>
@@ -1429,12 +1457,12 @@ async function guardarBiometria() {
   const { error } = await window.supabaseClient.from('biometria').insert(body);
 
   if (!error) {
-    showToast('✅ Medición guardada');
+    showToast('Medición guardada');
     document.getElementById('bio-talla').value = '';
     document.getElementById('bio-peso').value = '';
     await cargarHistorialBio(sid);
   } else {
-    showToast('❌ Error al guardar', 'error');
+    showToast('Error al guardar', 'error');
   }
 }
 
@@ -1442,9 +1470,15 @@ async function guardarBiometria() {
 
 async function eliminarBio(id) {
   if (!confirm('¿Eliminar esta medición?')) return;
-  await window.supabaseClient.from('biometria').delete().eq('id', id);
-  showToast('✅ Eliminado');
-  if (_bioSelected) await cargarHistorialBio(_bioSelected.id);
+  try {
+    const { error } = await window.supabaseClient.from('biometria').delete().eq('id', id);
+    if (error) throw error;
+    showToast('Eliminado');
+    if (_bioSelected) await cargarHistorialBio(_bioSelected.id);
+  } catch (err) {
+    console.error(err);
+    showToast('Error al eliminar', 'error');
+  }
 }
 
 
@@ -1519,7 +1553,7 @@ async function cargarRanking() {
 
     const label = campo === 'talla' ? 'Talla' : 'Peso';
     const unit = campo === 'talla' ? 'm' : 'kg';
-    const emoji = campo === 'talla' ? '📏' : '⚖️';
+    const measurementIcon = adminIcon(campo === 'talla' ? 'ruler' : 'scale');
 
     wrap.innerHTML = `
       <div style="overflow-x:auto">
@@ -1530,7 +1564,7 @@ async function cargarRanking() {
               <th style="padding:.5rem .7rem;text-align:left;font-size:.72rem;letter-spacing:.12em;color:var(--gray)">Atleta</th>
               <th style="padding:.5rem .7rem;text-align:center;font-size:.72rem;letter-spacing:.12em;color:var(--gray)">Sede</th>
               <th style="padding:.5rem .7rem;text-align:center;font-size:.72rem;letter-spacing:.12em;color:var(--gray)">Horario</th>
-              <th style="padding:.5rem .7rem;text-align:center;font-size:.72rem;letter-spacing:.12em;color:var(--gold)">${emoji} ${label}</th>
+              <th style="padding:.5rem .7rem;text-align:center;font-size:.72rem;letter-spacing:.12em;color:var(--gold)">${measurementIcon} ${label}</th>
               <th style="padding:.5rem .7rem;text-align:center;font-size:.72rem;letter-spacing:.12em;color:var(--gray)">Mes</th>
             </tr>
           </thead>
@@ -1587,8 +1621,8 @@ function renderEntrenadores() {
     <div class="alumno-card" style="opacity:${e.is_active ? '1' : '0.5'};flex-direction:column;align-items:stretch;gap:1rem;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <div class="alumno-card-name">🏃 ${e.nombre}</div>
-          <div style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray)">${e.is_active ? '✅ Acceso habilitado' : '🚫 Acceso revocado'}</div>
+          <div class="alumno-card-name"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#activity"></use></svg> ${e.nombre}</div>
+          <div style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray)">${e.is_active ? '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#check"></use></svg> Acceso habilitado' : '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ban"></use></svg> Acceso revocado'}</div>
         </div>
         <div class="alumno-card-actions">
           ${e.is_active
@@ -1604,7 +1638,7 @@ function renderEntrenadores() {
         <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--gold);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-right:10px;">
           /entrenador/login?token=${e.token.substring(0, 8)}...
         </div>
-        <button class="btn btn-gold" style="font-size:0.75rem;padding:0.4rem 0.8rem;" onclick="copyMagicLink('${e.token}')">📋 Copiar Enlace</button>
+        <button class="btn btn-gold" style="font-size:0.75rem;padding:0.4rem 0.8rem;" onclick="copyMagicLink('${e.token}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#clipboard"></use></svg> Copiar Enlace</button>
       </div>` : ''}
     </div>`).join('');
 }
@@ -1612,9 +1646,9 @@ function renderEntrenadores() {
 function copyMagicLink(token) {
   const url = window.location.origin + '/entrenador/login.html?token=' + token;
   navigator.clipboard.writeText(url).then(() => {
-    showToast('✅ Enlace copiado. Envíalo por WhatsApp.');
+    showToast('Enlace copiado. Envíalo por WhatsApp.');
   }).catch(err => {
-    showToast('❌ Error al copiar enlace', 'error');
+    showToast('Error al copiar enlace', 'error');
   });
 }
 
@@ -1626,10 +1660,10 @@ async function crearEntrenador() {
   const token = btoa(Math.random().toString()).substring(0, 24);
   const { data, error } = await window.supabaseClient.from('entrenadores').insert({ nombre, token, is_active: true }).select();
   
-  if (error || !data) return showToast('❌ Error al crear', 'error');
+  if (error || !data) return showToast('Error al crear', 'error');
 
   document.getElementById('ent-nombre').value = '';
-  showToast('✅ Entrenador creado.');
+  showToast('Entrenador creado.');
   copyMagicLink(data[0].token);
   loadEntrenadores();
 }
@@ -1639,7 +1673,7 @@ async function crearEntrenador() {
 async function toggleEntrenador(id, nombre, reactivar) {
   if (!confirm(`¿${reactivar ? 'Reactivar' : 'Desactivar'} a ${nombre}?`)) return;
   await window.supabaseClient.from('entrenadores').update({is_active: reactivar}).eq('id', id);
-  showToast('✅ Actualizado');
+  showToast('Actualizado');
   loadEntrenadores();
 }
 
@@ -1655,7 +1689,7 @@ async function imprimirPlanchaQRs() {
       datos = data || [];
       alumnosData = datos;
     } catch {
-      showToast('❌ Error al obtener alumnos. Verifica tu conexión.', 'error');
+      showToast('Error al obtener alumnos. Verifica tu conexión.', 'error');
       return;
     }
   }
@@ -1668,7 +1702,7 @@ async function imprimirPlanchaQRs() {
 
   const win = window.open('', '_blank');
   if (!win) {
-    showToast('⚠️ Popup bloqueado. Permite popups en la barra de tu navegador.', 'error');
+    showToast('Popup bloqueado. Permite popups en la barra de tu navegador.', 'error');
     return;
   }
 
@@ -1680,7 +1714,7 @@ async function imprimirPlanchaQRs() {
     animation:spin 1s linear infinite;margin-bottom:1rem}
     @keyframes spin{to{transform:rotate(360deg)}}
     h2{font-size:1.3rem;margin:0}</style></head>
-    <body><div class="spinner"></div><h2>⏳ Cargando ${activos.length} QRs...</h2></body></html>`);
+    <body><div class="spinner"></div><h2><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#clock"></use></svg> Cargando ${activos.length} QRs...</h2></body></html>`);
 
   showToast(`Generando plancha para ${activos.length} alumnos...`, 'ok');
 
@@ -1707,7 +1741,7 @@ async function imprimirPlanchaQRs() {
 
   if (items.length === 0) {
     win.document.open();
-    win.document.write('<html><body><h2>❌ No se pudo obtener ningún QR.</h2></body></html>');
+    win.document.write('<html><body><h2><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#error"></use></svg> No se pudo obtener ningún QR.</h2></body></html>');
     win.document.close();
     return;
   }
@@ -1779,7 +1813,7 @@ async function imprimirPlanchaQRs() {
 </head>
 <body>
   <div class="toolbar">
-    <h2>🖨️ Plancha QR (${items.length})</h2>
+    <h2><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#printer"></use></svg> Plancha QR (${items.length})</h2>
     <button onclick="window.print()">Imprimir Ahora</button>
   </div>
   <div class="page-sheet">
@@ -1800,4 +1834,3 @@ async function imprimirPlanchaQRs() {
   win.document.write(html);
   win.document.close();
 }
-

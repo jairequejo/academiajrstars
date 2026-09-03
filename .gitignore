@@ -1,0 +1,17 @@
+# Configuración privada y dependencias locales
+.env
+.env.*
+!.env.example
+node_modules/
+
+# Archivos del sistema y herramientas locales
+.DS_Store
+Thumbs.db
+*.log
+__pycache__/
+.kombai/
+refactor_css.py
+
+# Resultados temporales de pruebas
+playwright-report/
+test-results/

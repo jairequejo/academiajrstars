@@ -320,16 +320,16 @@ function renderCard(d) {
         wrap.innerHTML = `
           <div class="fut-card deuda">
             <div class="card-stripe"></div>
-            <div class="c-header">
-              <div class="avatar">${av}</div>
+            <div class="fut-header">
+              <div class="fut-avatar">${av}</div>
               <div>
-                <div class="c-name">${d.full_name}</div>
-                <div class="c-cat">${d.category}</div>
+                <div class="fut-name">${d.full_name}</div>
+                <div class="fut-cat">${d.category}</div>
               </div>
             </div>
             <div class="deuda-overlay">
-              <div class="lock-ico">🔒</div>
-              <div class="deuda-h">ESTATUS OCULTO</div>
+              <div class="lock-icon">🔒</div>
+              <div class="deuda-title">ESTATUS OCULTO</div>
               <div class="deuda-sub">MENSUALIDAD PENDIENTE</div>
               <p class="deuda-desc">
                 El historial de <strong>${d.full_name.split(' ')[0]}</strong>
@@ -364,18 +364,18 @@ function renderCard(d) {
           </div>` : '';
 
         wrap.innerHTML = `
-          <div class="fut-card ok">
+          <div class="fut-card al-dia">
             <div class="card-stripe"></div>
-            <div class="c-header">
-              <div class="avatar">${av}</div>
+            <div class="fut-header">
+              <div class="fut-avatar">${av}</div>
               <div>
-                <div class="c-name">${d.full_name}</div>
-                <div class="c-cat">${d.category}</div>
+                <div class="fut-name">${d.full_name}</div>
+                <div class="fut-cat">${d.category}</div>
               </div>
             </div>
-            <div class="racha-blk">
+            <div class="racha-box">
               <span class="racha-tag">// RACHA ACTIVA DE DISCIPLINA</span>
-              <div class="racha-num"><span class="fire">🔥</span> ${d.racha} SESIONES</div>
+              <div class="fire-metric"><span class="fire">🔥</span> ${d.racha} SESIONES</div>
             </div>
             ${(d.talla_actual || d.peso_actual) ? `
             <div class="bio-row">
@@ -392,8 +392,8 @@ function renderCard(d) {
               📏 Sin mediciones físicas registradas aún
             </div>`}
             ${histSection}
-            <div class="radar-blk">
-              <div class="radar-hex"></div>
+            <div class="radar-box">
+              <div class="radar-icon"></div>
               <div class="radar-txt">
                 <strong>PRÓXIMAMENTE</strong>
                 Velocidad · Potencia · Resistencia.

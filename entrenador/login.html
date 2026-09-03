@@ -7,27 +7,36 @@
     <title>JR Stars — Acceso Entrenador</title>
     <link rel="stylesheet" href="/css/theme.css">
     <link rel="stylesheet" href="/css/login.css">
-    <link rel="icon" href="/favicon-entrenador.ico" type="image/x-icon">
+    <link rel="icon" href="/img/escudo.png" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/supabaseClient.js"></script>
 </head>
 
 <body>
-    <div class="access-box">
+    <main class="access-box">
+
+        <!-- Logo centrado -->
         <div class="access-logo">
-            <img src="/img/logo.png" alt="logo" onload="this.classList.add('loaded')">
+            <img src="/img/escudo.png" alt="Escudo JR Stars"
+                onload="this.classList.add('loaded')"
+                onerror="this.style.display='none'">
             <span>🏃</span>
         </div>
-        <div class="access-title">JR <span>STARS</span></div>
-        <div class="access-sub">// Panel Entrenador</div>
 
+        <h1 class="access-title">JR <span>STARS</span></h1>
+        <h2 class="access-sub">Panel Entrenador</h2>
+
+        <!-- Spinner de verificación -->
         <div class="spinner" id="spinner"></div>
-        <div class="status-msg" id="status-msg">Verificando acceso...</div>
-        <div class="no-access" id="no-access">
+        <p class="status-msg" id="status-msg">Verificando acceso...</p>
+
+        <!-- Mensaje de error / acceso denegado -->
+        <p class="no-access" id="no-access">
             Este enlace es inválido o fue revocado.<br>
             Solicita un nuevo acceso al administrador.
-        </div>
-    </div>
+        </p>
+
+    </main>
 
     <script src="/js/login.js"></script>
 </body>

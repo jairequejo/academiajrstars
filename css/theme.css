@@ -1,151 +1,100 @@
 /* ═══════════════════════════════════════════
-   THEME.CSS — JR Stars · Dark E-Sports Aesthetic
+   THEME.CSS — Light Sports Aesthetic (Blanco Clínico)
 ═══════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&family=IBM+Plex+Mono:wght@400;700&display=swap');
 
 :root {
-  --bg-color: #050101;
-  --bg-gradient: radial-gradient(circle at 80% 0%, #4a0404 0%, #170000 40%, #030000 100%);
-  --surface-color: rgba(12, 2, 2, 0.4);
-  --surface-hover: rgba(25, 5, 5, 0.6);
-  --accent-red: #e61919;
-  --accent-red-glow: rgba(230, 25, 25, 0.5);
-  --accent-gold: #ffcc00;
-  --text-main: #ffffff;
-  --text-muted: #c4c4c4;
-  --border-light: rgba(230, 25, 25, 0.15);
-  --glass-bg: rgba(8, 0, 0, 0.5);
-  --glass-border: rgba(255, 255, 255, 0.05);
+  /* PALETA LIGHT SPORT */
+  --color-white: #ffffff;
+  --color-black: #111111; /* Carbón profundo, no negro puro */
+  --color-red: #da1212;   /* Rojo vivo */
+  --color-gold: #ffc107;
+  --color-gray-bg: #f8f9fa; /* Gris muy claro para fondos de cajas */
+  --color-gray: #555555;
+  --color-border: #e2e8f0;
   
-  --font-display: 'Bebas Neue', sans-serif;
-  --font-body: 'Barlow', sans-serif;
+  /* ALIASES */
+  --bg-color: var(--color-white);
+  --bg-gradient: none;
+  --surface-color: var(--color-white);
+  --surface-hover: var(--color-gray-bg);
   
-  --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --text-main: var(--color-black);
+  --text-muted: var(--color-gray);
+
+  --accent-red: var(--color-red);
+  --accent-gold: var(--color-gold);
+
+  --border-light: var(--color-border);
+  --border-strong: var(--color-black);
+
+  --bg: var(--color-white);
+  --gray: var(--color-gray);
+  --gray2: var(--color-border);
+  --red-main: var(--color-red);
+  --red-glow: var(--color-red);
+  --border: var(--color-border);
+  --status-present: #00a854;
+  --status-absent: var(--color-gray);
+  --status-warning: var(--color-gold);
+  --status-debe: var(--color-red);
+
+  --font-display: 'Bebas Neue', Impact, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --transition-fast: 0.2s ease-out;
   --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-  font-size: 16px;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0 !important; }
+html { scroll-behavior: smooth; font-size: 16px; }
+@media (max-width: 768px) { html { font-size: 14px; } }
 
 body {
   background-color: var(--bg-color);
-  background-image: var(--bg-gradient);
-  background-attachment: fixed;
   color: var(--text-main);
   font-family: var(--font-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
 }
 
-/* Subtle SVG Noise Texture */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-}
-
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  font-weight: normal;
+  font-weight: 400;
   line-height: 1.1;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.02em;
+  color: var(--color-black);
 }
 
-/* Base Buttons */
+/* BOTONES ESTILO NIKE/SPORT CLARO */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  letter-spacing: 0.06em;
-  padding: 0.8rem 2.2rem;
-  border: 1px solid var(--glass-border);
-  cursor: pointer;
-  text-decoration: none;
-  text-transform: uppercase;
-  transition: all var(--transition-smooth);
-  position: relative;
-  overflow: hidden;
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--text-main);
-  clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 1.3rem; letter-spacing: 0.05em;
+  padding: 0.8rem 2.5rem; border: 2px solid var(--color-black);
+  cursor: pointer; text-decoration: none; text-transform: uppercase;
+  transition: all var(--transition-fast); background: var(--color-white); color: var(--color-black);
 }
+.btn:active { transform: translateY(2px); }
 
-.btn-primary {
-  background: rgba(230, 25, 25, 0.15);
-  border-color: var(--accent-red);
-  color: #ffffff;
-  box-shadow: 0 0 20px rgba(230, 25, 25, 0.2), inset 0 0 10px rgba(230, 25, 25, 0.1);
-}
+.btn-primary { background: var(--color-red); border-color: var(--color-red); color: var(--color-white); }
+.btn-primary:hover { background: #b80d0d; border-color: #b80d0d; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(218, 18, 18, 0.2); }
 
-.btn-primary:hover {
-  background: var(--accent-red);
-  color: #ffffff;
-  transform: translateY(-2px);
-  box-shadow: 0 0 30px var(--accent-red-glow), inset 0 0 20px rgba(255, 255, 255, 0.2);
-}
+.btn-outline { border: 2px solid var(--color-black); color: var(--color-black); background: transparent; }
+.btn-outline:hover { background: var(--color-black); color: var(--color-white); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
 
-.btn-outline {
-  border: 1px solid var(--accent-red);
-  color: #ffffff;
-  background: rgba(10, 0, 0, 0.4);
-}
+/* Paneles Claros */
+.glass-panel { background: var(--color-white); border: 1px solid var(--color-border); border-bottom: 4px solid var(--color-black); box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 2rem; }
+.glass-panel:hover { border-bottom-color: var(--color-red); }
 
-.btn-outline:hover {
-  background: rgba(230, 25, 25, 0.2);
-  color: #ffffff;
-  box-shadow: 0 0 20px var(--accent-red-glow);
-}
+.hover-lift { transition: transform var(--transition-smooth), box-shadow var(--transition-smooth); }
+.hover-lift:hover { transform: translateY(-4px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
 
-/* Glassmorphism Utilities */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-}
-
-/* Micro-animations */
-.hover-lift {
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
-}
-.hover-lift:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-  border-color: var(--accent-red);
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #000000;
-}
-::-webkit-scrollbar-thumb {
-  background: #333333;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-red);
-}
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-gray-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-black); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-red); }

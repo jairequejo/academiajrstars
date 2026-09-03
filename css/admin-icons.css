@@ -1,0 +1,7 @@
+/* SVG locales: el color y el tamaño siguen al control que los contiene. */
+.admin-icon { display: inline-block; width: 1.15em; height: 1.15em; flex-shrink: 0; vertical-align: -.18em; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.page-title > .admin-icon { width: .9em; height: .9em; }
+.sidebar-icon { display: inline-flex; align-items: center; justify-content: center; }
+.sidebar-icon .admin-icon, .bottom-nav-item .admin-icon { width: 1.4rem; height: 1.4rem; }
+.empty-icon .admin-icon { width: 2.5rem; height: 2.5rem; }
+.toast .admin-icon { margin-right: .5rem; }

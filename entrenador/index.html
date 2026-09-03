@@ -7,7 +7,14 @@
     <title>JR Stars — Panel Entrenador</title>
     <link rel="stylesheet" href="/css/theme.css">
     <link rel="stylesheet" href="/css/entrenador.css">
-    <link rel="icon" href="/favicon-entrenador.ico" type="image/x-icon">
+    <link rel="icon" href="/img/escudo.png" type="image/png">
+    <style>
+        /* Clases utilitarias inline — alineadas al nuevo tema light */
+        .logo-escudo { width: 40px; height: auto; }
+        .flex-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+        .select-filter { font-size: 0.82rem; padding: 0.35rem 0.6rem; width: auto; }
+        .input-search  { font-size: 0.82rem; padding: 0.35rem 0.6rem; max-width: 160px; }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/supabaseClient.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -16,10 +23,10 @@
 <body>
 
     <!-- TOPBAR -->
-    <div class="topbar">
+    <header class="topbar">
         <a href="/" class="topbar-brand">
             <div class="topbar-logo-circle">
-                <img src="/img/escudo.png" alt="logo" style="width: 40px; height: auto; filter: drop-shadow(0 0 8px var(--accent-glow));">
+                <img src="/img/escudo.png" alt="logo escudo jr stars" class="logo-escudo" onerror="this.style.display='none'">
             </div>
             <span class="topbar-name">JR <span>STARS</span></span>
         </a>
@@ -28,7 +35,7 @@
             <span class="topbar-role-badge">🏃 Entrenador</span>
             <span class="topbar-email" id="coach-email"></span>
         </div>
-    </div>
+    </header>
 
     <!-- OVERLAY FLASH DE PANTALLA COMPLETA -->
     <div class="flash-overlay" id="flash-overlay">
@@ -40,63 +47,58 @@
     </div>
 
     <!-- CONTENIDO PRINCIPAL -->
-    <div class="coach-layout">
+    <main class="coach-layout">
 
         <!-- ── TAB: SCANNER ── -->
-        <div class="tab-page active" id="tab-scanner">
-            <div class="page-header">
-                <div class="page-title">📷 <span>Scanner</span></div>
+        <section class="tab-page active" id="tab-scanner">
+            <header class="page-header">
+                <h1 class="page-title">📷 <span>Scanner</span></h1>
                 <div class="nfc-badge" id="nfc-badge">NFC</div>
-            </div>
+            </header>
 
-            <div class="scanner-wrap">
+            <article class="scanner-wrap">
                 <div class="scanner-box">
                     <div id="reader"></div>
-                    <div class="scan-hint">Acerca el QR o medallón NFC del alumno</div>
+                    <p class="scan-hint">Acerca el QR o medallón NFC del alumno</p>
                 </div>
-                <div class="scan-history-panel">
-                    <div class="history-title">ÚLTIMOS REGISTROS</div>
+                <aside class="scan-history-panel">
+                    <h2 class="history-title">ÚLTIMOS REGISTROS</h2>
                     <ul id="scan-history"></ul>
-                </div>
-            </div>
-        </div>
+                </aside>
+            </article>
+        </section>
 
         <!-- ── TAB: ASISTENCIA ── -->
-        <div class="tab-page" id="tab-asistencia">
-            <div class="page-header">
-                <div class="page-title">📋 <span>Asistencia Hoy</span></div>
+        <section class="tab-page" id="tab-asistencia">
+            <header class="page-header">
+                <h1 class="page-title">📋 <span>Asistencia Hoy</span></h1>
                 <button class="btn btn-outline" onclick="loadAsistencia()">⟳ Actualizar</button>
-            </div>
+            </header>
 
             <div class="asistencia-stats" id="asistencia-stats"></div>
 
-            <div class="asistencia-filtros">
-                <button class="chip active" id="chip-todos" onclick="setFiltroAsist('todos', this)">Todos</button>
-                <button class="chip" id="chip-presentes" onclick="setFiltroAsist('presentes', this)">✅
-                    Presentes</button>
-                <button class="chip" id="chip-ausentes" onclick="setFiltroAsist('ausentes', this)">❌ Ausentes</button>
-                <button class="chip chip-rojo" id="chip-deudores" onclick="setFiltroAsist('deudores', this)">⚠️
-                    Deben</button>
-            </div>
+            <nav class="asistencia-filtros">
+                <button class="chip active" id="chip-todos"     onclick="setFiltroAsist('todos', this)">Todos</button>
+                <button class="chip"         id="chip-presentes" onclick="setFiltroAsist('presentes', this)">✅ Presentes</button>
+                <button class="chip"         id="chip-ausentes"  onclick="setFiltroAsist('ausentes', this)">❌ Ausentes</button>
+                <button class="chip chip-rojo" id="chip-deudores" onclick="setFiltroAsist('deudores', this)">⚠️ Deben</button>
+            </nav>
 
             <!-- Filtros de Sede y Grupo -->
-            <div class="asistencia-filtros" style="margin-top:.5rem;flex-wrap:wrap;gap:.5rem">
-                <select id="filtro-ent-turno" class="select-jr" style="font-size:.82rem;padding:.35rem .6rem;width:auto"
-                    onchange="renderAsistencia()">
+            <nav class="asistencia-filtros flex-wrap">
+                <select id="filtro-ent-turno" class="input-jr select-jr select-filter" onchange="renderAsistencia()">
                     <option value="">Todos los turnos</option>
                     <option value="mañana">Mañana</option>
                     <option value="tarde">Tarde</option>
                 </select>
-                <select id="filtro-ent-sede" class="select-jr" style="font-size:.82rem;padding:.35rem .6rem;width:auto"
-                    onchange="renderAsistencia()">
+                <select id="filtro-ent-sede" class="input-jr select-jr select-filter" onchange="renderAsistencia()">
                     <option value="">Todas las sedes</option>
                     <option value="El Bosque">El Bosque</option>
                     <option value="Centro">Centro</option>
                     <option value="Norte">Norte</option>
                     <option value="Sur">Sur</option>
                 </select>
-                <select id="filtro-ent-grupo" class="select-jr" style="font-size:.82rem;padding:.35rem .6rem;width:auto"
-                    onchange="renderAsistencia()">
+                <select id="filtro-ent-grupo" class="input-jr select-jr select-filter" onchange="renderAsistencia()">
                     <option value="">Todos los grupos</option>
                     <option value="A">Grupo A</option>
                     <option value="B">Grupo B</option>
@@ -104,37 +106,36 @@
                     <option value="D">Grupo D</option>
                     <option value="E">Grupo E</option>
                 </select>
-                <input type="text" id="filtro-ent-nombre" class="input-jr"
-                    style="font-size:.82rem;padding:.35rem .6rem;max-width:160px" placeholder="🔍 Buscar nombre..."
-                    oninput="renderAsistencia()">
-            </div>
+                <input type="text" id="filtro-ent-nombre" class="input-jr input-search"
+                    placeholder="🔍 Buscar nombre..." oninput="renderAsistencia()">
+            </nav>
 
             <div id="asistencia-list">
-                <div class="loading-msg">Cargando...</div>
+                <p class="loading-msg">Cargando...</p>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
     <!-- MODAL DE BIOMETRÍA -->
-    <div id="modal-biometria" class="flash-overlay" style="background: rgba(0,0,0,0.95); z-index: 10000; overflow-y: auto;">
-        <div style="background: #000; border: 2px solid #fff; padding: 2rem; width: 90%; max-width: 400px; text-align: left; margin: auto;">
-            <button onclick="document.getElementById('modal-biometria').classList.remove('show')" style="float: right; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">✕</button>
-            <h2 style="color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; margin-bottom: 0.5rem;" id="bio-student-name">ALUMNO</h2>
-            <p style="color: #ffff00; font-weight: bold; margin-bottom: 1rem;">Registrar Pruebas Físicas</p>
-            
+    <div id="modal-biometria" class="flash-overlay modal-brutal-overlay">
+        <article class="modal-brutal-box">
+            <button onclick="document.getElementById('modal-biometria').classList.remove('show')" class="btn-close">✕</button>
+            <h2 class="modal-title" id="bio-student-name">ALUMNO</h2>
+            <p class="modal-subtitle">Registrar Pruebas Físicas</p>
+
             <input type="hidden" id="bio-student-id">
-            
-            <label style="color: #fff; display: block; margin-bottom: 0.3rem;">Estatura (m)</label>
-            <input type="number" step="0.01" id="bio-talla" class="input-jr" style="width: 100%; border: 2px solid #fff; background: #000; color: #fff; font-weight: bold; font-size: 1.2rem;">
-            
-            <label style="color: #fff; display: block; margin-top: 1rem; margin-bottom: 0.3rem;">Peso (kg)</label>
-            <input type="number" step="0.1" id="bio-peso" class="input-jr" style="width: 100%; border: 2px solid #fff; background: #000; color: #fff; font-weight: bold; font-size: 1.2rem;">
-            
-            <label style="color: #fff; display: block; margin-top: 1rem; margin-bottom: 0.3rem;">Sprint 20m (Segundos)</label>
-            <input type="number" step="0.01" id="bio-sprint" class="input-jr" style="width: 100%; border: 2px solid #fff; background: #000; color: #fff; font-weight: bold; font-size: 1.2rem;">
-            
-            <button class="btn" style="width: 100%; margin-top: 1.5rem; font-size: 1.5rem; background: #ffff00; color: #000;" onclick="guardarBiometria()">GUARDAR REGISTRO</button>
-        </div>
+
+            <label class="brutal-label" for="bio-talla">Estatura (m)</label>
+            <input type="number" step="0.01" id="bio-talla" class="input-jr input-brutal">
+
+            <label class="brutal-label" for="bio-peso">Peso (kg)</label>
+            <input type="number" step="0.1" id="bio-peso" class="input-jr input-brutal">
+
+            <label class="brutal-label" for="bio-sprint">Sprint 20m (Segundos)</label>
+            <input type="number" step="0.01" id="bio-sprint" class="input-jr input-brutal">
+
+            <button class="btn-gold" onclick="guardarBiometria()">GUARDAR REGISTRO</button>
+        </article>
     </div>
 
     <!-- NAV INFERIOR -->

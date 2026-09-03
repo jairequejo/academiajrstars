@@ -5,12 +5,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JR Stars — Admin Panel</title>
-  <link rel="stylesheet" href="/css/theme.css">
-  <link rel="stylesheet" href="/css/admin.css">
-  <link rel="icon" href="/favicon-admin.ico" type="image/x-icon">
+  <link rel="stylesheet" href="../css/theme.css">
+  <link rel="stylesheet" href="../css/admin_original.css?v=20260903">
+  <link rel="stylesheet" href="../css/admin.css?v=20260903-pagos-legibles">
+  <link rel="stylesheet" href="../css/inscripcion.css?v=20260903-sedes">
+  <meta name="theme-color" content="#E30D13">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="JR Admin">
+  <link rel="icon" href="./icons/red-white/favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
+  <link rel="icon" href="./icons/red-white/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="./icons/red-white/apple-touch-icon-admin.png" sizes="180x180">
+  <link rel="manifest" href="./manifest.webmanifest">
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/supabaseClient.js"></script>
+  <script src="../js/supabaseClient.js"></script>
+  <link rel="stylesheet" href="../css/admin-icons.css?v=20260903">
 </head>
 
 <body>
@@ -20,13 +31,13 @@
     </button>
     <a href="/" class="topbar-brand">
       <div class="topbar-logo-circle">
-        <img src="/img/escudo.png" alt="logo" style="width: 40px; height: auto; filter: drop-shadow(0 0 8px var(--red-glow));">
+        <img src="../img/escudo.png" alt="logo" style="width: 40px; height: auto; filter: drop-shadow(0 0 8px var(--red-glow));">
       </div>
       <span class="topbar-name">JR <span>STARS</span></span>
     </a>
     <div class="topbar-right">
       <span style="font-family:var(--font-mono);font-size:.75rem;color:var(--gray)" id="admin-email"></span>
-      <a href="/" class="btn btn-outline topbar-home-btn">← Inicio</a>
+      <a href="/" class="btn btn-outline topbar-home-btn"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#back"></use></svg> Inicio</a>
     </div>
   </div>
 
@@ -37,43 +48,43 @@
 
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-close-row">
-        <button class="sidebar-close-btn" onclick="closeSidebar()">✕</button>
+        <button class="sidebar-close-btn" aria-label="Cerrar menú" onclick="closeSidebar()"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
       </div>
       <div class="sidebar-section">Principal</div>
       <div class="sidebar-item active" id="nav-stats" onclick="goTo('stats', event)">
-        <span class="sidebar-icon">📊</span> Estadísticas
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#chart"></use></svg></span> Estadísticas
       </div>
       <div class="sidebar-item" id="nav-scanner" onclick="goTo('scanner', event)">
-        <span class="sidebar-icon">📷</span> Scanner
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#camera"></use></svg></span> Scanner
       </div>
 
       <div class="sidebar-section">Gestión</div>
       <div class="sidebar-item" id="nav-alumnos" onclick="goTo('alumnos', event)">
-        <span class="sidebar-icon">👥</span> Alumnos
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#users"></use></svg></span> Alumnos
       </div>
       <div class="sidebar-item" id="nav-batidos" onclick="goTo('batidos', event)">
-        <span class="sidebar-icon">💰</span> Caja / Pagos
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg></span> Caja / Pagos
       </div>
 
       <div class="sidebar-section">Métricas</div>
       <div class="sidebar-item" id="nav-rendimiento" onclick="goTo('rendimiento', event)">
-        <span class="sidebar-icon">📏</span> Rendimiento
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ruler"></use></svg></span> Rendimiento
       </div>
       <div class="sidebar-item" id="nav-ranking" onclick="goTo('ranking', event)">
-        <span class="sidebar-icon">🏅</span> Ranking
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#medal"></use></svg></span> Ranking
       </div>
       <div class="sidebar-item" id="nav-calendario" onclick="goTo('calendario', event)">
-        <span class="sidebar-icon">📅</span> Asistencia Global
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#calendar"></use></svg></span> Asistencia Global
       </div>
 
       <div class="sidebar-section">Equipo</div>
       <div class="sidebar-item" id="nav-entrenadores" onclick="goTo('entrenadores', event)">
-        <span class="sidebar-icon">🏃</span> Entrenadores
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#activity"></use></svg></span> Entrenadores
       </div>
 
       <div class="sidebar-logout">
-        <div class="sidebar-item" onclick="logout()" style="color:var(--red2)">
-          <span class="sidebar-icon">🚪</span> Cerrar sesión
+        <div class="sidebar-item" onclick="logout()" style="color:var(--admin-red)">
+          <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#logout"></use></svg></span> Cerrar sesión
         </div>
       </div>
     </nav>
@@ -84,7 +95,7 @@
       <div class="page active" id="page-stats">
         <div class="page-header">
           <div class="page-title">Panel <span>Admin</span></div>
-          <button class="btn btn-gold" onclick="loadStats()">⟳ Actualizar</button>
+          <button class="btn btn-gold" onclick="loadStats()"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#refresh"></use></svg> Actualizar</button>
         </div>
         <div class="stats-row" id="stats-row">
           <div class="stat-box">
@@ -111,10 +122,10 @@
 
       <div class="page" id="page-scanner">
         <div class="page-header">
-          <div class="page-title">📷 <span>Scanner</span></div>
+          <div class="page-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#camera"></use></svg> <span>Scanner</span></div>
           <span id="nfc-badge-admin"
             style="display:none;align-items:center;gap:.4rem;background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.35);color:#00ff88;font-family:var(--font-cond);font-size:.78rem;padding:.3rem .8rem;border-radius:20px;letter-spacing:.05em">
-            📡 NFC Activo
+            <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#radio"></use></svg> NFC Activo
           </span>
         </div>
         <div class="scanner-admin-wrap">
@@ -134,142 +145,47 @@
       <!-- ── ALUMNOS ── -->
       <div class="page" id="page-alumnos">
         <div class="page-header">
-          <div class="page-title">👥 <span>Alumnos</span></div>
-        </div>
-
-        <div class="form-card">
-          <div class="form-card-title">+ Nuevo alumno (Inscripción y Pago)</div>
-          <p style="font-family:var(--font-cond);font-size:.85rem;color:var(--gray);margin-bottom:1rem">
-            Registrar al niño aquí le otorgará automáticamente 30 días de acceso y registrará el pago inicial.
-          </p>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Nombre completo</label>
-              <input class="input-jr" id="a-nombre" placeholder="Nombre Apellido">
-            </div>
-            <div class="form-group">
-              <label class="form-label">DNI</label>
-              <input class="input-jr" id="a-dni" placeholder="12345678" type="text" maxlength="8">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Fecha de nacimiento</label>
-              <input class="input-jr" id="a-fecha-nacimiento" type="date">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Nombre del Apoderado</label>
-              <input class="input-jr" id="a-apoderado" placeholder="Ej: Carlos Pérez">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Teléfono (WhatsApp)</label>
-              <input class="input-jr" id="a-telefono" placeholder="987654321" type="tel">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Sede</label>
-              <select class="select-jr" id="a-sede">
-                <option value="">Sin sede</option>
-                <option value="El Bosque">El Bosque</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Grupo</label>
-              <select class="select-jr" id="a-grupo">
-                <option value="">Sin grupo</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Categoría (año)</label>
-              <select class="select-jr" id="a-categoria">
-                <option value="">Sin categoría</option>
-                <option value="2013">2013</option>
-                <option value="2014">2014</option>
-                <option value="2015">2015</option>
-                <option value="2016">2016</option>
-                <option value="2017">2017</option>
-                <option value="2018">2018</option>
-                <option value="2019">2019</option>
-                <option value="2020">2020</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Horario</label>
-              <select class="select-jr" id="a-horario">
-                <option value="LMV">Lunes, Miércoles, Viernes</option>
-                <option value="MJS">Martes, Jueves, Sábado</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Turno</label>
-              <select class="select-jr" id="a-turno">
-                <option value="">Sin turno</option>
-                <option value="mañana">Mañana</option>
-                <option value="tarde">Tarde</option>
-              </select>
-            </div>
+          <div class="alumnos-heading">
+            <div class="page-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#users"></use></svg> <span>Alumnos</span></div>
+            <p class="alumnos-description">Gestiona tu directorio y las nuevas inscripciones.</p>
           </div>
-
-          <div class="form-row"
-            style="background: rgba(255, 215, 0, 0.05); padding: 1rem; border-radius: 8px; margin-top: 1rem; border: 1px solid rgba(255, 215, 0, 0.2);">
-            <div class="form-group">
-              <label class="form-label" style="color:var(--gold)">Pago Mensualidad (S/)</label>
-              <input class="input-jr" id="a-pago-mes" type="number" value="80.00">
-            </div>
-            <div class="form-group">
-              <label class="form-label" style="color:var(--gold)">Matrícula (S/) [Opcional]</label>
-              <input class="input-jr" id="a-pago-mat" type="number" value="0.00">
-            </div>
-            <div class="form-group">
-              <label class="form-label" style="color:var(--gold)">Método de Pago</label>
-              <select class="select-jr" id="a-metodo">
-                <option value="Efectivo">Efectivo</option>
-                <option value="Yape">Yape</option>
-                <option value="Plin">Plin</option>
-              </select>
-            </div>
-          </div>
-
-          <button class="btn btn-gold" style="margin-top: 1rem;" onclick="crearAlumno()">✅ Inscribir y Cobrar</button>
+          <button class="btn" id="abrir-inscripcion" type="button"><span aria-hidden="true"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#plus"></use></svg></span> Agregar inscripción</button>
         </div>
 
         <!-- Filtros para la lista de alumnos -->
         <div class="filtros-bar">
-          <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
-            <div class="form-card-title" style="margin:0;font-size:1rem">📋 Directorio de Alumnos</div>
+          <div class="filtros-heading">
+            <div class="form-card-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#clipboard"></use></svg> Directorio de Alumnos</div>
             <button class="btn btn-gold" style="font-size:.8rem;padding:.4rem .9rem" onclick="imprimirPlanchaQRs()">
-              🖨️ Generar Plancha QR
+              <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#printer"></use></svg> Generar Plancha QR
             </button>
           </div>
           <div class="filtros-controles">
             <div class="filtro-group">
-              <label class="form-label">Estado</label>
+              <label class="form-label" for="filtro-estado">Estado</label>
               <select class="select-jr select-sm" id="filtro-estado" onchange="aplicarFiltros()">
                 <option value="">Todos</option>
-                <option value="al-dia">✅ Al Día</option>
-                <option value="vencido">⚠️ Vencido</option>
-                <option value="inactivo">🔴 Inactivo</option>
+                <option value="al-dia">Al Día</option>
+                <option value="vencido">Vencido</option>
+                <option value="inactivo">Inactivo</option>
               </select>
             </div>
             <div class="filtro-group">
-              <label class="form-label">Horario</label>
+              <label class="form-label" for="filtro-horario">Horario</label>
               <select class="select-jr select-sm" id="filtro-horario" onchange="aplicarFiltros()">
                 <option value="">Todos</option>
                 <option value="LMV">LMV</option>
                 <option value="MJS">MJS</option>
               </select>
             </div>
-            <div class="filtro-group">
-              <label class="form-label">Sede</label>
-              <select class="select-jr select-sm" id="filtro-sede" onchange="aplicarFiltros()">
+            <div class="filtro-group filtro-group-sede">
+              <label class="form-label" for="filtro-sede">Sede</label>
+              <select class="select-jr select-sm" id="filtro-sede" data-admin-sede data-sede-placeholder="Todas" onchange="aplicarFiltros()">
                 <option value="">Todas</option>
-                <option value="El Bosque">El Bosque</option>
               </select>
             </div>
-            <div class="filtro-group">
-              <label class="form-label">Grupo</label>
+            <div class="filtro-group filtro-group-grupo">
+              <label class="form-label" for="filtro-grupo">Grupo</label>
               <select class="select-jr select-sm" id="filtro-grupo" onchange="aplicarFiltros()">
                 <option value="">Todos</option>
                 <option value="A">A</option>
@@ -279,8 +195,8 @@
                 <option value="E">E</option>
               </select>
             </div>
-            <div class="filtro-group">
-              <label class="form-label">Buscar</label>
+            <div class="filtro-group filtro-group-search">
+              <label class="form-label" for="filtro-busqueda">Buscar</label>
               <input class="input-jr input-sm" id="filtro-busqueda" placeholder="Nombre..." oninput="aplicarFiltros()">
             </div>
           </div>
@@ -292,11 +208,11 @@
       <!-- ── CAJA / PAGOS ── -->
       <div class="page" id="page-batidos">
         <div class="page-header">
-          <div class="page-title">💰 <span>Caja & Pagos</span></div>
+          <div class="page-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg> <span>Caja & Pagos</span></div>
         </div>
 
         <div class="form-card" style="margin-bottom:1.5rem;">
-          <div class="form-card-title">🔍 Buscar alumno para cobrar</div>
+          <div class="form-card-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#search"></use></svg> Buscar alumno para cobrar</div>
           <p style="font-family:var(--font-cond);font-size:.9rem;color:var(--gray);line-height:1.6;margin-bottom:1rem">
             Escribe el nombre o apellido del niño para cobrar la mensualidad (S/ 80) o recargar créditos de batidos.
           </p>
@@ -304,20 +220,20 @@
           <!-- Buscador con autocompletado -->
           <div class="search-autocomplete-wrap">
             <div class="search-input-group">
-              <span class="search-icon">🔍</span>
+              <span class="search-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#search"></use></svg></span>
               <input class="input-jr search-input" id="batidos-nombre-search" type="text"
                 placeholder="Ej: Juan Pérez..." autocomplete="off" oninput="onSearchInput()"
                 onkeydown="onSearchKeydown(event)">
               <button class="btn-clear-search" id="btn-clear-search" onclick="limpiarBusqueda()"
-                title="Limpiar">✕</button>
+                title="Limpiar"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
             </div>
 
             <!-- Filtros rápidos -->
             <div class="search-filtros">
               <span class="filtro-label">Filtrar:</span>
               <button class="filtro-chip active" id="chip-todos" onclick="setChip('todos', event)">Todos</button>
-              <button class="filtro-chip" id="chip-al-dia" onclick="setChip('al-dia', event)">✅ Al Día</button>
-              <button class="filtro-chip" id="chip-vencido" onclick="setChip('vencido', event)">⚠️ Vencido</button>
+              <button class="filtro-chip" id="chip-al-dia" onclick="setChip('al-dia', event)"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#check"></use></svg> Al Día</button>
+              <button class="filtro-chip" id="chip-vencido" onclick="setChip('vencido', event)"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#alert"></use></svg> Vencido</button>
               <button class="filtro-chip" id="chip-lmv" onclick="setChip('lmv', event)">LMV</button>
               <button class="filtro-chip" id="chip-mjs" onclick="setChip('mjs', event)">MJS</button>
             </div>
@@ -329,7 +245,7 @@
 
         <div id="creditos-result">
           <div class="empty-search-state">
-            <div class="empty-icon">👆</div>
+            <div class="empty-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#pointer"></use></svg></div>
             <p>Escribe el nombre del alumno para buscarlo</p>
           </div>
         </div>
@@ -339,14 +255,14 @@
       <!-- ── RENDIMIENTO FÍSICO ── -->
       <div class="page" id="page-rendimiento">
         <div class="page-header">
-          <div class="page-title">📏 <span>Rendimiento Físico</span></div>
+          <div class="page-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ruler"></use></svg> <span>Rendimiento Físico</span></div>
           <p style="font-family:var(--font-cond);font-size:.85rem;color:var(--gray);margin-top:.3rem">Registro mensual
             de mediciones — talla y peso por atleta.</p>
         </div>
 
         <!-- Buscar alumno -->
         <div class="form-card" style="margin-bottom:1.5rem">
-          <div class="form-card-title">🔍 Buscar Atleta</div>
+          <div class="form-card-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#search"></use></svg> Buscar Atleta</div>
           <div style="display:flex;gap:.6rem;flex-wrap:wrap">
             <input class="input-jr" id="bio-search" placeholder="Nombre o DNI" style="flex:1;min-width:160px"
               oninput="buscarParaBio()">
@@ -373,7 +289,7 @@
             </div>
           </div>
           <div style="display:flex;gap:.8rem;flex-wrap:wrap">
-            <button class="btn btn-gold" onclick="guardarBiometria()">💾 Guardar Medición</button>
+            <button class="btn btn-gold" onclick="guardarBiometria()"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#save"></use></svg> Guardar Medición</button>
             <button class="btn btn-outline" onclick="cancelarBio()">Cancelar</button>
           </div>
           <div id="bio-historial-wrap" style="margin-top:1.4rem"></div>
@@ -383,29 +299,26 @@
       <!-- ── RANKING ── -->
       <div class="page" id="page-ranking">
         <div class="page-header">
-          <div class="page-title">🏅 <span>Ranking</span></div>
+          <div class="page-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#medal"></use></svg> <span>Ranking</span></div>
           <p style="font-family:var(--font-cond);font-size:.85rem;color:var(--gray);margin-top:.3rem">Compara atletas
             por talla o peso. Filtra por sede y horario.</p>
         </div>
 
         <!-- Filtros -->
-        <div class="form-card" style="margin-bottom:1.5rem">
+        <div class="form-card ranking-filters" style="margin-bottom:1.5rem">
           <div class="form-card-title">Filtros</div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Campo</label>
               <select class="select-jr" id="rk-campo" onchange="cargarRanking()">
-                <option value="talla">📏 Talla</option>
-                <option value="peso">⚖️ Peso</option>
+                <option value="talla">Talla</option>
+                <option value="peso">Peso</option>
               </select>
             </div>
             <div class="form-group">
               <label class="form-label">Sede</label>
-              <select class="select-jr" id="rk-sede" onchange="cargarRanking()">
+              <select class="select-jr" id="rk-sede" data-admin-sede data-sede-placeholder="Todas" onchange="cargarRanking()">
                 <option value="">Todas</option>
-                <option>Centro</option>
-                <option>Norte</option>
-                <option>Sur</option>
               </select>
             </div>
             <div class="form-group">
@@ -427,27 +340,27 @@
       <!-- ── ASISTENCIA GLOBAL (CALENDARIO MAESTRO) ── -->
       <div class="page" id="page-calendario">
         <div class="page-header">
-          <div class="page-title">📅 <span>Asistencia Global</span></div>
-          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-            <button class="month-btn" onclick="calChangeMonth(-1)">◀</button>
+          <div class="page-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#calendar"></use></svg> <span>Asistencia Global</span></div>
+          <div class="calendar-navigation">
+            <button class="month-btn" aria-label="Mes anterior" onclick="calChangeMonth(-1)"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#left"></use></svg></button>
             <div class="month-label" id="cal-month-label">—</div>
-            <button class="month-btn" onclick="calChangeMonth(1)">▶</button>
+            <button class="month-btn" aria-label="Mes siguiente" onclick="calChangeMonth(1)"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#right"></use></svg></button>
             <span class="last-update" id="cal-last-update" style="margin-left:.5rem"></span>
-            <button class="btn btn-gold" onclick="loadCalendario()">⟳ Actualizar</button>
+            <button class="btn btn-gold" onclick="loadCalendario()"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#refresh"></use></svg> Actualizar</button>
           </div>
         </div>
 
         <div class="filters-bar" style="margin-bottom:1rem">
           <span class="filter-tag">Filtrar:</span>
-          <select class="select-jr" id="cal-filter-turno" onchange="renderCalendario()" style="width:auto">
+          <select class="select-jr" id="cal-filter-turno" aria-label="Filtrar por turno" onchange="renderCalendario()" style="width:auto">
             <option value="">Todos los turnos</option>
             <option value="mañana">Mañana</option>
             <option value="tarde">Tarde</option>
           </select>
-          <select class="select-jr" id="cal-filter-sede" onchange="renderCalendario()" style="width:auto">
+          <select class="select-jr" id="cal-filter-sede" aria-label="Filtrar por sede" data-admin-sede data-sede-placeholder="Todas las sedes" onchange="renderCalendario()" style="width:auto">
             <option value="">Todas las sedes</option>
           </select>
-          <input class="input-jr" type="text" id="cal-search" placeholder="🔍 Buscar alumno..."
+          <input class="input-jr" type="text" id="cal-search" aria-label="Buscar alumno" placeholder="Buscar alumno..."
             oninput="renderCalendario()" style="max-width:220px">
         </div>
 
@@ -496,11 +409,11 @@
       <!-- ── ENTRENADORES ── -->
       <div class="page" id="page-entrenadores">
         <div class="page-header">
-          <div class="page-title">🏃 <span>Entrenadores</span></div>
+          <div class="page-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#activity"></use></svg> <span>Entrenadores</span></div>
         </div>
 
         <div class="form-card" style="margin-bottom:1.5rem">
-          <div class="form-card-title">➕ Crear Entrenador</div>
+          <div class="form-card-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#plus"></use></svg> Crear Entrenador</div>
           <div class="form-row">
             <div class="form-group" style="grid-column: span 2;">
               <label class="form-label">Nombre completo del profesor</label>
@@ -520,17 +433,17 @@
 
   <nav class="bottom-nav" id="bottom-nav">
     <button class="bottom-nav-item active" id="bnav-stats" onclick="goTo('stats', event); setBottomNav('stats')">
-      <span>📊</span><span class="bnav-label">Stats</span>
+      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#chart"></use></svg></span><span class="bnav-label">Stats</span>
     </button>
     <button class="bottom-nav-item" id="bnav-alumnos" onclick="goTo('alumnos', event); setBottomNav('alumnos')">
-      <span>👥</span><span class="bnav-label">Alumnos</span>
+      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#users"></use></svg></span><span class="bnav-label">Alumnos</span>
     </button>
     <button class="bottom-nav-item" id="bnav-batidos" onclick="goTo('batidos', event); setBottomNav('batidos')">
-      <span>💰</span><span class="bnav-label">Caja</span>
+      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg></span><span class="bnav-label">Caja</span>
     </button>
     <button class="bottom-nav-item" id="bnav-calendario"
       onclick="goTo('calendario', event); setBottomNav('calendario')">
-      <span>📅</span><span class="bnav-label">Asistencia</span>
+      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#calendar"></use></svg></span><span class="bnav-label">Asistencia</span>
     </button>
   </nav>
 
@@ -538,15 +451,15 @@
   <div id="modal-editar-alumno" class="modal-overlay hidden" onclick="cerrarModalEdicionOutside(event)">
     <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-edit-title">
       <div class="modal-header">
-        <div class="modal-title" id="modal-edit-title">✏️ Editar <span>Alumno</span></div>
-        <button class="modal-close-btn" onclick="cerrarModalEdicion()" aria-label="Cerrar">✕</button>
+        <div class="modal-title" id="modal-edit-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#edit"></use></svg> Editar <span>Alumno</span></div>
+        <button class="modal-close-btn" onclick="cerrarModalEdicion()" aria-label="Cerrar"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
       </div>
 
       <form id="form-editar-alumno" onsubmit="guardarEdicionAlumno(event)" autocomplete="off">
         <input type="hidden" id="edit-id">
 
         <!-- ── Datos Personales ── -->
-        <div class="modal-section-title">👤 Datos Personales</div>
+        <div class="modal-section-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#user"></use></svg> Datos Personales</div>
         <div class="form-row">
           <div class="form-group" style="grid-column:span 2">
             <label class="form-label">Nombre completo</label>
@@ -563,7 +476,7 @@
         </div>
 
         <!-- ── Contacto ── -->
-        <div class="modal-section-title">📞 Contacto</div>
+        <div class="modal-section-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#phone"></use></svg> Contacto</div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Nombre del apoderado</label>
@@ -576,13 +489,12 @@
         </div>
 
         <!-- ── Datos Deportivos ── -->
-        <div class="modal-section-title">⚽ Datos Deportivos</div>
+        <div class="modal-section-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ball"></use></svg> Datos Deportivos</div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Sede</label>
-            <select class="select-jr" id="edit-sede">
+            <select class="select-jr" id="edit-sede" data-admin-sede data-sede-placeholder="Sin sede">
               <option value="">Sin sede</option>
-              <option value="El Bosque">El Bosque</option>
             </select>
           </div>
           <div class="form-group">
@@ -628,7 +540,7 @@
         </div>
 
         <!-- ── Facturación ── -->
-        <div class="modal-section-title">💰 Facturación</div>
+        <div class="modal-section-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg> Facturación</div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" style="color:var(--gold)">Tarifa mensual (S/)</label>
@@ -648,15 +560,171 @@
 
         <div class="modal-actions">
           <button type="button" class="btn btn-outline" onclick="cerrarModalEdicion()">Cancelar</button>
-          <button type="submit" class="btn btn-gold">💾 Guardar Cambios</button>
+          <button type="submit" class="btn btn-gold"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#save"></use></svg> Guardar Cambios</button>
         </div>
       </form>
     </div>
   </div>
 
+  <dialog class="inscripcion-dialog" id="inscripcion-dialog" aria-labelledby="inscripcion-title" aria-describedby="inscripcion-subtitle">
+    <div class="inscripcion-header">
+      <div>
+        <div class="inscripcion-eyebrow">JR Stars · Alumnos</div>
+        <h2 id="inscripcion-title">Nueva inscripción</h2>
+        <p class="inscripcion-subtitle" id="inscripcion-subtitle">Un paso a la vez. Revisa los datos antes de crear la inscripción.</p>
+      </div>
+      <button class="inscripcion-close" id="inscripcion-cerrar" type="button" aria-label="Cerrar inscripción"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
+    </div>
+
+    <form class="inscripcion-form" id="inscripcion-form" novalidate>
+      <ol class="inscripcion-progress" aria-label="Pasos de inscripción">
+        <li aria-current="step"><span class="step-number" aria-hidden="true">1</span><span>Alumno</span></li>
+        <li><span class="step-number" aria-hidden="true">2</span><span>Apoderado</span></li>
+        <li><span class="step-number" aria-hidden="true">3</span><span>Entrenamiento</span></li>
+        <li><span class="step-number" aria-hidden="true">4</span><span>Revisión y pago</span></li>
+      </ol>
+
+      <div class="inscripcion-content">
+        <section data-inscripcion-step aria-labelledby="inscripcion-alumno-title">
+          <h3 class="inscripcion-step-title" id="inscripcion-alumno-title" tabindex="-1">¿A quién vamos a inscribir?</h3>
+          <p class="inscripcion-step-description">Empieza por sus datos personales. Solo el nombre es obligatorio.</p>
+          <div class="inscripcion-fields">
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-nombre">Nombre completo <span aria-hidden="true">*</span></label>
+              <input class="input-jr" id="a-nombre" name="nombre" placeholder="Nombres y apellidos del alumno" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-fecha-nacimiento">Fecha de nacimiento del niño <span class="field-optional">(opcional)</span></label>
+              <input class="input-jr" id="a-fecha-nacimiento" name="fechaNacimiento" type="date" aria-describedby="inscripcion-edad">
+              <small class="inscripcion-field-hint" id="inscripcion-edad" aria-live="polite">Selecciona el día, mes y año de nacimiento del niño.</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-dni">DNI <span class="field-optional">(opcional)</span></label>
+              <input class="input-jr" id="a-dni" name="dni" placeholder="8 dígitos" type="text" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" title="Ingresa los 8 dígitos del DNI.">
+            </div>
+          </div>
+        </section>
+
+        <section data-inscripcion-step aria-labelledby="inscripcion-contacto-title" hidden>
+          <h3 class="inscripcion-step-title" id="inscripcion-contacto-title" tabindex="-1">Su contacto de confianza</h3>
+          <p class="inscripcion-step-description">Datos del apoderado para comunicar novedades o atender una emergencia.</p>
+          <div class="inscripcion-fields">
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-apoderado">Apoderado responsable <span class="field-optional">(opcional)</span></label>
+              <input class="input-jr" id="a-apoderado" name="apoderado" placeholder="Nombres y apellidos del apoderado" autocomplete="off">
+            </div>
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-telefono">Teléfono / WhatsApp <span class="field-optional">(opcional)</span></label>
+              <input class="input-jr" id="a-telefono" name="telefono" placeholder="Ej. 987 654 321" type="tel" autocomplete="off">
+            </div>
+          </div>
+        </section>
+
+        <section data-inscripcion-step aria-labelledby="inscripcion-deporte-title" hidden>
+          <h3 class="inscripcion-step-title" id="inscripcion-deporte-title" tabindex="-1">Prepara su entrenamiento</h3>
+          <p class="inscripcion-step-description">Elige dónde y cuándo entrenará. Puedes dejar pendientes las asignaciones que aún no conozcas.</p>
+          <div class="inscripcion-fields">
+            <div class="form-group">
+              <label class="form-label" for="a-sede">Sede</label>
+              <select class="select-jr" id="a-sede" name="sede" data-admin-sede data-sede-placeholder="Por asignar" aria-describedby="inscripcion-sedes-status">
+                <option value="">Por asignar</option>
+              </select>
+              <small class="inscripcion-field-hint" id="inscripcion-sedes-status" role="status">Cargando sedes…</small>
+              <button class="inscripcion-sedes-retry" id="inscripcion-sedes-retry" type="button" hidden>Volver a cargar sedes</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-categoria">Categoría (año)</label>
+              <select class="select-jr" id="a-categoria" name="categoria">
+                <option value="">Por asignar</option>
+                <option value="2013">2013</option>
+                <option value="2014">2014</option>
+                <option value="2015">2015</option>
+                <option value="2016">2016</option>
+                <option value="2017">2017</option>
+                <option value="2018">2018</option>
+                <option value="2019">2019</option>
+                <option value="2020">2020</option>
+              </select>
+            </div>
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-horario">Días de entrenamiento</label>
+              <select class="select-jr" id="a-horario" name="horario">
+                <option value="LMV">Lunes, Miércoles, Viernes</option>
+                <option value="MJS">Martes, Jueves, Sábado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-turno">Turno</label>
+              <select class="select-jr" id="a-turno" name="turno">
+                <option value="">Por asignar</option>
+                <option value="mañana">Mañana</option>
+                <option value="tarde">Tarde</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-grupo">Grupo</label>
+              <select class="select-jr" id="a-grupo" name="grupo">
+                <option value="">Por asignar</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+                <option value="E">E</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <section data-inscripcion-step aria-labelledby="inscripcion-revision-title" hidden>
+          <h3 class="inscripcion-step-title" id="inscripcion-revision-title" tabindex="-1">Revisa y completa la inscripción</h3>
+          <p class="inscripcion-step-description">Comprueba los datos. Usa “Volver” si necesitas cambiar algo.</p>
+          <dl class="inscripcion-summary">
+            <div><dt>Alumno</dt><dd id="inscripcion-resumen-alumno"></dd></div>
+            <div><dt>Nacimiento</dt><dd id="inscripcion-resumen-nacimiento"></dd></div>
+            <div><dt>Apoderado</dt><dd id="inscripcion-resumen-apoderado"></dd></div>
+            <div><dt>Entrenamiento</dt><dd id="inscripcion-resumen-deporte"></dd></div>
+          </dl>
+          <div class="inscripcion-fields">
+            <div class="form-group">
+              <label class="form-label" for="a-pago-mes">Mensualidad (S/)</label>
+              <input class="input-jr" id="a-pago-mes" name="mensualidad" type="number" min="0" step="0.01" value="80.00" inputmode="decimal" required aria-describedby="inscripcion-beca-hint">
+              <small class="inscripcion-field-hint" id="inscripcion-beca-hint">Ingresa 0 si el alumno es becado.</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-pago-mat">Matrícula (S/) <span class="field-optional">(opcional)</span></label>
+              <input class="input-jr" id="a-pago-mat" name="matricula" type="number" min="0" step="0.01" value="0.00" inputmode="decimal">
+            </div>
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-metodo">Método de pago</label>
+              <select class="select-jr" id="a-metodo" name="metodo">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Yape">Yape</option>
+                <option value="Plin">Plin</option>
+              </select>
+            </div>
+          </div>
+          <p class="inscripcion-payment-note">Al crear la inscripción se habilitan 30 días de acceso y se registra la mensualidad indicada.</p>
+        </section>
+        <p class="inscripcion-message" id="inscripcion-message" role="alert" hidden></p>
+      </div>
+
+      <div class="inscripcion-footer">
+        <span class="inscripcion-step-count" id="inscripcion-step-count" role="status" aria-live="polite">Paso 1 de 4</span>
+        <div class="inscripcion-actions">
+          <button class="btn inscripcion-back" id="inscripcion-anterior" type="button" hidden>Volver</button>
+          <button class="btn inscripcion-primary" id="inscripcion-siguiente" type="button">Continuar <span aria-hidden="true"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#right"></use></svg></span></button>
+          <button class="btn inscripcion-primary" id="inscripcion-crear" type="submit" hidden>Crear inscripción</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
   <div class="toast" id="toast"></div>
 
-  <script src="/js/admin.js"></script>
+  <script src="../js/admin-icons.js?v=20260903"></script>
+  <script src="../js/admin-sedes.js?v=20260903"></script>
+  <script src="../js/admin.js?v=20260903-pagos-legibles"></script>
+  <script src="../js/inscripcion.js?v=20260903-sedes"></script>
 </body>
 
 </html>

@@ -4,74 +4,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Caja Registradora - JR Stars</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700&display=swap"
+  <title>Caja — JR Stars</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/css/caja.css">
-  <link rel="icon" href="/favicon-caja.ico" type="image/x-icon">
+  <link rel="icon" href="/img/escudo.png" type="image/png">
 </head>
 
 <body>
 
-  <div class="pin-screen" id="pin-screen">
-    <div class="pin-title">PIN DE CAJA</div>
+  <!-- ── PIN SCREEN ── -->
+  <section class="pin-screen" id="pin-screen">
+    <h1 class="pin-title">PIN DE CAJA</h1>
     <div class="pin-dots" id="pin-dots">
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
-      <div class="pin-dot"></div>
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
+      <span class="pin-dot"></span>
     </div>
     <div class="pin-pad">
-      <div class="pin-btn" onclick="addPin('1')">1</div>
-      <div class="pin-btn" onclick="addPin('2')">2</div>
-      <div class="pin-btn" onclick="addPin('3')">3</div>
-      <div class="pin-btn" onclick="addPin('4')">4</div>
-      <div class="pin-btn" onclick="addPin('5')">5</div>
-      <div class="pin-btn" onclick="addPin('6')">6</div>
-      <div class="pin-btn" onclick="addPin('7')">7</div>
-      <div class="pin-btn" onclick="addPin('8')">8</div>
-      <div class="pin-btn" onclick="addPin('9')">9</div>
-      <div class="pin-btn btn-borrar" onclick="clearPin()">BORRAR</div>
-      <div class="pin-btn" onclick="addPin('0')">0</div>
+      <button class="pin-btn" onclick="addPin('1')">1</button>
+      <button class="pin-btn" onclick="addPin('2')">2</button>
+      <button class="pin-btn" onclick="addPin('3')">3</button>
+      <button class="pin-btn" onclick="addPin('4')">4</button>
+      <button class="pin-btn" onclick="addPin('5')">5</button>
+      <button class="pin-btn" onclick="addPin('6')">6</button>
+      <button class="pin-btn" onclick="addPin('7')">7</button>
+      <button class="pin-btn" onclick="addPin('8')">8</button>
+      <button class="pin-btn" onclick="addPin('9')">9</button>
+      <button class="pin-btn btn-borrar" onclick="clearPin()">BORRAR</button>
+      <button class="pin-btn" onclick="addPin('0')">0</button>
     </div>
-  </div>
+  </section>
 
-  <div class="caja-layout" id="caja-layout">
-    <div class="caja-header">
+  <!-- ── CAJA LAYOUT ── -->
+  <main class="caja-layout" id="caja-layout">
+
+    <!-- Topbar con escudo + nombre + badge -->
+    <header class="caja-header" id="caja-header-topbar">
+      <div class="caja-topbar-brand">
+        <img src="/img/escudo.png" alt="JR Stars" onerror="this.style.display='none'">
+        <span class="caja-topbar-name">JR STARS</span>
+        <span class="caja-topbar-badge">Caja</span>
+      </div>
       <div id="reader-container">
         <div id="reader"></div>
       </div>
-      <div class="status-nfc" id="status-nfc">📡 Esperando NFC o QR...</div>
-    </div>
+      <p class="status-nfc" id="status-nfc">📡 Esperando NFC o QR...</p>
+    </header>
 
-    <div class="cliente-box" id="cliente-box">
-      <div class="c-nombre" id="c-nombre">JUAN PÉREZ</div>
-      <div class="c-creditos">Créditos: <span class="c-num" id="c-num">4</span></div>
-    </div>
+    <!-- Datos del cliente escaneado -->
+    <section class="cliente-box" id="cliente-box">
+      <h2 class="c-nombre" id="c-nombre">JUAN PÉREZ</h2>
+      <p class="c-creditos">Créditos: <strong class="c-num" id="c-num">4</strong></p>
+    </section>
 
-    <div class="menu-grid" id="menu-grid">
-      <div class="item-btn" onclick="cobrar('Fresa', 1, '🍓')">
+    <!-- Grid de productos -->
+    <section class="menu-grid" id="menu-grid">
+      <button class="item-btn" onclick="cobrar('Fresa', 1, '🍓')">
         <span class="i-emoji">🍓</span>
-        <div class="i-name">Fresa</div>
-        <div class="i-cost">-1 cr</div>
-      </div>
-      <div class="item-btn" onclick="cobrar('Plátano', 1, '🍌')">
+        <span class="i-name">Fresa</span>
+        <strong class="i-cost">-1 cr</strong>
+      </button>
+      <button class="item-btn" onclick="cobrar('Plátano', 1, '🍌')">
         <span class="i-emoji">🍌</span>
-        <div class="i-name">Plátano</div>
-        <div class="i-cost">-1 cr</div>
-      </div>
-      <div class="item-btn" onclick="cobrar('Verde', 1, '🌿')">
+        <span class="i-name">Plátano</span>
+        <strong class="i-cost">-1 cr</strong>
+      </button>
+      <button class="item-btn" onclick="cobrar('Verde', 1, '🌿')">
         <span class="i-emoji">🌿</span>
-        <div class="i-name">Verde</div>
-        <div class="i-cost">-1 cr</div>
-      </div>
-      <div class="item-btn" onclick="cobrar('Proteína', 2, '💪')">
+        <span class="i-name">Verde</span>
+        <strong class="i-cost">-1 cr</strong>
+      </button>
+      <button class="item-btn" onclick="cobrar('Proteína', 2, '💪')">
         <span class="i-emoji">💪</span>
-        <div class="i-name">Proteína</div>
-        <div class="i-cost">-2 cr</div>
-      </div>
-    </div>
-  </div>
+        <span class="i-name">Proteína</span>
+        <strong class="i-cost">-2 cr</strong>
+      </button>
+    </section>
+  </main>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="/js/supabaseClient.js"></script>

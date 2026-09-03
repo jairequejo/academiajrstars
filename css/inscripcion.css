@@ -1,0 +1,81 @@
+/* Inscripción por pasos. Estilos limitados al formulario y su botón. */
+#page-alumnos .alumnos-heading { display: block; }
+.alumnos-description { margin-top: 0.35rem; color: #64748b; font-size: 0.88rem; font-weight: 400; }
+#abrir-inscripcion { display: inline-flex; gap: 0.6rem; background: #da1212; color: #fff; border-color: #da1212 !important; font-family: var(--font-body); text-transform: none; letter-spacing: 0; font-size: 0.9rem !important; }
+#abrir-inscripcion:hover { background: #b90f0f; border-color: #b90f0f !important; }
+body.inscripcion-open { overflow: hidden; }
+
+.inscripcion-dialog {
+  width: min(760px, calc(100vw - 2rem));
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 24px !important;
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 24px 80px #0f172a30;
+  overflow: hidden;
+}
+.inscripcion-dialog[open] { display: flex; flex-direction: column; }
+.inscripcion-dialog::backdrop { background: #0f172a80; backdrop-filter: blur(3px); }
+.inscripcion-dialog [hidden] { display: none !important; }
+.inscripcion-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.5rem 2rem 1rem; flex-shrink: 0; }
+.inscripcion-eyebrow { color: #da1212; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+#inscripcion-title { margin: 0.25rem 0; font-size: 2rem; letter-spacing: 0.01em; }
+.inscripcion-subtitle { color: #64748b; font-size: 0.84rem; font-weight: 400; }
+.inscripcion-close { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border: 1px solid #e5e7eb; border-radius: 50% !important; color: #64748b; background: #f8fafc; font-size: 1.3rem; cursor: pointer; }
+.inscripcion-close:hover { background: #f1f5f9; color: #111827; }
+.inscripcion-close:focus-visible { outline: 3px solid #da1212; outline-offset: 2px; }
+.inscripcion-form { display: flex; flex-direction: column; min-height: 0; }
+.inscripcion-progress { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); list-style: none; padding: 0 2rem 1.25rem; border-bottom: 1px solid #eef0f3; }
+.inscripcion-progress li { display: flex; align-items: center; gap: 0.5rem; color: #94a3b8; font-size: 0.72rem; font-weight: 600; }
+.inscripcion-progress .step-number { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50% !important; background: #f1f5f9; color: #64748b; }
+.inscripcion-progress li[aria-current="step"] { color: #111827; font-weight: 800; }
+.inscripcion-progress li[aria-current="step"] .step-number { background: #da1212; color: #fff; }
+.inscripcion-progress li.is-complete { color: #64748b; }
+.inscripcion-progress li.is-complete .step-number { background: #e8f5ee; color: #087f43; }
+.inscripcion-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 1.5rem 2rem; }
+.inscripcion-step-title { margin-bottom: 0.35rem; font-family: var(--font-body); font-size: 1.12rem; font-weight: 800; text-transform: none; letter-spacing: 0; }
+.inscripcion-step-description { color: #64748b; font-size: 0.84rem; font-weight: 400; margin-bottom: 1.4rem; }
+.inscripcion-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.25rem; }
+.inscripcion-field-wide { grid-column: 1 / -1; }
+.inscripcion-dialog .form-label { font-family: var(--font-body); font-size: 0.82rem !important; font-weight: 600 !important; text-transform: none; letter-spacing: 0; color: #334155 !important; }
+.inscripcion-dialog .field-optional { color: #94a3b8; font-size: 0.74rem; font-weight: 400; }
+.inscripcion-dialog .input-jr, .inscripcion-dialog .select-jr { border: 1px solid #dce1e8 !important; border-radius: 10px !important; padding: 0.7rem 0.85rem !important; font-size: 0.92rem !important; font-weight: 500 !important; min-height: 44px; color: #111827 !important; background: #fff !important; }
+.inscripcion-dialog .input-jr::placeholder { color: #94a3b8; }
+.inscripcion-dialog .input-jr:focus, .inscripcion-dialog .select-jr:focus { border-color: #da1212 !important; outline: 2px solid #da12121a; outline-offset: 1px; }
+.inscripcion-dialog [aria-invalid="true"] { border-color: #da1212 !important; }
+.inscripcion-field-hint { color: #64748b; font-size: 0.73rem; font-weight: 400; }
+.inscripcion-sedes-retry { align-self: flex-start; padding: 0.25rem 0; background: transparent; border: none; color: #b91c1c; font: inherit; font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
+.inscripcion-sedes-retry:focus-visible { outline: 2px solid #da1212; outline-offset: 2px; }
+.inscripcion-summary { display: grid; gap: 0.7rem; margin-bottom: 1.25rem; padding: 1rem 1.15rem; background: #f8fafc; border: 1px solid #eef0f3; border-radius: 12px !important; }
+.inscripcion-summary > div { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 0.75rem; }
+.inscripcion-summary dt { color: #64748b; font-size: 0.76rem; font-weight: 500; }
+.inscripcion-summary dd { color: #111827; font-size: 0.82rem; font-weight: 600; overflow-wrap: anywhere; }
+.inscripcion-payment-note { margin-top: 1rem; padding: 0.8rem 1rem; border-radius: 10px !important; background: #fff9e8; color: #785a16; font-size: 0.77rem; font-weight: 400; }
+.inscripcion-message { margin-top: 1rem; color: #b91c1c; background: #fff1f2; border-radius: 10px !important; padding: 0.75rem 1rem; font-size: 0.82rem; }
+.inscripcion-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 2rem; border-top: 1px solid #eef0f3; background: #fff; flex-shrink: 0; }
+.inscripcion-step-count { color: #64748b; font-size: 0.76rem; font-weight: 500; white-space: nowrap; }
+.inscripcion-actions { display: flex; gap: 0.6rem; }
+.inscripcion-dialog .btn { gap: 0.4rem; padding: 0.7rem 1.15rem !important; border-radius: 10px !important; font-family: var(--font-body); font-size: 0.86rem !important; font-weight: 700 !important; text-transform: none; letter-spacing: 0; white-space: normal; }
+.inscripcion-back { background: #fff; color: #475569; }
+.inscripcion-back:hover { background: #f8fafc; }
+.inscripcion-dialog .inscripcion-primary { background: #da1212; color: #fff; border-color: #da1212 !important; }
+.inscripcion-dialog .inscripcion-primary:hover { background: #b90f0f; border-color: #b90f0f !important; }
+
+@media (max-width: 600px) {
+  #abrir-inscripcion { width: 100%; }
+  .inscripcion-dialog { width: calc(100vw - 1rem); max-height: calc(100dvh - 1rem); border-radius: 18px !important; }
+  .inscripcion-header { padding: 1.2rem 1.2rem 1rem; }
+  #inscripcion-title { font-size: 1.85rem; }
+  .inscripcion-progress { padding: 0 1rem 1rem; gap: 0.3rem; }
+  .inscripcion-progress li { flex-direction: column; text-align: center; gap: 0.3rem; font-size: 0.67rem; }
+  .inscripcion-content { padding: 1.2rem; }
+  .inscripcion-fields { grid-template-columns: minmax(0, 1fr); gap: 0.85rem; }
+  .inscripcion-dialog .input-jr, .inscripcion-dialog .select-jr { font-size: 16px !important; }
+  .inscripcion-summary > div { grid-template-columns: 80px minmax(0, 1fr); gap: 0.5rem; }
+  .inscripcion-footer { padding: 0.9rem 1.2rem; gap: 0.5rem; }
+  .inscripcion-dialog .btn { padding: 0.65rem 0.8rem !important; }
+}
