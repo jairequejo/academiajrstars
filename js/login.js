@@ -32,7 +32,7 @@ async function init() {
         // Acceso permitido
         sessionStorage.setItem('jr_nombre', data.nombre || '');
         document.getElementById('status-msg').textContent = `¡Hola, ${data.nombre}! Abriendo scanner...`;
-        setTimeout(() => { window.location.href = '/entrenador/index.html'; }, 600);
+        setTimeout(() => { window.location.href = './index.html'; }, 600);
         
     } catch (e) {
         // Sin conexión o error

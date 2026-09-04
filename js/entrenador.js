@@ -7,7 +7,7 @@ const EMAIL_KEY = 'jr_entrenador_email';
 const SIGNING_KEY_SK = 'jr_signing_key';     // localStorage
 
 const token = localStorage.getItem(TOKEN_KEY);
-if (!token) window.location.href = '/entrenador/login.html';
+if (!token) window.location.href = './login.html';
 
 document.addEventListener('DOMContentLoaded', () => {
     const nameEl = document.getElementById('coach-email');

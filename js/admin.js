@@ -2,7 +2,7 @@
 
 // ── AUTH ──────────────────────────────────────────────
 const token = localStorage.getItem('jr_admin_token');
-if (!token) window.location.href = '/admin/login.html';
+if (!token) window.location.href = './login.html';
 
 document.getElementById('admin-email').textContent =
   localStorage.getItem('jr_admin_email') || '';
@@ -15,7 +15,7 @@ const H = {
 function logout() {
   localStorage.removeItem('jr_admin_token');
   localStorage.removeItem('jr_admin_email');
-  window.location.href = '/admin/login.html';
+  window.location.href = './login.html';
 }
 
 // ── SIDEBAR MOBILE ────────────────────────────────────
