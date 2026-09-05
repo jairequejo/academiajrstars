@@ -360,7 +360,7 @@ async function loadAlumnos() {
     const { data, error } = await window.supabaseClient.from('students').select('*').order('full_name');
     if (error) throw error;
     alumnosData = data || [];
-    renderAlumnos(alumnosData);
+    aplicarFiltros();
   } catch(e) {
     console.error(e);
     showToast('Error cargando alumnos', 'error');
@@ -378,7 +378,8 @@ function aplicarFiltros() {
 
   const filtrados = alumnosData.filter(a => {
     // Filtro búsqueda de texto
-    if (busqueda && !a.full_name.toLowerCase().includes(busqueda)) return false;
+    const searchable = `${a.full_name || ''} ${a.dni || ''}`.toLowerCase();
+    if (busqueda && !searchable.includes(busqueda)) return false;
     // Filtro horario
     if (horario && (a.horario || '').toLowerCase() !== horario.toLowerCase()) return false;
     // Filtro sede
@@ -404,6 +405,49 @@ function aplicarFiltros() {
   });
 
   renderAlumnos(filtrados);
+  actualizarResumenFiltrosAlumnos(filtrados.length);
+}
+
+function actualizarResumenFiltrosAlumnos(visibleCount = 0) {
+  const filterIds = ['filtro-estado', 'filtro-horario', 'filtro-sede', 'filtro-grupo'];
+  const activeCount = filterIds.reduce((total, id) => total + (document.getElementById(id)?.value ? 1 : 0), 0);
+  const search = document.getElementById('filtro-busqueda');
+  const results = document.getElementById('alumnos-filter-results');
+  const badge = document.getElementById('alumnos-filter-badge');
+  const reset = document.getElementById('alumnos-filter-reset');
+  const clearSearch = document.getElementById('alumnos-search-clear');
+
+  if (results) results.textContent = `${visibleCount} de ${alumnosData.length} alumnos`;
+  if (badge) {
+    badge.textContent = String(activeCount);
+    badge.hidden = activeCount === 0;
+  }
+  if (reset) reset.hidden = activeCount === 0;
+  if (clearSearch) clearSearch.classList.toggle('is-visible', Boolean(search?.value));
+}
+
+function toggleAlumnosFiltros() {
+  const panel = document.getElementById('alumnos-filtros-panel');
+  const button = document.getElementById('alumnos-filter-toggle');
+  if (!panel || !button) return;
+  const open = panel.classList.toggle('is-open');
+  button.setAttribute('aria-expanded', String(open));
+}
+
+function limpiarBusquedaAlumnos() {
+  const search = document.getElementById('filtro-busqueda');
+  if (!search) return;
+  search.value = '';
+  aplicarFiltros();
+  search.focus();
+}
+
+function limpiarFiltrosAlumnos() {
+  ['filtro-estado', 'filtro-horario', 'filtro-sede', 'filtro-grupo'].forEach(id => {
+    const field = document.getElementById(id);
+    if (field) field.value = '';
+  });
+  aplicarFiltros();
 }
 
 function accionesAlumno(a) {

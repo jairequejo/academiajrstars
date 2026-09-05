@@ -101,6 +101,39 @@ body {
 .portal-search-card > * { position: relative; z-index: 1; }
 .portal-input-label { color: #9b9ba1; font-size: 9px; font-weight: 800; letter-spacing: .18em; }
 
+/* Lector QR: experiencia de cámara dedicada. */
+.portal-scanner-open { overflow: hidden !important; }
+.portal-scanner-modal { position: fixed !important; inset: 0; z-index: 500 !important; display: grid; overflow-y: auto; place-items: center; padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom)); background: rgba(0,0,0,.86) !important; backdrop-filter: blur(14px); }
+.portal-scanner-modal.hidden { display: none !important; }
+.portal-scanner-shell { width: min(100%, 470px); padding: 18px; color: #fff; border: 1px solid rgba(255,255,255,.13); border-radius: 26px; background: linear-gradient(155deg, #18181b, #050505 58%, #1c0507); box-shadow: 0 30px 90px rgba(0,0,0,.7); }
+.portal-scanner-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 4px 2px 17px; }
+.portal-scanner-head span { color: var(--portal-red); font-size: 8px; font-weight: 900; letter-spacing: .2em; }
+.portal-scanner-head h2 { margin: 4px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(34px, 10vw, 48px); font-weight: 400; font-style: italic; line-height: .9; letter-spacing: .02em; }
+.portal-scanner-close { display: grid; flex: 0 0 44px; width: 44px; height: 44px; place-items: center; padding: 0; color: #fff !important; border: 1px solid rgba(255,255,255,.14) !important; border-radius: 50% !important; background: rgba(255,255,255,.07) !important; font-size: 28px; line-height: 1; cursor: pointer; }
+.portal-scanner-stage { padding: 12px; border: 1px solid rgba(255,255,255,.11); border-radius: 19px; background: rgba(255,255,255,.045); }
+.portal-scanner-status { display: flex; align-items: center; gap: 7px; padding: 2px 2px 11px; color: #aaaab1; font-size: 7px; font-weight: 900; letter-spacing: .13em; }
+.portal-scanner-status i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,.8); }
+.portal-scanner-status b { margin-left: auto; color: #777780; font-weight: inherit; }
+.portal-scanner-viewport { position: relative; overflow: hidden; aspect-ratio: 1; border-radius: 14px; background: #000; }
+.portal-scanner-viewport #reader { width: 100%; height: 100%; overflow: hidden; border: 0 !important; background: #030303; }
+.portal-scanner-viewport #reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+.portal-scanner-viewport #reader__scan_region { min-height: 100%; }
+.portal-scanner-viewport #reader__dashboard { position: absolute; right: 12px; bottom: 12px; left: 12px; z-index: 7; padding: 8px !important; border-radius: 10px; background: rgba(0,0,0,.72); backdrop-filter: blur(6px); }
+.portal-scanner-viewport #reader__dashboard button,
+.portal-scanner-viewport #reader__dashboard select { min-height: 38px; padding: 7px 10px; color: #fff; border: 1px solid rgba(255,255,255,.2); border-radius: 8px; background: #18181b; font: 700 12px/1.2 Inter, sans-serif; }
+.portal-scanner-viewport #reader__dashboard a { color: #fff !important; font: 700 11px/1.3 Inter, sans-serif; }
+.portal-scanner-viewport #html5-qrcode-button-camera-permission { min-height: 44px; padding: 10px 16px; color: #fff !important; border: 0 !important; border-radius: 10px !important; background: var(--portal-red) !important; font: 900 11px/1 Inter, sans-serif; letter-spacing: .06em; }
+.portal-scanner-viewport #html5-qrcode-anchor-scan-type-change { display: inline-block; margin-top: 10px; color: #fff !important; font: 800 10px/1.3 Inter, sans-serif; letter-spacing: .06em; text-decoration: none; }
+.portal-scan-corner { position: absolute; z-index: 8; width: 52px; height: 52px; pointer-events: none; }
+.portal-scan-corner--tl { top: 18px; left: 18px; border-top: 4px solid var(--portal-red); border-left: 4px solid var(--portal-red); border-radius: 11px 0 0; }
+.portal-scan-corner--tr { top: 18px; right: 18px; border-top: 4px solid var(--portal-red); border-right: 4px solid var(--portal-red); border-radius: 0 11px 0 0; }
+.portal-scan-corner--bl { bottom: 18px; left: 18px; border-bottom: 4px solid var(--portal-red); border-left: 4px solid var(--portal-red); border-radius: 0 0 0 11px; }
+.portal-scan-corner--br { right: 18px; bottom: 18px; border-right: 4px solid var(--portal-red); border-bottom: 4px solid var(--portal-red); border-radius: 0 0 11px; }
+.portal-scan-line { position: absolute; z-index: 8; right: 27px; left: 27px; top: 20%; height: 2px; pointer-events: none; background: linear-gradient(90deg, transparent, #ff2430 18% 82%, transparent); box-shadow: 0 0 18px rgba(255,36,48,.95); animation: portal-scan-sweep 2.2s ease-in-out infinite; }
+.portal-scanner-stage > p { margin: 12px 4px 2px; color: #9d9da5; font-size: 10px; line-height: 1.5; text-align: center; }
+.portal-scanner-cancel { width: 100%; min-height: 48px; margin-top: 12px; color: #fff !important; border: 1px solid rgba(255,255,255,.13) !important; border-radius: 12px !important; background: rgba(255,255,255,.07) !important; font-family: "Bebas Neue", Impact, sans-serif; font-size: 19px; letter-spacing: .1em; cursor: pointer; }
+@keyframes portal-scan-sweep { 0%, 100% { top: 20%; opacity: .55; } 50% { top: 76%; opacity: 1; } }
+
 /* La ficha usa todo el ancho después de autenticar al jugador. */
 .portal-player-view { display: block !important; background: var(--portal-black); }
 .portal-player-view .portal-visual { display: none !important; }
@@ -338,9 +371,9 @@ body {
   .portal-search-card #btnC { color: #fff !important; border-color: #050505 !important; background: #050505 !important; }
   .portal-search-card button:not(#btnC) { color: #050505 !important; border-color: rgba(255,255,255,.8) !important; background: rgba(255,255,255,.92) !important; }
   .portal-search-card button:not(#btnC) svg { width: 17px; height: 17px; }
-  .portal-search-card #scanner-container:not(.hidden) { position: fixed; inset: 0; z-index: 200; display: flex; justify-content: center; padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)); border: 0; border-radius: 0 !important; background: #050505 !important; }
-  .portal-search-card #scanner-container #reader { width: min(100%, 440px); margin: auto; }
-  .portal-search-card #scanner-container > button { width: min(100%, 440px); min-height: 52px; margin-inline: auto !important; color: #fff !important; border-color: rgba(255,255,255,.18) !important; background: #1a1a1d !important; }
+  .portal-scanner-modal { padding-inline: 12px; }
+  .portal-scanner-shell { padding: 14px; border-radius: 22px; }
+  .portal-scanner-stage { padding: 10px; }
   .portal-player-view .portal-main { padding: 16px 12px 48px !important; }
   .portal-player-view .portal-topbar { margin-bottom: 16px; }
   .portal-player-view #p3 > .grid { grid-template-columns: 1fr; }
@@ -418,4 +451,5 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .epic-share { transition: none; }
   .streak-stage.is-active .streak-star path { animation: none; }
+  .portal-scan-line { animation: none; top: 50%; }
 }

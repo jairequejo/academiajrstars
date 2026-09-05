@@ -65,7 +65,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
-  <link rel="stylesheet" href="../css/portal.css?v=20260905c">
+  <link rel="stylesheet" href="../css/portal.css?v=20260905e">
   <link rel="stylesheet" href="../css/tailwind.css">
 </head>
 
@@ -123,16 +123,36 @@
             <span class="slant-btn-content font-display text-2xl uppercase tracking-wider">VER ESTATUS</span>
           </button>
 
-          <button type="button" onclick="toggleScanner()" class="slant-btn w-full bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 mt-2">
+          <button type="button" onclick="toggleScanner()" class="portal-scan-trigger slant-btn w-full bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 mt-2">
             <span class="slant-btn-content font-display text-xl uppercase tracking-wider flex items-center justify-center gap-2">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 9h6v6H9z"/></svg>
               ESCANEAR CÓDIGO QR
             </span>
           </button>
 
-          <div id="scanner-container" class="hidden flex flex-col gap-4 bg-[#050505] p-4 rounded-xl border border-white/10 mt-2">
-            <div id="reader" class="w-full bg-black rounded-lg overflow-hidden border border-white/20"></div>
-            <button onclick="toggleScanner()" class="font-display text-xl uppercase bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/20">Cerrar</button>
+          <div id="scanner-container" class="portal-scanner-modal hidden" role="dialog" aria-modal="true" aria-labelledby="portal-scanner-title" aria-hidden="true">
+            <div class="portal-scanner-shell">
+              <header class="portal-scanner-head">
+                <div>
+                  <span>ACCESO INSTANTÁNEO</span>
+                  <h2 id="portal-scanner-title">ESCANEA SU FICHA</h2>
+                </div>
+                <button type="button" class="portal-scanner-close" onclick="toggleScanner()" aria-label="Cerrar lector QR">×</button>
+              </header>
+              <div class="portal-scanner-stage">
+                <div class="portal-scanner-status"><i></i><span>CÁMARA ACTIVA</span><b>QR / CREDENCIAL</b></div>
+                <div class="portal-scanner-viewport">
+                  <div id="reader" aria-label="Vista de la cámara para escanear el código QR"></div>
+                  <span class="portal-scan-corner portal-scan-corner--tl" aria-hidden="true"></span>
+                  <span class="portal-scan-corner portal-scan-corner--tr" aria-hidden="true"></span>
+                  <span class="portal-scan-corner portal-scan-corner--bl" aria-hidden="true"></span>
+                  <span class="portal-scan-corner portal-scan-corner--br" aria-hidden="true"></span>
+                  <span class="portal-scan-line" aria-hidden="true"></span>
+                </div>
+                <p>Centra el QR de la credencial dentro del marco. La ficha se abrirá automáticamente.</p>
+              </div>
+              <button type="button" onclick="toggleScanner()" class="portal-scanner-cancel">CANCELAR ESCANEO</button>
+            </div>
           </div>
 
           <div id="ld" role="status" aria-live="polite" class="hidden flex items-center justify-center gap-3 text-gray-400 font-bold uppercase tracking-widest text-sm mt-4 p-4 rounded-xl bg-white/5">
@@ -223,6 +243,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="../js/home.js?v=20260905c"></script>
+  <script src="../js/home.js?v=20260905e"></script>
 </body>
 </html>

@@ -262,17 +262,40 @@ function volver() {
 
 // ── SCANNER QR ────────────────────────────────────────
 let qrScanner = null;
+let qrLocalizationObserver = null;
+
+function localizePortalScanner() {
+    const labels = {
+        'html5-qrcode-button-camera-permission': 'PERMITIR CÁMARA',
+        'html5-qrcode-button-camera-start': 'INICIAR CÁMARA',
+        'html5-qrcode-button-camera-stop': 'DETENER CÁMARA',
+        'html5-qrcode-anchor-scan-type-change': 'ESCANEAR DESDE UNA FOTO',
+        'html5-qrcode-button-file-selection': 'ELEGIR FOTO'
+    };
+    Object.entries(labels).forEach(([id, label]) => {
+        const control = document.getElementById(id);
+        if (control && control.textContent !== label) control.textContent = label;
+    });
+}
 
 function toggleScanner() {
     const container = $('scanner-container');
     if (!container) return;
-    if (container.classList.contains('hidden')) {
+    const opening = container.classList.contains('hidden');
+    container.setAttribute('aria-hidden', String(!opening));
+    document.body.classList.toggle('portal-scanner-open', opening);
+
+    if (opening) {
         container.classList.remove('hidden');
         if (!qrScanner) {
             qrScanner = new Html5QrcodeScanner('reader', {
                 fps: 15,
-                qrbox: { width: 220, height: 220 },
-                rememberLastUsedCamera: true
+                qrbox: (viewWidth, viewHeight) => {
+                    const size = Math.floor(Math.min(viewWidth, viewHeight) * .72);
+                    return { width: size, height: size };
+                },
+                rememberLastUsedCamera: true,
+                aspectRatio: 1
             });
             qrScanner.render(
                 (decodedText) => {
@@ -282,6 +305,12 @@ function toggleScanner() {
                 },
                 () => {}
             );
+            localizePortalScanner();
+            const reader = $('reader');
+            if (reader && !qrLocalizationObserver) {
+                qrLocalizationObserver = new MutationObserver(localizePortalScanner);
+                qrLocalizationObserver.observe(reader, { childList: true, subtree: true });
+            }
         } else {
             try { if (qrScanner.getState() === 3) qrScanner.resume(); } catch {}
         }
@@ -290,6 +319,11 @@ function toggleScanner() {
         try { if (qrScanner && qrScanner.getState() !== 3) qrScanner.pause(true); } catch {}
     }
 }
+
+document.addEventListener('keydown', event => {
+    const scanner = $('scanner-container');
+    if (event.key === 'Escape' && scanner && !scanner.classList.contains('hidden')) toggleScanner();
+});
 
 // ── HANDLE CÓDIGO (QR o NFC) ──────────────────────────
 function handleScanCode(rawCode) {

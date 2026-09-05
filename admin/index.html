@@ -8,7 +8,7 @@
   <title>JR Stars — Admin Panel</title>
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20260904">
-  <link rel="stylesheet" href="../css/admin.css?v=20260905b">
+  <link rel="stylesheet" href="../css/admin.css?v=20260905d">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260904">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
   <meta name="theme-color" content="#E30D13">
@@ -213,7 +213,19 @@
               <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#printer"></use></svg> Generar Plancha QR
             </button>
           </div>
-          <div class="filtros-controles">
+          <div class="alumnos-filter-primary">
+            <label class="form-label" for="filtro-busqueda">Buscar alumno</label>
+            <div class="alumnos-search-box">
+              <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#search"></use></svg>
+              <input class="input-jr input-sm" id="filtro-busqueda" placeholder="Nombre o DNI" autocomplete="off" oninput="aplicarFiltros()">
+              <button class="alumnos-search-clear" id="alumnos-search-clear" type="button" onclick="limpiarBusquedaAlumnos()" aria-label="Limpiar búsqueda"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
+            </div>
+            <button class="alumnos-filter-toggle" id="alumnos-filter-toggle" type="button" onclick="toggleAlumnosFiltros()" aria-controls="alumnos-filtros-panel" aria-expanded="false">
+              <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
+              <span>Filtros</span><b id="alumnos-filter-badge" hidden>0</b>
+            </button>
+          </div>
+          <div class="filtros-controles" id="alumnos-filtros-panel">
             <div class="filtro-group">
               <label class="form-label" for="filtro-estado">Estado</label>
               <select class="select-jr select-sm" id="filtro-estado" onchange="aplicarFiltros()">
@@ -248,10 +260,10 @@
                 <option value="E">E</option>
               </select>
             </div>
-            <div class="filtro-group filtro-group-search">
-              <label class="form-label" for="filtro-busqueda">Buscar</label>
-              <input class="input-jr input-sm" id="filtro-busqueda" placeholder="Nombre..." oninput="aplicarFiltros()">
-            </div>
+          </div>
+          <div class="alumnos-filter-footer">
+            <span id="alumnos-filter-results" role="status" aria-live="polite">Cargando alumnos…</span>
+            <button type="button" id="alumnos-filter-reset" onclick="limpiarFiltrosAlumnos()" hidden>Limpiar filtros</button>
           </div>
         </div>
 
@@ -816,7 +828,7 @@
 
   <script src="../js/admin-icons.js?v=20260904"></script>
   <script src="../js/admin-sedes.js?v=20260904"></script>
-  <script src="../js/admin.js?v=20260905b"></script>
+  <script src="../js/admin.js?v=20260905d"></script>
   <script src="../js/alumno-ficha.js?v=20260904"></script>
   <script src="../js/inscripcion.js?v=20260904"></script>
   <script src="../js/admin-cobranzas.js?v=20260905b"></script>
