@@ -1,0 +1,368 @@
+/* Portal del Jugador — presentación deportiva inspirada en cartas de fútbol */
+:root {
+  --portal-red: #e5191b;
+  --portal-gold: #f5a623;
+  --portal-black: #050505;
+  --portal-paper: #f3f2ee;
+  --portal-line-dark: rgba(255, 255, 255, .12);
+  --portal-line-light: rgba(5, 5, 5, .14);
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--portal-black);
+}
+*, *::before, *::after { box-sizing: border-box; }
+
+.portal-body { min-width: 320px; }
+.portal-main { background: var(--portal-paper) !important; color: var(--portal-black); }
+.portal-shell { justify-content: center; }
+
+/* Portada lateral */
+.portal-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 0 63%, rgba(229, 25, 27, .18) 63% 64%, transparent 64%),
+    linear-gradient(transparent 49.8%, rgba(255, 255, 255, .08) 50%, transparent 50.2%);
+}
+
+.portal-visual-inner { width: min(100%, 590px); align-items: flex-start !important; text-align: left !important; }
+.portal-brand { align-items: flex-start !important; position: absolute; top: 48px; left: 48px; }
+.portal-brand img { width: 72px; height: 72px; }
+.portal-visual-copy { margin-top: 160px; position: relative; z-index: 2; }
+.portal-visual-copy > span {
+  display: block;
+  margin-bottom: 18px;
+  color: #b8b8bd;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+.portal-visual-copy strong {
+  display: block;
+  color: #fff;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: clamp(76px, 8vw, 126px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: .75;
+  letter-spacing: -.015em;
+}
+.portal-visual-copy strong em { color: var(--portal-red); font-style: inherit; }
+.portal-visual-copy p { max-width: 390px; margin-top: 28px; color: #b8b8bd; font-size: 15px; line-height: 1.65; }
+.portal-season-mark {
+  position: absolute;
+  right: -8px;
+  bottom: -48px;
+  z-index: 11;
+  color: rgba(255, 255, 255, .055);
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 330px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Acceso */
+.portal-topbar { color: var(--portal-black); border-color: rgba(5, 5, 5, .12) !important; }
+.portal-topbar-season {
+  color: #757575;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+.portal-auth-pill { background: var(--portal-black) !important; color: #fff !important; border-color: var(--portal-black) !important; }
+.portal-search-title { color: var(--portal-black) !important; }
+.portal-search-copy { max-width: 510px; margin: 0 0 28px; color: #656569; font-size: 14px; font-weight: 600; line-height: 1.65; }
+.portal-search-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--portal-black) !important;
+  border-color: rgba(255, 255, 255, .12) !important;
+  box-shadow: 0 28px 70px rgba(5, 5, 5, .18);
+}
+.portal-search-card::before {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  top: -100px;
+  right: -70px;
+  border-radius: 50%;
+  background: var(--portal-red);
+  filter: blur(60px);
+  opacity: .18;
+  pointer-events: none;
+}
+.portal-search-card > * { position: relative; z-index: 1; }
+.portal-input-label { color: #9b9ba1; font-size: 9px; font-weight: 800; letter-spacing: .18em; }
+
+/* La ficha usa todo el ancho después de autenticar al jugador. */
+.portal-player-view { display: block !important; background: var(--portal-black); }
+.portal-player-view .portal-visual { display: none !important; }
+.portal-player-view .portal-main {
+  width: 100% !important;
+  min-height: 100vh;
+  padding: 24px clamp(16px, 4vw, 64px) 64px !important;
+  background:
+    radial-gradient(circle at 12% 15%, rgba(229, 25, 27, .18), transparent 25%),
+    linear-gradient(135deg, #111 0%, #050505 54%, #151515 100%) !important;
+}
+.portal-player-view .portal-topbar {
+  display: flex !important;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto 22px;
+  padding-bottom: 16px;
+  color: #fff;
+  border-color: rgba(255, 255, 255, .12) !important;
+}
+.portal-player-view .portal-topbar-season { color: #999; }
+.portal-player-view .portal-shell { max-width: 1180px !important; justify-content: flex-start; }
+.portal-player-view #p2 > button { margin-bottom: 16px; }
+.portal-player-view #p3 { margin-top: 28px !important; }
+.portal-player-view #p3 > .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.portal-player-view #p3 .bento-card { border-color: rgba(255, 255, 255, .1); box-shadow: 0 18px 50px rgba(0, 0, 0, .22); }
+
+/* Carta principal */
+#card-wrap { container-type: inline-size; }
+.epic-card {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  overflow: hidden;
+  color: var(--portal-black);
+  border: 1px solid rgba(255, 255, 255, .15);
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 0 35px 90px rgba(0, 0, 0, .48);
+}
+
+.epic-player-panel {
+  position: relative;
+  isolation: isolate;
+  min-height: 310px;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(circle at 72% 26%, rgba(229, 25, 27, .48), transparent 30%),
+    linear-gradient(155deg, #1d1d20 0%, #050505 50%, #160405 100%);
+}
+.epic-player-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: .44;
+  background:
+    linear-gradient(117deg, transparent 0 47%, rgba(255, 255, 255, .08) 47% 48%, transparent 48%),
+    repeating-linear-gradient(90deg, transparent 0 39px, rgba(255, 255, 255, .025) 40px);
+}
+.epic-player-panel::after {
+  content: "";
+  position: absolute;
+  inset: auto -60px -100px 35%;
+  z-index: -1;
+  width: 330px;
+  height: 330px;
+  border: 42px solid rgba(229, 25, 27, .16);
+  border-radius: 50%;
+}
+.epic-player-topline {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 24px 26px;
+  color: #a6a6ad;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .17em;
+}
+.epic-status { display: inline-flex; align-items: center; gap: 7px; color: #baf5d1; letter-spacing: .08em; text-transform: uppercase; }
+.epic-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, .75); }
+.epic-status.is-locked { color: #ffacae; }
+.epic-status.is-locked::before { background: var(--portal-red); box-shadow: 0 0 12px rgba(229, 25, 27, .75); }
+.epic-rating { position: absolute; top: 66px; left: 21px; z-index: 5; text-align: center; }
+.epic-rating strong { display: block; font-family: "Bebas Neue", Impact, sans-serif; font-size: 58px; font-weight: 400; line-height: .78; }
+.epic-rating span { display: block; margin-top: 9px; color: var(--portal-gold); font-size: 13px; font-weight: 900; letter-spacing: .14em; }
+.epic-player-art { position: absolute; top: 56px; right: 8px; bottom: 88px; left: 88px; overflow: hidden; }
+.epic-player-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, #070707 100%); pointer-events: none; }
+.epic-player-art img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.08); }
+.epic-player-placeholder { position: absolute; inset: 0; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.1); border-radius: 50% 50% 28% 28%; background: radial-gradient(circle at 50% 35%, rgba(255,255,255,.15), transparent 32%), linear-gradient(145deg, #252529, #09090a 62%, #39090b); }
+.epic-player-placeholder span { color: rgba(255,255,255,.92); font-family: "Bebas Neue", Impact, sans-serif; font-size: 112px; line-height: 1; text-shadow: 0 10px 30px rgba(0,0,0,.6); }
+.epic-player-placeholder small { position: absolute; right: 18px; bottom: 14px; color: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 34px; letter-spacing: .08em; }
+.epic-crest { position: absolute; z-index: 5; top: 135px; left: 23px; width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .75)); }
+.epic-player-identity {
+  position: absolute;
+  z-index: 6;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 48px 20px 20px;
+  background: linear-gradient(transparent, rgba(5, 5, 5, .94) 38%);
+}
+.epic-kicker { color: var(--portal-gold); font-size: 9px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
+.epic-name { margin: 7px 0 0; color: #fff; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(39px, 5cqw, 60px); font-weight: 400; line-height: .88; letter-spacing: .02em; text-transform: uppercase; overflow-wrap: anywhere; }
+.epic-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 17px; }
+.epic-chip { padding: 5px 8px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px; color: #dadade; background: rgba(255, 255, 255, .07); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+
+/* Panel blanco de estadísticas */
+.epic-data-panel { min-width: 0; padding: 34px clamp(24px, 4cqw, 48px) 28px; background: #fff; }
+.epic-report-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 22px; border-bottom: 5px solid var(--portal-black); }
+.epic-report-head span { color: #77777d; font-size: 9px; font-weight: 900; letter-spacing: .18em; }
+.epic-report-head h3 { margin: 2px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(42px, 6cqw, 68px); font-weight: 400; font-style: italic; line-height: .9; }
+.epic-report-head > strong { color: #d7d7d7; font-family: "Bebas Neue", Impact, sans-serif; font-size: 40px; font-weight: 400; line-height: 1; }
+.epic-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 8px; }
+.epic-stat { min-width: 0; padding: 22px 18px 20px 0; border-bottom: 1px solid var(--portal-line-light); }
+.epic-stat:nth-child(odd) { border-right: 1px solid var(--portal-line-light); }
+.epic-stat:nth-child(even) { padding-left: 22px; }
+.epic-stat > div { display: flex; align-items: baseline; gap: 9px; }
+.epic-stat strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(46px, 7cqw, 72px); font-weight: 400; line-height: .8; }
+.epic-stat b { color: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 21px; font-weight: 400; letter-spacing: .04em; }
+.epic-stat > span { display: block; margin-top: 9px; color: #77777d; font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.epic-form-strip { display: grid; grid-template-columns: 45px minmax(0, 1fr) auto; align-items: center; gap: 14px; margin-top: 22px; padding: 15px 17px; color: #fff; border-radius: 14px; background: var(--portal-black); }
+.epic-form-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--portal-red); font-size: 23px; font-weight: 900; }
+.epic-form-strip strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: 21px; font-weight: 400; letter-spacing: .05em; text-transform: uppercase; }
+.epic-form-strip p { margin: 2px 0 0; color: #a8a8ae; font-size: 10px; line-height: 1.4; }
+.epic-last-session { min-width: 86px; padding-left: 14px; text-align: right; border-left: 1px solid rgba(255, 255, 255, .13); }
+.epic-last-session span { display: block; color: #77777e; font-size: 7px; font-weight: 900; letter-spacing: .1em; }
+.epic-last-session strong { color: var(--portal-gold); font-size: 22px; }
+.epic-physical { padding-top: 22px; }
+.epic-section-title { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; color: #69696f; font-size: 9px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+.epic-section-title::before { content: ""; width: 20px; height: 3px; background: var(--portal-red); }
+.epic-physical-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.epic-physical-item { padding: 12px 14px; border: 1px solid var(--portal-line-light); border-radius: 12px; background: #f5f5f3; }
+.epic-physical-item strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: 27px; font-weight: 400; }
+.epic-physical-item > span { display: block; color: #77777d; font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.epic-delta { display: inline !important; margin-left: 6px; color: #168441 !important; }
+.epic-empty { padding: 13px 14px; border: 1px dashed var(--portal-line-light); border-radius: 12px; color: #77777d; background: #f7f7f5; font-size: 11px; text-align: center; }
+.epic-history { margin-top: 13px; border-top: 1px solid var(--portal-line-light); }
+.epic-history summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 0; cursor: pointer; color: #55555b; font-size: 9px; font-weight: 900; letter-spacing: .12em; list-style: none; text-transform: uppercase; }
+.epic-history summary::-webkit-details-marker { display: none; }
+.epic-history summary::after { content: "+"; color: var(--portal-red); font-size: 19px; }
+.epic-history[open] summary::after { content: "−"; }
+.epic-table-wrap { overflow-x: auto; padding-bottom: 10px; }
+.epic-table { width: 100%; min-width: 320px; border-collapse: collapse; font-size: 11px; }
+.epic-table th { padding: 8px; color: #77777d; text-align: left; text-transform: uppercase; letter-spacing: .08em; }
+.epic-table td { padding: 9px 8px; border-top: 1px solid var(--portal-line-light); color: #303035; }
+.epic-actions { padding-top: 15px; }
+.epic-share { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 50px; padding: 0 20px; color: #fff; border-radius: 12px; background: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 20px; letter-spacing: .08em; text-decoration: none; transition: transform .2s ease, background .2s ease, box-shadow .2s ease; }
+.epic-share b { font-size: 22px; }
+.epic-share:hover { background: #c81013; transform: translateY(-2px); box-shadow: 0 10px 24px rgba(229, 25, 27, .25); }
+.epic-share:focus-visible,
+.epic-pay:focus-visible,
+.epic-history summary:focus-visible { outline: 3px solid var(--portal-gold); outline-offset: 3px; }
+
+/* Mensualidad pendiente */
+.epic-card.is-locked .epic-player-panel { filter: saturate(.72); }
+.epic-locked-panel { display: flex; flex-direction: column; }
+.epic-lock { position: relative; display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; padding: 34px 20px 20px; text-align: center; }
+.epic-lock-mark { position: absolute; color: rgba(229, 25, 27, .055); font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(80px, 13cqw, 145px); line-height: 1; transform: rotate(-12deg); }
+.epic-lock-icon { position: relative; font-size: 36px; }
+.epic-lock h3 { position: relative; margin-top: 11px; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(34px, 5cqw, 50px); font-weight: 400; line-height: .95; }
+.epic-lock p { position: relative; max-width: 430px; margin: 11px auto 20px; color: #68686e; font-size: 12px; line-height: 1.6; }
+.epic-pay { position: relative; width: 100%; min-height: 50px; padding: 10px 16px; color: #fff; border: 0; border-radius: 11px; background: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 20px; letter-spacing: .06em; cursor: pointer; }
+
+/* Ranking */
+.rk-item { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 11px; min-height: 48px; padding: 8px 11px; border: 1px solid rgba(255, 255, 255, .08); border-radius: 11px; background: rgba(255, 255, 255, .035); }
+.rk-item.first { border-color: rgba(245, 166, 35, .42); background: linear-gradient(90deg, rgba(245, 166, 35, .12), rgba(255, 255, 255, .035)); }
+.rk-pos { display: grid; width: 30px; height: 30px; place-items: center; color: #fff; border-radius: 8px; background: rgba(255, 255, 255, .08); font-family: "Bebas Neue", Impact, sans-serif; font-size: 18px; }
+.rk-item.first .rk-pos { color: #050505; background: var(--portal-gold); }
+.rk-name { min-width: 0; overflow: hidden; color: #ddd; font-size: 12px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.rk-score { color: var(--portal-gold); font-family: "Bebas Neue", Impact, sans-serif; font-size: 19px; }
+.rk-empty { padding: 22px 12px; color: #77777d; font-size: 12px; text-align: center; }
+
+@media (max-width: 900px) {
+  .epic-form-strip { grid-template-columns: 40px minmax(0, 1fr); }
+  .epic-last-session { grid-column: 2; padding: 8px 0 0; text-align: left; border-top: 1px solid rgba(255, 255, 255, .13); border-left: 0; }
+}
+
+@media (max-width: 767px) {
+  .portal-body:not(.portal-player-view) { height: 100svh; min-height: 560px; overflow: hidden; background: var(--portal-red); }
+  .portal-body:not(.portal-player-view) .portal-main { width: 100%; max-width: 100%; min-height: 100svh; padding: max(10px, env(safe-area-inset-top)) 18px max(12px, env(safe-area-inset-bottom)) !important; overflow: hidden; background: linear-gradient(145deg, #ef1b1f 0%, #d20f14 58%, #ad090d 100%) !important; color: #fff; }
+  .portal-body:not(.portal-player-view) .portal-main::before { content: ""; position: absolute; right: -110px; bottom: -120px; width: 340px; height: 340px; border: 54px solid rgba(0,0,0,.08); border-radius: 50%; pointer-events: none; }
+  .portal-shell { width: 100%; max-width: 430px !important; align-items: center; justify-content: flex-start; margin-inline: auto; }
+  .portal-body:not(.portal-player-view) .portal-topbar { position: relative; z-index: 2; min-height: 48px; margin-bottom: 18px; padding-bottom: 9px; color: #fff; border-color: rgba(255,255,255,.25) !important; }
+  .portal-body:not(.portal-player-view) .portal-topbar img { width: 34px; height: 34px; }
+  .portal-body:not(.portal-player-view) .portal-topbar .font-display { font-size: 20px; }
+  .portal-body:not(.portal-player-view) .portal-topbar .text-brand { color: #fff !important; opacity: .72; }
+  .portal-body:not(.portal-player-view) .portal-topbar-season { color: rgba(255,255,255,.68); }
+  .portal-body:not(.portal-player-view) #p1 { display: flex; width: 100%; max-width: 420px; min-height: 0; flex: 1; flex-direction: column; align-items: center; justify-content: center; margin-inline: auto; padding-bottom: 5vh; }
+  .portal-search-title { position: relative; z-index: 1; width: 100%; margin-bottom: 24px !important; color: #fff !important; font-size: clamp(48px, 15vw, 64px) !important; line-height: .82 !important; text-align: center; text-shadow: 0 8px 24px rgba(100,0,0,.18); }
+  .portal-search-title span { color: #fff !important; }
+  .portal-search-card { position: relative; z-index: 1; width: 100%; max-width: 370px; gap: 11px !important; margin-inline: auto; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none; overflow: visible; }
+  .portal-search-card::before { display: none; }
+  .portal-input-label { color: rgba(255,255,255,.78); font-size: 8px; text-align: center; }
+  .portal-search-card #dni { min-height: 56px; padding: 10px 14px !important; color: #050505 !important; border: 0 !important; border-radius: 12px !important; background: #fff !important; font-size: 26px !important; box-shadow: 0 12px 30px rgba(92,0,0,.16); }
+  .portal-search-card #dni::placeholder { color: #9a9aa0 !important; }
+  .portal-search-card .slant-btn { min-height: 50px; margin-top: 0 !important; padding: 10px 14px !important; border-radius: 12px !important; transform: none; }
+  .portal-search-card .slant-btn:hover { transform: none; box-shadow: none; }
+  .portal-search-card .slant-btn-content { transform: none; font-size: 18px !important; }
+  .portal-search-card #btnC { color: #fff !important; border-color: #050505 !important; background: #050505 !important; }
+  .portal-search-card button:not(#btnC) { color: #050505 !important; border-color: rgba(255,255,255,.8) !important; background: rgba(255,255,255,.92) !important; }
+  .portal-search-card button:not(#btnC) svg { width: 17px; height: 17px; }
+  .portal-search-card #scanner-container:not(.hidden) { position: fixed; inset: 0; z-index: 200; display: flex; justify-content: center; padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)); border: 0; border-radius: 0 !important; background: #050505 !important; }
+  .portal-search-card #scanner-container #reader { width: min(100%, 440px); margin: auto; }
+  .portal-search-card #scanner-container > button { width: min(100%, 440px); min-height: 52px; margin-inline: auto !important; color: #fff !important; border-color: rgba(255,255,255,.18) !important; background: #1a1a1d !important; }
+  .portal-player-view .portal-main { padding: 16px 12px 48px !important; }
+  .portal-player-view .portal-topbar { margin-bottom: 16px; }
+  .portal-player-view #p3 > .grid { grid-template-columns: 1fr; }
+  .epic-card { border-radius: 22px; }
+  .epic-player-panel { min-height: 300px; }
+  .epic-player-identity { padding: 45px 18px 18px; }
+  .epic-name { font-size: clamp(40px, 13cqw, 58px); }
+  .epic-data-panel { padding: 24px 19px 20px; }
+  .epic-report-head h3 { font-size: clamp(43px, 15cqw, 58px); }
+  .epic-report-head > strong { font-size: 32px; }
+  .epic-stat { padding: 18px 10px 17px 0; }
+  .epic-stat:nth-child(even) { padding-left: 15px; }
+  .epic-stat strong { font-size: clamp(44px, 15cqw, 62px); }
+  .epic-stat b { font-size: 18px; }
+  .epic-form-strip { grid-template-columns: 39px minmax(0, 1fr); padding: 13px; }
+  .epic-form-icon { width: 38px; height: 38px; }
+  .epic-physical-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 767px) and (max-height: 680px) {
+  .portal-body:not(.portal-player-view) .portal-topbar { margin-bottom: 8px; }
+  .portal-body:not(.portal-player-view) #p1 { justify-content: flex-start; padding-top: 10px; padding-bottom: 0; }
+  .portal-search-title { margin-bottom: 12px !important; font-size: clamp(40px, 12vw, 50px) !important; }
+  .portal-search-card { padding: 12px !important; }
+}
+
+@media (max-width: 600px) {
+  .epic-player-topline { overflow: hidden; padding-inline: 18px; white-space: nowrap; }
+  .epic-status { flex: 0 0 auto; font-size: 0; }
+  .epic-status::before { width: 9px; height: 9px; }
+}
+
+@media (max-width: 420px) {
+  .portal-topbar-season { display: none; }
+  .epic-player-topline { padding-inline: 18px; font-size: 8px; }
+  .epic-player-panel { min-height: 286px; }
+  .epic-player-art { left: 82px; bottom: 82px; }
+  .epic-player-placeholder span { font-size: 92px; }
+  .epic-physical-grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 901px) {
+  .epic-card { display: grid; grid-template-columns: minmax(310px, .82fr) minmax(0, 1.5fr); }
+  .epic-player-panel { min-height: 620px; }
+  .epic-rating { top: 75px; left: 27px; }
+  .epic-rating strong { font-size: 76px; }
+  .epic-player-art { inset: 70px 12px 142px 76px; }
+  .epic-player-placeholder span { font-size: 170px; }
+  .epic-crest { top: 166px; left: 29px; width: 50px; height: 50px; }
+  .epic-player-identity { padding: 56px 28px 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .epic-share { transition: none; }
+}

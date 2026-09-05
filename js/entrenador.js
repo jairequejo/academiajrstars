@@ -9,9 +9,24 @@ const SIGNING_KEY_SK = 'jr_signing_key';     // localStorage
 const token = localStorage.getItem(TOKEN_KEY);
 if (!token) window.location.href = './login.html';
 
+function escapeCoachHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[char]);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    const coachName = (sessionStorage.getItem('jr_nombre') || localStorage.getItem('jr_entrenador_nombre') || 'Profe').trim();
+    const shortName = coachName.split(/\s+/)[0] || 'Profe';
     const nameEl = document.getElementById('coach-email');
-    if (nameEl) nameEl.textContent = sessionStorage.getItem('jr_nombre') || '';
+    const avatarEl = document.getElementById('coach-avatar');
+    if (nameEl) nameEl.textContent = coachName;
+    if (avatarEl) avatarEl.textContent = shortName.charAt(0).toUpperCase() || 'P';
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
+            console.warn('PWA entrenador no disponible:', error.message);
+        });
+    }
 });
 
 // ── WEB WORKER DE SYNC ────────────────────────────────────
@@ -20,7 +35,7 @@ let pendingCount = 0;
 
 function initSyncWorker() {
     if (!window.Worker) return;
-    syncWorker = new Worker('/entrenador/sync-worker.js');
+    syncWorker = new Worker('../js/sync-worker.js');
     syncWorker.postMessage({ type: 'set_token', token });
     syncWorker.postMessage({ type: 'count' });
 
@@ -44,7 +59,12 @@ function initSyncWorker() {
 function updateOfflineBadge() {
     const badge = document.getElementById('offline-badge');
     if (!badge) return;
-    if (pendingCount > 0) {
+    if (!navigator.onLine) {
+        badge.textContent = pendingCount > 0
+            ? `${pendingCount} pendiente${pendingCount !== 1 ? 's' : ''}`
+            : 'Modo sin conexión';
+        badge.classList.add('visible');
+    } else if (pendingCount > 0) {
         badge.textContent = `📡 ${pendingCount} pendiente${pendingCount !== 1 ? 's' : ''}`;
         badge.classList.add('visible');
     } else {
@@ -63,8 +83,13 @@ function queueScan(student_id) {
 }
 
 // Auto-flush al reconectar
-window.addEventListener('online', () => syncWorker?.postMessage({ type: 'flush', token }));
-window.addEventListener('offline', () => updateOfflineBadge());
+window.addEventListener('online', () => {
+    updateOfflineBadge();
+    syncWorker?.postMessage({ type: 'flush', token });
+});
+window.addEventListener('offline', () => {
+    updateOfflineBadge();
+});
 
 // ── CRYPTO: VALIDACIÓN HMAC LOCAL ─────────────────────────
 let _cryptoKey = null;   // CryptoKey cacheada
@@ -196,8 +221,8 @@ function addHistory(estado, nombre) {
     ul.innerHTML = histItems.map(h => `
         <li class="history-item ${h.estado}">
             <div class="h-dot"></div>
-            <span class="h-name">${h.nombre}</span>
-            <span class="h-time">${h.hora}</span>
+            <span class="h-name">${escapeCoachHtml(h.nombre)}</span>
+            <span class="h-time">${escapeCoachHtml(h.hora)}</span>
         </li>`).join('');
 }
 
@@ -380,10 +405,15 @@ function scheduleResume() {
 // ── NAVEGACIÓN TABS ───────────────────────────────────────
 function goTab(name, btn) {
     document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.bnav-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+    });
     document.getElementById('tab-' + name)?.classList.add('active');
     btn?.classList.add('active');
+    btn?.setAttribute('aria-selected', 'true');
     if (name === 'asistencia') loadAsistencia();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── QR SCANNER ────────────────────────────────────────────
@@ -483,12 +513,12 @@ async function loadAsistencia() {
 
     try {
         const todayStart = new Date();
-        todayStart.setUTCHours(0, 0, 0, 0);
+        todayStart.setHours(0, 0, 0, 0);
         const startIso = todayStart.toISOString();
 
         const [stRes, attRes] = await Promise.all([
             window.supabaseClient.from('students')
-                .select('id, full_name, horario, turno, valid_until, sede, grupo')
+                .select('id, full_name, horario, valid_until, sede')
                 .eq('is_active', true)
                 .order('full_name'),
             window.supabaseClient.from('attendance')
@@ -518,20 +548,67 @@ async function loadAsistencia() {
                 id: student.id,
                 full_name: student.full_name,
                 horario: student.horario || "",
-                turno: student.turno || "",
+                turno: inferTurno(student.horario),
                 sede: student.sede || "",
-                grupo: student.grupo || "",
+                grupo: "",
                 present: !!attendedIds[student.id],
                 time: attendedIds[student.id],
                 debe,
                 valid_until: student.valid_until
             };
         });
+        populateAttendanceFilters();
         renderAsistencia();
     } catch (e) {
         console.error(e);
         if (listEl) listEl.innerHTML = '<div class="loading-msg" style="color:var(--red2)">Error al cargar. ¿Hay conexión?</div>';
     }
+}
+
+function inferTurno(horario) {
+    const value = String(horario || '').trim().toLowerCase();
+    if (!value) return '';
+    if (value.includes('mañana')) return 'Mañana';
+    if (value.includes('tarde')) return 'Tarde';
+    const match = value.match(/(\d{1,2})(?::\d{2})?\s*(a\.?\s*m\.?|p\.?\s*m\.?)?/i);
+    if (!match) return '';
+    let hour = Number(match[1]);
+    const meridiem = (match[2] || '').replace(/[.\s]/g, '');
+    if (meridiem === 'pm' && hour < 12) hour += 12;
+    if (meridiem === 'am' && hour === 12) hour = 0;
+    return hour < 12 ? 'Mañana' : 'Tarde';
+}
+
+function populateAttendanceFilters() {
+    const configs = [
+        ['filtro-ent-turno', 'Todos', 'turno'],
+        ['filtro-ent-sede', 'Todas', 'sede'],
+        ['filtro-ent-grupo', 'Todos', 'grupo']
+    ];
+    configs.forEach(([id, allLabel, key]) => {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const current = select.value;
+        const values = [...new Set(asistenciaData.map(item => item[key]).filter(Boolean))]
+            .sort((a, b) => String(a).localeCompare(String(b), 'es'));
+        const field = select.closest('.filter-field');
+        if (field) field.hidden = values.length === 0;
+        select.innerHTML = `<option value="">${allLabel}</option>` + values
+            .map(value => `<option value="${escapeCoachHtml(value)}">${escapeCoachHtml(value)}</option>`)
+            .join('');
+        if (values.includes(current)) select.value = current;
+    });
+}
+
+function resetAsistenciaFilters() {
+    filtroAsist = 'todos';
+    ['filtro-ent-turno', 'filtro-ent-sede', 'filtro-ent-grupo', 'filtro-ent-nombre'].forEach(id => {
+        const control = document.getElementById(id);
+        if (control) control.value = '';
+    });
+    document.querySelectorAll('.asistencia-chips .chip').forEach(chip => chip.classList.remove('active'));
+    document.getElementById('chip-todos')?.classList.add('active');
+    renderAsistencia();
 }
 
 function setFiltroAsist(filtro, btn) {
@@ -609,15 +686,19 @@ function renderAsistencia() {
             ? new Date(a.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             : '';
         const meta = [a.horario, a.turno, a.sede, a.grupo ? `Grupo ${a.grupo}` : ''].filter(Boolean).join(' · ') + (hora ? ` · ${hora}` : '');
-        return `<div class="alumno-card ${cls}">
+        const safeName = escapeCoachHtml(a.full_name);
+        return `<article class="alumno-card ${cls}">
             <div class="alumno-avatar">${emoji}</div>
             <div class="alumno-info">
-                <div class="alumno-nombre">${a.full_name}</div>
-                <div class="alumno-meta" style="font-size:0.7rem">${meta}</div>
+                <div class="alumno-nombre">${safeName}</div>
+                <div class="alumno-meta">${escapeCoachHtml(meta)}</div>
             </div>
-            <button onclick="abrirBiometria('${a.id}', '${a.full_name.replace(/'/g, "\\'")}')" style="background:#ffff00; border:none; padding:5px 10px; border-radius:5px; font-weight:bold; cursor:pointer;">⏱</button>
-            ${badge}</div>`;
+            <button type="button" class="bio-action" data-student-id="${escapeCoachHtml(a.id)}" data-student-name="${safeName}" aria-label="Registrar control físico de ${safeName}">⏱<span>MEDIR</span></button>
+            ${badge}</article>`;
     }).join('')}</div>`;
+    listEl.querySelectorAll('.bio-action').forEach(button => {
+        button.addEventListener('click', () => abrirBiometria(button.dataset.studentId, button.dataset.studentName));
+    });
 }
 
 function abrirBiometria(id, nombre) {
@@ -647,10 +728,20 @@ async function guardarBiometria() {
 
         if (error) throw error;
 
-        alert("Biometría guardada correctamente");
         document.getElementById('modal-biometria').classList.remove('show');
+        showCoachToast('Control físico guardado correctamente', 'success');
     } catch (e) {
         console.error(e);
-        alert("Error al guardar: " + (e.message || "Problema de conexión."));
+        showCoachToast('No se pudo guardar: ' + (e.message || 'problema de conexión.'), 'error');
     }
+}
+
+let coachToastTimer = null;
+function showCoachToast(message, type = '') {
+    const toast = document.getElementById('coach-toast');
+    if (!toast) return;
+    clearTimeout(coachToastTimer);
+    toast.textContent = message;
+    toast.className = `coach-toast show ${type}`.trim();
+    coachToastTimer = setTimeout(() => { toast.className = 'coach-toast'; }, 3200);
 }

@@ -9,12 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const nfcCode = urlParams.get('code');
     if (nfcCode) {
-        window.history.replaceState({}, '', '/');
+        window.history.replaceState({}, '', window.location.pathname);
         handleScanCode(nfcCode.trim());
     }
 
     loadRanking();
     initNFC();
+    const dniInput = $('dni');
+    dniInput?.addEventListener('keydown', event => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        buscar();
+    });
 });
 
 // ── BUSCAR POR DNI ────────────────────────────────────
@@ -92,20 +98,19 @@ async function buscar() {
             debe = fecha_venc < hoy;
         }
         
-        const noventa_dias = new Date();
-        noventa_dias.setDate(noventa_dias.getDate() - 90);
+        const inicio_ciclo = new Date(hoy.getFullYear(), 0, 1);
         
         const { data: attData } = await window.supabaseClient
             .from('attendance')
             .select('created_at')
             .eq('student_id', sid)
-            .gte('created_at', noventa_dias.toISOString())
+            .gte('created_at', inicio_ciclo.toISOString())
             .order('created_at', { ascending: false });
             
         let racha = 0;
+        let fechas_ord = [];
         if (attData && attData.length > 0) {
             const fechas_vistas = new Set();
-            const fechas_ord = [];
             for (const r of attData) {
                 const date = new Date(r.created_at);
                 const localDateStr = date.toLocaleDateString();
@@ -123,6 +128,14 @@ async function buscar() {
                 }
             }
         }
+
+        const total_sesiones = fechas_ord.length;
+        const sesiones_mes = fechas_ord.filter(fecha =>
+            fecha.getFullYear() === hoy.getFullYear() && fecha.getMonth() === hoy.getMonth()
+        ).length;
+        const ultima_sesion = fechas_ord.length
+            ? fechas_ord[0].toLocaleDateString('es-PE', { day: '2-digit', month: 'short' }).replace('.', '')
+            : '—';
         
         const { data: bioData } = await window.supabaseClient
             .from('biometria')
@@ -159,10 +172,17 @@ async function buscar() {
         
         const data = {
             full_name: student.full_name,
-            category: student.sede ? `Sede ${student.sede}` : `Entreno ${student.horario || 'LMV'}`,
+            category: 'Jugador JR Stars',
+            sede: student.sede,
+            horario: student.horario,
             img_url: null,
+            batido_credits: student.batido_credits,
             debe,
             racha,
+            total_sesiones,
+            sesiones_mes,
+            ultima_sesion,
+            registros_fisicos: historial.length,
             talla_actual,
             peso_actual,
             delta_talla,
@@ -188,6 +208,7 @@ async function buscar() {
 // ── NAVEGACIÓN ENTRE PANELES ──────────────────────────
 function mostrarPaneles(vista) {
     const p1 = $('p1'), p2 = $('p2'), p3 = $('p3');
+    document.body.classList.toggle('portal-player-view', vista === 'ficha');
     if (vista === 'ficha') {
         if (p1) p1.classList.add('hidden');
         if (p2) p2.classList.remove('hidden');
@@ -308,102 +329,129 @@ async function initNFC() {
 }
 
 // ── RENDER FICHA ──────────────────────────────────────
+function escapePortalHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    })[char]);
+}
+
 function renderCard(d) {
     const wrap = $('card-wrap');
     if (!wrap) return;
 
-    const av = d.img_url
-        ? `<img src="${d.img_url}" alt="${d.full_name}">`
-        : `<span>${d.full_name.charAt(0).toUpperCase()}</span>`;
+    const fullName = String(d.full_name || 'Jugador JR Stars').trim();
+    const name = escapePortalHtml(fullName);
+    const firstName = escapePortalHtml(fullName.split(/\s+/)[0] || 'Jugador');
+    const initial = escapePortalHtml(fullName.charAt(0).toUpperCase() || 'J');
+    const season = new Date().getFullYear();
+    const totalSessions = Number(d.total_sesiones) || 0;
+    const monthSessions = Number(d.sesiones_mes) || 0;
+    const streak = Number(d.racha) || 0;
+    const physicalRecords = Number(d.registros_fisicos) || 0;
+    const credits = Math.max(0, Number(d.batido_credits) || 0);
+    const creditBalance = $('kiosk-credit-balance');
+    const energyLabel = $('kiosk-energy-label');
+    const energyBar = $('kiosk-energy-bar');
+    if (creditBalance) creditBalance.textContent = `${credits} ${credits === 1 ? 'CRÉDITO' : 'CRÉDITOS'}`;
+    if (energyLabel) energyLabel.textContent = credits >= 15 ? 'ALTA' : credits >= 5 ? 'MEDIA' : 'BAJA';
+    if (energyBar) energyBar.style.width = `${Math.min(100, (credits / 20) * 100)}%`;
+    const playerVisual = d.img_url
+        ? `<img src="${escapePortalHtml(d.img_url)}" alt="Foto de ${name}">`
+        : `<div class="epic-player-placeholder" aria-label="Jugador ${name}"><span>${initial}</span><small>JR</small></div>`;
+    const meta = [d.category, d.sede && `Sede ${d.sede}`, d.grupo && `Grupo ${d.grupo}`, d.turno, d.horario]
+        .filter(Boolean)
+        .map(item => `<span class="epic-chip">${escapePortalHtml(item)}</span>`)
+        .join('');
+    const status = d.debe
+        ? '<span class="epic-status is-locked">Acceso restringido</span>'
+        : '<span class="epic-status">Jugador activo</span>';
+    const playerPanel = `
+      <section class="epic-player-panel">
+        <div class="epic-player-topline">
+          <span>JR STARS · PLAYER CARD</span>
+          ${status}
+        </div>
+        <div class="epic-rating" aria-label="${streak} sesiones de racha">
+          <strong>${streak}</strong>
+          <span>RAC</span>
+        </div>
+        <div class="epic-player-art">
+          ${playerVisual}
+        </div>
+        <img class="epic-crest" src="../img/escudo.png" alt="Escudo JR Stars" width="400" height="400">
+        <div class="epic-player-identity">
+          <span class="epic-kicker">Ficha oficial · Temporada ${season}</span>
+          <h2 class="epic-name">${name}</h2>
+          <div class="epic-meta">${meta}</div>
+        </div>
+      </section>`;
 
     if (d.debe) {
         wrap.innerHTML = `
-          <div class="fut-card deuda">
-            <div class="card-stripe"></div>
-            <div class="fut-header">
-              <div class="fut-avatar">${av}</div>
-              <div>
-                <div class="fut-name">${d.full_name}</div>
-                <div class="fut-cat">${d.category}</div>
+          <article class="epic-card is-locked">
+            ${playerPanel}
+            <section class="epic-data-panel epic-locked-panel">
+              <div class="epic-report-head"><div><span>REPORTE DE TEMPORADA</span><h3>ESTADÍSTICAS</h3></div><strong>${season}</strong></div>
+              <div class="epic-lock">
+                <div class="epic-lock-mark" aria-hidden="true">LOCKED</div>
+                <div class="epic-lock-icon" aria-hidden="true">🔒</div>
+                <h3>ESTADÍSTICAS BLOQUEADAS</h3>
+                <p>El progreso de <strong>${firstName}</strong> está listo, pero la mensualidad figura pendiente. Regularízala para volver a ver asistencia y evolución física.</p>
+                <button class="epic-pay" onclick="document.getElementById('modal-yape').classList.remove('hidden')">PAGAR S/80 · YAPE / PLIN</button>
               </div>
-            </div>
-            <div class="deuda-overlay">
-              <div class="lock-icon">🔒</div>
-              <div class="deuda-title">ESTATUS OCULTO</div>
-              <div class="deuda-sub">MENSUALIDAD PENDIENTE</div>
-              <p class="deuda-desc">
-                El historial de <strong>${d.full_name.split(' ')[0]}</strong>
-                está bloqueado. Regulariza el pago para ver tus métricas.
-              </p>
-              <button class="btn-pagar"
-                      onclick="document.getElementById('modal-yape').classList.add('open')">
-                PAGAR S/80 VÍA YAPE / PLIN
-              </button>
-            </div>
-          </div>`;
-    } else {
-        const waMsg = encodeURIComponent(
-            `¡Mi hijo/a ${d.full_name} tiene ${d.racha} sesiones en JR Stars! 🔥🏆\n` +
-            `Consulta el tuyo → https://emblema-app-production.up.railway.app`
-        );
-
-        const histRows = (d.historial_biometrico || []).map(h => `
-          <tr>
-            <td class="fecha">${h.fecha}</td>
-            <td>${h.talla}</td>
-            <td>${h.peso}</td>
-          </tr>`).join('');
-
-        const histSection = histRows ? `
-          <div class="bio-hist">
-            <div class="hist-title">// EVOLUCIÓN FÍSICA</div>
-            <table class="hist-table">
-              <thead><tr><th>Mes</th><th>Talla</th><th>Peso</th></tr></thead>
-              <tbody>${histRows}</tbody>
-            </table>
-          </div>` : '';
-
-        wrap.innerHTML = `
-          <div class="fut-card al-dia">
-            <div class="card-stripe"></div>
-            <div class="fut-header">
-              <div class="fut-avatar">${av}</div>
-              <div>
-                <div class="fut-name">${d.full_name}</div>
-                <div class="fut-cat">${d.category}</div>
-              </div>
-            </div>
-            <div class="racha-box">
-              <span class="racha-tag">// RACHA ACTIVA DE DISCIPLINA</span>
-              <div class="fire-metric"><span class="fire">🔥</span> ${d.racha} SESIONES</div>
-            </div>
-            ${(d.talla_actual || d.peso_actual) ? `
-            <div class="bio-row">
-              <div class="bio-cell">
-                <div class="bio-val">${d.talla_actual || '—'}<span class="bio-delta">${d.delta_talla || ''}</span></div>
-                <div class="bio-label">Estatura</div>
-              </div>
-              <div class="bio-cell">
-                <div class="bio-val">${d.peso_actual || '—'}</div>
-                <div class="bio-label">Peso corporal</div>
-              </div>
-            </div>` : `
-            <div style="padding:.9rem 1.2rem;border-bottom:1px solid var(--border);font-family:var(--ff-c);font-size:.82rem;color:var(--gray);text-align:center">
-              📏 Sin mediciones físicas registradas aún
-            </div>`}
-            ${histSection}
-            <div class="radar-box">
-              <div class="radar-icon"></div>
-              <div class="radar-txt">
-                <strong>PRÓXIMAMENTE</strong>
-                Velocidad · Potencia · Resistencia.
-              </div>
-            </div>
-            <a href="https://wa.me/?text=${waMsg}" target="_blank" class="btn-presumir">
-              📲 COMPARTIR ESTATUS
-            </a>
-          </div>`;
+            </section>
+          </article>`;
+        return;
     }
+
+    const waMsg = encodeURIComponent(
+        `¡${d.full_name} ya suma ${totalSessions} sesiones esta temporada en JR Stars! 🔥🏆\n` +
+        `Revisa el Portal del Jugador → ${window.location.origin}/portal/`
+    );
+    const histRows = (d.historial_biometrico || []).map(h => `
+      <tr><td>${escapePortalHtml(h.fecha)}</td><td>${escapePortalHtml(h.talla)}</td><td>${escapePortalHtml(h.peso)}</td></tr>`).join('');
+    const physical = (d.talla_actual || d.peso_actual) ? `
+      <div class="epic-physical-grid">
+        <div class="epic-physical-item"><strong>${escapePortalHtml(d.talla_actual || '—')}<span class="epic-delta">${escapePortalHtml(d.delta_talla || '')}</span></strong><span>Estatura actual</span></div>
+        <div class="epic-physical-item"><strong>${escapePortalHtml(d.peso_actual || '—')}</strong><span>Peso actual</span></div>
+      </div>` : '<div class="epic-empty">Sin mediciones físicas registradas todavía.</div>';
+    const history = histRows ? `
+      <details class="epic-history">
+        <summary>Ver evolución física (${d.registros_fisicos || 0})</summary>
+        <div class="epic-table-wrap"><table class="epic-table">
+          <thead><tr><th>Fecha</th><th>Estatura</th><th>Peso</th></tr></thead>
+          <tbody>${histRows}</tbody>
+        </table></div>
+      </details>` : '';
+    const streakLabel = streak > 0 ? 'Racha activa' : 'Próxima meta';
+    const streakCopy = streak > 0
+        ? 'Sesiones consecutivas de disciplina. Cada entrenamiento suma a su historia.'
+        : 'Su próxima asistencia iniciará una nueva racha de disciplina.';
+
+    wrap.innerHTML = `
+      <article class="epic-card">
+        ${playerPanel}
+        <section class="epic-data-panel">
+          <div class="epic-report-head">
+            <div><span>REPORTE DE TEMPORADA</span><h3>ESTADÍSTICAS</h3></div>
+            <strong>${season}</strong>
+          </div>
+          <div class="epic-stats" aria-label="Estadísticas de asistencia">
+            <div class="epic-stat"><div><strong>${totalSessions}</strong><b>SES</b></div><span>Sesiones del ciclo</span></div>
+            <div class="epic-stat"><div><strong>${monthSessions}</strong><b>MES</b></div><span>Sesiones este mes</span></div>
+            <div class="epic-stat"><div><strong>${streak}</strong><b>RAC</b></div><span>Racha actual</span></div>
+            <div class="epic-stat"><div><strong>${physicalRecords}</strong><b>CTR</b></div><span>Controles físicos</span></div>
+          </div>
+          <div class="epic-form-strip">
+            <span class="epic-form-icon" aria-hidden="true">↗</span>
+            <div><strong>${streakLabel}</strong><p>${streakCopy}</p></div>
+            <div class="epic-last-session"><span>ÚLTIMO ENTRENO</span><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong></div>
+          </div>
+          <div class="epic-physical"><div class="epic-section-title">Evolución física</div>${physical}</div>
+          ${history}
+          <div class="epic-actions"><a href="https://wa.me/?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="epic-share"><span>COMPARTIR PROGRESO</span><b>↗</b></a></div>
+        </section>
+      </article>`;
 }
 
 // ── RANKING ───────────────────────────────────────────
@@ -454,8 +502,8 @@ async function loadRanking() {
         el.innerHTML = result.map((item, i) => `
           <div class="rk-item${i === 0 ? ' first' : ''}">
             <div class="rk-pos">${i + 1}</div>
-            <div class="rk-name">${item.name}</div>
-            <div class="rk-score">🔥 ${item.score}</div>
+            <div class="rk-name">${escapePortalHtml(item.name)}</div>
+            <div class="rk-score">🔥 ${escapePortalHtml(item.score)}</div>
           </div>`).join('');
     } catch {
         el.innerHTML = '<div class="rk-empty" style="color:var(--red2)">No disponible.</div>';

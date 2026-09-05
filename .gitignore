@@ -9,9 +9,11 @@ node_modules/
 Thumbs.db
 *.log
 __pycache__/
+.idea/
 .kombai/
 refactor_css.py
 
 # Resultados temporales de pruebas
 playwright-report/
 test-results/
+*.tmp

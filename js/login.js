@@ -3,13 +3,19 @@
 
 const TOKEN_KEY = 'jr_entrenador_token';
 
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
+        console.warn('PWA entrenador no disponible:', error.message);
+    });
+}
+
 async function init() {
     const urlToken = new URLSearchParams(location.search).get('token');
 
     // Si llegó un token nuevo en la URL, guardarlo y limpiar la URL
     if (urlToken) {
         localStorage.setItem(TOKEN_KEY, urlToken);
-        history.replaceState({}, '', '/entrenador/login.html');
+        history.replaceState({}, '', './login.html');
     }
 
     const token = localStorage.getItem(TOKEN_KEY);
@@ -26,11 +32,13 @@ async function init() {
         if (error || !data || !data.is_active) {
             // Token inválido o revocado
             localStorage.removeItem(TOKEN_KEY);
+            localStorage.removeItem('jr_entrenador_nombre');
             return showNoAccess();
         }
 
         // Acceso permitido
         sessionStorage.setItem('jr_nombre', data.nombre || '');
+        localStorage.setItem('jr_entrenador_nombre', data.nombre || '');
         document.getElementById('status-msg').textContent = `¡Hola, ${data.nombre}! Abriendo scanner...`;
         setTimeout(() => { window.location.href = './index.html'; }, 600);
         

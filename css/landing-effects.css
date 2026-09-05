@@ -1,22 +1,31 @@
-/* El header empieza fuera de la portada y aparece al terminar el hero. */
+/* El header flota sobre la portada y se convierte en barra blanca al bajar. */
 #main-header {
-  background: #fff;
-  color: #050505;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 4px 20px rgb(0 0 0 / 10%);
-  transform: translateY(-100%);
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: transform 220ms ease, opacity 220ms ease;
-}
-#main-header.is-visible {
+  background: linear-gradient(180deg, rgb(0 0 0 / 72%) 0%, rgb(0 0 0 / 28%) 65%, transparent 100%);
+  color: #fff;
+  border-bottom: 0;
+  box-shadow: none;
   transform: translateY(0);
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  transition: background 220ms ease, color 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 }
-/* Patrón decorativo: más estrellas sin añadir elementos interactivos. */
+#main-header.is-visible {
+  background: #fff;
+  color: #050505;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 10%);
+}
+#main-header:not(.is-visible) #nav-btn { background: #fff; color: #050505; }
+#main-header:not(.is-visible) #nav-btn:hover { background: #e5191b; color: #fff; }
+#main-header:not(.is-visible) #nav-wa { color: #fff; }
+#main-header:not(.is-visible) #nav-wa:hover { color: #f5a623; }
+
+/* Mantiene el bloque principal debajo del header sin alterar su escala. */
+@media (min-width: 1024px) {
+  #hero .hero-content { padding-top: 2.25rem; }
+}
+/* Estrellas sutiles: únicamente sobre secciones blancas. */
 .landing-stars { position: relative; isolation: isolate; }
 .landing-stars::before {
   content: "";
@@ -24,13 +33,12 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.09;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 440 360' fill='%23E5191B'%3E%3Cdefs%3E%3Cpath id='s' d='m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01Z'/%3E%3C/defs%3E%3Cuse href='%23s' transform='translate(25 20) rotate(-14 36 36) scale(3)'/%3E%3Cuse href='%23s' transform='translate(225 12) rotate(18 18 18) scale(1.5)'/%3E%3Cuse href='%23s' transform='translate(340 95) rotate(12 30 30) scale(2.5)'/%3E%3Cuse href='%23s' transform='translate(145 155) rotate(-18 24 24) scale(2)'/%3E%3Cuse href='%23s' transform='translate(25 270) rotate(22 18 18) scale(1.5)'/%3E%3Cuse href='%23s' transform='translate(275 255) rotate(-12 36 36) scale(3)'/%3E%3C/svg%3E");
-  background-size: 440px 360px;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 560 430' fill='%23E5191B'%3E%3Cdefs%3E%3Cpath id='s' d='m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01Z'/%3E%3C/defs%3E%3Cuse href='%23s' transform='translate(34 36) rotate(-12 36 36) scale(3)'/%3E%3Cuse href='%23s' transform='translate(402 82) rotate(16 24 24) scale(2)'/%3E%3Cuse href='%23s' transform='translate(248 304) rotate(-18 30 30) scale(2.5)'/%3E%3C/svg%3E");
+  background-size: 560px 430px;
 }
-.landing-stars-dark::before { z-index: 1; opacity: 0.22; }
 @media (max-width: 639px) {
-  .landing-stars::before { background-size: 320px 280px; }
+  .landing-stars::before { opacity: 0.035; background-size: 430px 350px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #main-header { transition: none; }

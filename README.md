@@ -1,6 +1,6 @@
-# JR Stars — Frontend
+# JR Stars — Plataforma web
 
-Sitio y paneles de la academia JR Stars, desarrollados con HTML, CSS y JavaScript. La carpeta `academiajrstars` es la raíz del repositorio y del sitio: no requiere compilación ni instalación de paquetes para servir las páginas.
+Sitio público y paneles operativos de la academia JR Stars, desarrollados con HTML, CSS y JavaScript. La raíz del repositorio también es la raíz pública del sitio; no requiere compilación ni instalación de paquetes para ejecutarse.
 
 ## Desarrollo local
 
@@ -21,21 +21,25 @@ Abre `http://127.0.0.1:5501/`. Utiliza HTTP; los iconos SVG y algunas funciones 
 | `/` | Landing de la academia |
 | `/admin/` | Administración de alumnos, inscripciones, pagos y asistencia |
 | `/admin/login.html` | Acceso de administración |
-| `/entrenador/` | Panel del entrenador |
+| `/entrenador/` | PWA del entrenador: escaneo, asistencia y biometría |
+| `/entrenador/login.html` | Acceso del entrenador |
 | `/caja/` | Caja |
-| `/portal/` | Portal del alumno |
+| `/portal/` | Consulta del jugador mediante DNI o QR |
 | `/scanner/` | Lectura de credenciales |
 
-## Archivos principales
+## Estructura
 
-- `css/`: estilos del sitio y de cada panel.
-- `js/`: lógica de interfaz e integración con Supabase.
-- `img/`: recursos visuales, incluido `admin-icons.svg`, el conjunto local de iconos del admin.
-- `admin/icons/` y `admin/manifest.webmanifest`: iconos de instalación y configuración de la aplicación de administración.
+- `admin/`, `entrenador/`, `caja/`, `portal/`, `scanner/`: entradas de cada módulo.
+- `css/`: estilos compartidos y hojas específicas por módulo.
+- `js/`: interfaz, acceso a Supabase y workers compartidos.
+- `img/`: identidad y recursos visuales; los iconos de navegador viven en `img/favicons/`.
+- `migrations/`: cambios SQL versionados para Supabase.
+- `scripts/`: utilidades manuales de mantenimiento y datos de prueba.
+- `docs/`: documentación técnica y convenciones del repositorio.
 
 `js/supabaseClient.js` contiene la URL y la clave pública del proyecto Supabase. La autorización de datos depende de las políticas del servicio. No se deben incluir claves privadas o `service_role` en el frontend.
 
-Los scripts `seed.mjs` y `transform.js` son utilidades de mantenimiento existentes; no forman parte del arranque del sitio. `seed.mjs` escribe datos de prueba en Supabase.
+`scripts/seed.mjs` es una utilidad manual que escribe datos de prueba en Supabase; no forma parte del arranque del sitio y no debe ejecutarse contra producción. Sus variables requeridas se documentan en `.env.example`.
 
 La ficha consulta la fecha de registro de `students.created_at` y cuenta días distintos de asistencia en `attendance.created_at`, según la zona horaria de Perú. Un día con varios escaneos cuenta una sola vez. Si falla la consulta, se muestra que la asistencia no está disponible.
 
@@ -45,4 +49,11 @@ La ficha consulta la fecha de registro de `students.created_at` y cuenta días d
 
 Configura el alojamiento estático para servir esta carpeta como raíz y conservar las rutas de sus subdirectorios. Los paneles requieren acceso al proyecto Supabase configurado; algunas páginas cargan fuentes y bibliotecas por CDN.
 
-Antes del commit, revisa `git status` y `git diff --check`. El destino del push se configura con el remoto del repositorio elegido.
+## Verificación antes de un commit
+
+```sh
+git diff --check
+git status --short
+```
+
+Además, comprueba las rutas principales con un servidor local y valida la sintaxis de los archivos JavaScript modificados con `node --check`. Consulta [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) antes de añadir un módulo o un recurso global.

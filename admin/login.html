@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow, noarchive"/>
   <title>JR Stars — Acceso Admin</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -63,13 +64,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="JR Admin">
-  <link rel="icon" href="./icons/red-white/favicon.ico" sizes="16x16 32x32 48x48 64x64" type="image/x-icon">
+  <link rel="icon" href="../img/favicons/favicon-admin.ico" type="image/x-icon">
   <link rel="icon" href="./icons/red-white/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="./icons/red-white/apple-touch-icon-admin.png" sizes="180x180">
   <link rel="manifest" href="./manifest.webmanifest">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <link rel="stylesheet" href="../css/admin-icons.css?v=20260903">
+  <link rel="stylesheet" href="../css/admin-icons.css?v=20260904">
 </head>
 <body class="min-h-screen flex items-center justify-center font-body antialiased selection:bg-brand selection:text-white p-4 relative overflow-hidden">
 
@@ -83,7 +84,7 @@
 
     <!-- BRAND -->
     <div class="flex flex-col items-center text-center mb-10">
-      <img src="../img/escudo.png" alt="Escudo JR Stars" class="w-24 h-24 drop-shadow-[0_0_20px_rgba(229,25,27,0.3)] mb-4" onerror="this.src='/img/escudo.png'">
+      <img src="../img/escudo.png" alt="Escudo JR Stars" class="w-24 h-24 drop-shadow-[0_0_20px_rgba(229,25,27,0.3)] mb-4" onerror="this.onerror=null;this.style.display='none'">
       <div class="font-display text-5xl italic tracking-wider leading-none">JR <span class="text-brand">STARS</span></div>
       <div class="inline-block bg-white/5 border border-white/10 text-gray-400 font-bold text-[0.65rem] uppercase tracking-widest px-3 py-1 rounded-full mt-4">
         Panel de Administración

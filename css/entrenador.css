@@ -340,6 +340,13 @@ body {
 
 .select-filter { font-size: 0.82rem; padding: 0.35rem 0.6rem; width: auto; margin-bottom: 0; }
 .input-search  { font-size: 0.82rem; padding: 0.35rem 0.6rem; max-width: 160px; margin-bottom: 0; }
+.asistencia-filtros.asistencia-controls {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+}
+.asistencia-controls .select-filter,
+.asistencia-controls .input-search { width: 100%; max-width: none; min-width: 0; }
 
 /* ── ALUMNO CARDS ─────────────────────────────── */
 .alumno-card {
@@ -656,6 +663,19 @@ body {
 
   .page-title { font-size: 2rem; }
 
+  .asistencia-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    padding-bottom: .35rem;
+  }
+  .asistencia-chips::-webkit-scrollbar { display: none; }
+  .asistencia-chips .chip { flex: 0 0 auto; min-width: max-content; min-height: 44px; padding-inline: 1rem; }
+  .asistencia-filtros.asistencia-controls { grid-template-columns: minmax(0, 1fr); gap: .7rem; }
+  .asistencia-controls .select-filter,
+  .asistencia-controls .input-search { width: 100% !important; max-width: none !important; min-height: 48px; margin: 0; font-size: 16px; }
+
   .alumno-nombre { font-size: 1.2rem; }
   .alumno-avatar { width: 44px; height: 44px; font-size: 1.4rem; }
 
@@ -672,4 +692,196 @@ body {
   .stat-pill { padding: 1rem 0.3rem; }
   .stat-pill-num { font-size: 2.5rem; }
   .stat-pill-label { font-size: 0.65rem; letter-spacing: 0.06em; }
+}
+
+/* ═══════════════════════════════════════════
+   COACH EXPERIENCE — interfaz cómoda de cancha
+═══════════════════════════════════════════ */
+:root {
+  --coach-black: #0b0b0c;
+  --coach-paper: #f3f2ee;
+  --coach-white: #ffffff;
+  --coach-red: #e5191b;
+  --coach-gold: #f5a623;
+  --coach-green: #079455;
+  --coach-muted: #69696f;
+  --coach-line: #deded9;
+  --red2: #e5191b;
+}
+
+body { background: var(--coach-paper); color: var(--coach-black); user-select: auto; }
+button, .chip, .bnav-btn { touch-action: manipulation; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--coach-gold); outline-offset: 3px; }
+
+.topbar {
+  height: 76px;
+  padding: 0 clamp(16px, 4vw, 42px);
+  color: #fff;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  background: var(--coach-black);
+  box-shadow: 0 10px 30px rgba(0,0,0,.16);
+}
+.topbar-logo-circle { padding: 0; border: 0; background: transparent; }
+.topbar-logo-circle img, .logo-escudo { width: 44px; height: 44px; object-fit: contain; }
+.topbar-name { display: flex; flex-direction: column; color: #fff; font-size: 1.75rem; line-height: .82; }
+.topbar-name span { color: #fff; }
+.topbar-name small { margin-top: 8px; color: var(--coach-red); font-family: 'Inter', sans-serif; font-size: 7px; font-weight: 800; letter-spacing: .2em; }
+.topbar-right { flex-direction: row; align-items: center; gap: 14px; }
+.coach-profile { display: flex; align-items: center; gap: 10px; }
+.coach-profile-copy { display: flex; flex-direction: column; align-items: flex-end; }
+.coach-profile-copy span { color: #85858c; font-size: 7px; font-weight: 800; letter-spacing: .14em; }
+.coach-profile-copy strong { max-width: 180px; overflow: hidden; color: #fff; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.coach-avatar { display: grid; width: 42px; height: 42px; place-items: center; color: #fff; border: 2px solid rgba(255,255,255,.16); border-radius: 50%; background: var(--coach-red); font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+.offline-badge { display: none; padding: 7px 10px; color: #fff; border: 1px solid rgba(255,255,255,.15); border-radius: 999px; background: rgba(229,25,27,.2); font-size: 8px; }
+.offline-badge.visible { display: inline-flex; }
+
+.coach-layout { width: min(100%, 1120px); max-width: none; margin-top: 76px; padding: 28px 20px 118px; }
+
+.page-header { align-items: flex-end; gap: 18px; margin-bottom: 18px; padding: 0; border: 0; }
+.section-kicker { color: var(--coach-red); font-size: 8px; font-weight: 900; letter-spacing: .18em; }
+.page-title { margin: 3px 0 0; color: var(--coach-black); font-size: clamp(36px, 6vw, 54px); font-weight: 400; font-style: italic; line-height: .94; }
+.page-title span { color: var(--coach-red); }
+.page-subtitle { max-width: 590px; margin-top: 7px; color: var(--coach-muted); font-size: 12px; font-weight: 600; line-height: 1.5; }
+.nfc-badge { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; padding: 9px 12px; border-radius: 999px; background: #dededb; color: #777; }
+.nfc-badge i { width: 7px; height: 7px; border-radius: 50%; background: #999; }
+.nfc-badge.visible { color: #fff; background: var(--coach-black); }
+.nfc-badge.visible i { background: var(--coach-green); box-shadow: 0 0 8px rgba(7,148,85,.8); }
+
+.scanner-wrap { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); gap: 16px; }
+.scanner-box, .scan-history-panel { border: 1px solid var(--coach-line); border-radius: 20px; background: #fff; box-shadow: 0 12px 35px rgba(5,5,5,.06); }
+.scanner-box { padding: 16px; border-bottom: 1px solid var(--coach-line); }
+.scanner-box-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.scanner-box-head > div { display: flex; align-items: center; gap: 8px; }
+.scanner-box-head strong, .scanner-box-head small { color: #77777d; font-size: 8px; font-weight: 900; letter-spacing: .14em; }
+.scanner-live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coach-red); box-shadow: 0 0 9px rgba(229,25,27,.6); }
+#reader { min-height: 330px; overflow: hidden; border: 0; border-radius: 14px; background: var(--coach-black); }
+#reader video { border-radius: 12px; object-fit: cover; }
+#reader button { min-height: 46px; margin: 8px 4px; padding: 9px 16px; color: #fff; border: 0; border-radius: 10px; background: var(--coach-red); font-weight: 800; cursor: pointer; }
+#reader select { min-height: 44px; max-width: 100%; padding: 8px; border: 1px solid var(--coach-line); border-radius: 9px; background: #fff; }
+.scan-hint { margin-top: 14px; color: #69696f; font-size: 10px; letter-spacing: .08em; text-transform: none; }
+.scan-history-panel { min-height: 250px; padding: 17px; }
+.history-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding-bottom: 13px; border-bottom: 1px solid var(--coach-line); }
+.history-heading > div > span { color: var(--coach-red); font-size: 8px; font-weight: 900; letter-spacing: .16em; }
+.history-title { margin: 2px 0 0; padding: 0; border: 0; font-size: 25px; line-height: 1; }
+.history-today { padding: 5px 8px; border-radius: 999px; background: #ededeb; color: #737378; font-size: 8px; font-weight: 900; letter-spacing: .1em; }
+#scan-history { margin-top: 12px; }
+.history-empty { padding: 28px 12px; color: #8b8b90; font-size: 11px; line-height: 1.5; text-align: center; }
+.history-item { min-height: 54px; padding: 10px 11px; border: 0; border-radius: 12px; background: #f4f4f1; }
+.history-item:hover { border: 0; }
+.h-dot { width: 9px; height: 9px; border-radius: 50%; }
+.h-name { font-size: 18px; }
+.h-time { font-size: 10px; }
+
+.asistencia-stats { gap: 10px; margin-bottom: 16px; padding: 0; border: 0; background: transparent; }
+.stat-pill { padding: 18px 10px; border: 1px solid var(--coach-line); border-radius: 16px; background: #fff; box-shadow: 0 8px 22px rgba(5,5,5,.045); }
+.stat-pill:hover { border-bottom-color: var(--coach-line); }
+.stat-pill-num { font-size: 46px; }
+.stat-pill-label { font-size: 8px; }
+.attendance-tools { margin-bottom: 18px; padding: 15px; border: 1px solid var(--coach-line); border-radius: 18px; background: #fff; }
+.attendance-tools-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.attendance-tools-head strong { font-size: 9px; letter-spacing: .14em; }
+.attendance-tools-head button { padding: 6px 0; color: var(--coach-red); border: 0; background: transparent; font-size: 9px; font-weight: 800; cursor: pointer; }
+.asistencia-filtros { margin-bottom: 12px; }
+.asistencia-chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.chip { min-width: 0; min-height: 44px; padding: 9px 8px; border: 1px solid var(--coach-line); border-radius: 10px; background: #f3f3f0; color: #68686e; font-size: 10px; letter-spacing: .04em; text-transform: none; }
+.chip.active { border-color: var(--coach-black); background: var(--coach-black); color: #fff; }
+.chip.chip-rojo.active { border-color: var(--coach-red); background: var(--coach-red); }
+.asistencia-filtros.asistencia-controls { grid-template-columns: 1.45fr repeat(3, minmax(0, 1fr)); gap: 9px; margin-bottom: 0; }
+.filter-field { min-width: 0; }
+.filter-field[hidden] { display: none !important; }
+.filter-field label { display: block; margin-bottom: 5px; color: #77777d; font-size: 8px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.asistencia-controls .input-jr, .asistencia-controls .select-jr { min-height: 46px; margin: 0; padding: 10px 11px; border: 1px solid var(--coach-line); border-radius: 10px; background: #f7f7f5; font-size: 13px; }
+
+.asistencia-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.alumno-card { position: relative; display: grid; grid-template-columns: 46px minmax(0,1fr) auto; gap: 11px; min-height: 82px; margin: 0; padding: 13px; border: 1px solid var(--coach-line); border-left: 1px solid var(--coach-line); border-bottom: 1px solid var(--coach-line); border-radius: 15px; background: #fff; box-shadow: 0 7px 20px rgba(5,5,5,.04); }
+.alumno-card::before { content: ""; position: absolute; top: 12px; bottom: 12px; left: 0; width: 4px; border-radius: 0 4px 4px 0; background: #a3a3a7; }
+.alumno-card.presente::before { background: var(--coach-green); }
+.alumno-card.debe::before { background: var(--coach-red); }
+.alumno-card:hover { border-bottom-color: var(--coach-line); background: #fff; }
+.alumno-avatar { width: 44px; height: 44px; border: 0; border-radius: 13px; background: #f0f0ed; font-size: 18px; }
+.alumno-nombre { margin: 0; font-size: 20px; }
+.alumno-meta { margin-top: 4px; color: #77777d; line-height: 1.35; }
+.alumno-badge { grid-column: 2 / 3; justify-self: start; padding: 4px 7px; border-radius: 999px; font-size: 7px; }
+.badge-ausente { color: #6b6b70; border: 1px solid #d6d6d2; background: #efefec; }
+.bio-action { grid-column: 3; grid-row: 1 / span 2; align-self: center; display: inline-flex; min-width: 46px; min-height: 46px; align-items: center; justify-content: center; gap: 6px; padding: 8px; color: var(--coach-black); border: 1px solid #e4c054; border-radius: 12px; background: #ffe37d; font-size: 16px; font-weight: 900; cursor: pointer; }
+.bio-action span { display: none; font-size: 8px; letter-spacing: .08em; }
+.loading-msg { padding: 34px 16px; border: 1px dashed var(--coach-line); border-radius: 15px; background: #fff; }
+
+.btn { min-height: 46px; padding: 10px 16px; border-radius: 11px; font-size: 16px; }
+.btn-outline { border: 1px solid var(--coach-line); background: #fff; }
+.btn-outline:hover { border-color: var(--coach-black); background: var(--coach-black); }
+.btn-refresh span { font-size: 21px; }
+
+.bottom-nav { right: auto; bottom: 12px; left: 50%; width: min(calc(100% - 24px), 520px); height: 72px; padding: 7px; border: 1px solid rgba(255,255,255,.12); border-radius: 22px; background: rgba(11,11,12,.97); box-shadow: 0 18px 45px rgba(0,0,0,.34); transform: translateX(-50%); }
+.bnav-btn { min-height: 56px; gap: 3px; color: #929299; border: 0; border-radius: 16px; font-size: 1rem; }
+.bnav-btn:last-child { border: 0; }
+.bnav-btn:hover { background: rgba(255,255,255,.05); }
+.bnav-btn.active { color: #fff; border: 0; background: var(--coach-red); }
+.bnav-btn svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.bnav-label { font-size: 8px; letter-spacing: .08em; }
+
+.flash-overlay { background: rgba(255,255,255,.985); }
+.flash-overlay, .modal-brutal-overlay { backdrop-filter: none; }
+.flash-icon { font-size: clamp(64px, 18vw, 110px); }
+.flash-name { max-width: 780px; font-size: clamp(42px, 11vw, 76px); }
+.flash-bar { border-radius: 999px; }
+.modal-brutal-box { border: 0; border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.35); }
+.input-brutal { min-height: 48px; border-radius: 10px; }
+.btn-gold { min-height: 50px; border-radius: 11px; }
+.btn-close { width: 42px; height: 42px; border-radius: 50%; background: #f0f0ed; }
+
+.coach-toast { position: fixed; right: 18px; bottom: 98px; z-index: 11000; max-width: min(360px, calc(100% - 36px)); padding: 13px 16px; color: #fff; border-radius: 12px; background: var(--coach-black); box-shadow: 0 16px 42px rgba(0,0,0,.3); font-size: 12px; font-weight: 700; opacity: 0; pointer-events: none; transform: translateY(12px); transition: .22s ease; }
+.coach-toast.show { opacity: 1; transform: translateY(0); }
+.coach-toast.success { background: var(--coach-green); }
+.coach-toast.error { background: var(--coach-red); }
+
+@media (max-width: 760px) {
+  .topbar { height: 66px; padding-inline: 13px; }
+  .topbar-logo-circle img, .logo-escudo { width: 38px; height: 38px; }
+  .topbar-name { font-size: 1.45rem; }
+  .topbar-name small { margin-top: 6px; font-size: 6px; }
+  .coach-profile-copy span { display: none; }
+  .coach-profile-copy strong { max-width: 104px; font-size: 10px; }
+  .coach-avatar { width: 36px; height: 36px; font-size: 19px; }
+  .offline-badge { position: fixed; top: 72px; right: 10px; z-index: 900; color: #fff; background: var(--coach-red); }
+  .coach-layout { margin-top: 66px; padding: 13px 11px 108px; }
+  .page-header { align-items: flex-start; margin-bottom: 14px; }
+  .page-title { font-size: clamp(31px, 10vw, 43px); }
+  .page-subtitle { font-size: 10px; }
+  .nfc-badge { margin-top: 4px; padding: 8px 9px; font-size: 8px; }
+  .scanner-wrap { grid-template-columns: 1fr; }
+  .scanner-box, .scan-history-panel { border-radius: 16px; }
+  #reader { min-height: 260px; }
+  .scan-history-panel { min-height: 160px; }
+  .asistencia-stats { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; }
+  .stat-pill { padding: 13px 4px; border-radius: 13px; }
+  .stat-pill-num { font-size: 37px; }
+  .attendance-tools { padding: 12px; border-radius: 15px; }
+  .asistencia-chips { display: flex; flex-wrap: nowrap; gap: 7px; margin-right: -12px; margin-left: -12px; padding: 0 12px 5px; overflow-x: auto; scrollbar-width: none; }
+  .asistencia-chips::-webkit-scrollbar { display: none; }
+  .asistencia-chips .chip { flex: 0 0 auto; min-width: 84px; min-height: 44px; padding-inline: 13px; }
+  .asistencia-filtros.asistencia-controls { grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 9px; }
+  .filter-field:first-child { grid-column: 1 / -1; }
+  .filter-field:last-child { grid-column: 1 / -1; }
+  .asistencia-controls .input-jr, .asistencia-controls .select-jr { min-height: 48px; font-size: 16px; }
+  .asistencia-grid { grid-template-columns: 1fr; gap: 8px; }
+  .alumno-card { min-height: 80px; }
+  .modal-brutal-box { width: calc(100% - 22px); padding: 20px; }
+}
+
+@media (max-width: 390px) {
+  .coach-profile-copy { display: none; }
+  .page-header { flex-wrap: wrap; }
+  .btn-refresh { width: 100%; }
+}
+
+@media (min-width: 900px) {
+  .bio-action { min-width: 78px; }
+  .bio-action span { display: inline; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-page.active, .flash-overlay.show { animation: none; }
+  .coach-toast { transition: none; }
 }

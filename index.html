@@ -1,12 +1,53 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es-PE" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia de Fútbol de Alto Rendimiento | JR Stars</title>
-  <meta name="description" content="Academia de fútbol de alto rendimiento en Cajamarca. Formamos jugadores con disciplina, valores y métricas reales.">
-  <link rel="icon" href="./img/escudo.png" type="image/png">
-  <link rel="stylesheet" href="./css/landing-effects.css?v=20260903">
+  <title>Academia de Fútbol en Cajamarca | JR Stars</title>
+  <meta name="description" content="Academia de fútbol para niños y jóvenes en Cajamarca. Entrenamiento de alto rendimiento, disciplina táctica, métricas reales y seguimiento para padres.">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="theme-color" content="#050505">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_PE">
+  <meta property="og:site_name" content="JR Stars Cajamarca">
+  <meta property="og:title" content="Academia de Fútbol en Cajamarca | JR Stars">
+  <meta property="og:description" content="Entrenamiento de alto rendimiento para niños y jóvenes, con disciplina táctica, métricas reales y seguimiento para padres.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Academia de Fútbol en Cajamarca | JR Stars">
+  <meta name="twitter:description" content="Entrenamiento de alto rendimiento para niños y jóvenes en Cajamarca.">
+  <link rel="icon" href="./img/favicons/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="./img/escudo.png">
+  <link rel="preload" href="./img/hero.jpg" as="image" type="image/jpeg" fetchpriority="high">
+  <link rel="stylesheet" href="./css/landing-effects.css?v=20260904">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    "name": "Academia de Fútbol JR Stars Cajamarca",
+    "description": "Academia de fútbol para niños y jóvenes con entrenamiento de alto rendimiento, disciplina táctica y seguimiento mediante métricas reales.",
+    "telephone": "+51 955 515 693",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Cajamarca",
+      "addressRegion": "Cajamarca",
+      "addressCountry": "PE"
+    },
+    "areaServed": {
+      "@type": "City",
+      "name": "Cajamarca"
+    },
+    "sameAs": [
+      "https://www.facebook.com/p/Academia-de-F%C3%BAtbol-JR-Stars-Cajamarca-100034777191797/"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+51 955 515 693",
+      "contactType": "admissions",
+      "availableLanguage": "Spanish"
+    }
+  }
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,8 +74,13 @@
 
   <style type="text/tailwindcss">
     @layer base {
+      html,
       body {
+        margin: 0;
         background-color: #050505;
+      }
+
+      body {
         color: #FFFFFF;
       }
     }
@@ -83,18 +129,18 @@
 </head>
 <body class="no-overflow-x min-h-screen flex flex-col font-body antialiased selection:bg-brand selection:text-white">
 
-  <!-- Header blanco, visible solo después de la imagen principal. -->
-  <header id="main-header" inert aria-hidden="true" class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 sm:px-8 h-16 sm:h-20">
-    <a href="./" class="flex items-center gap-2 sm:gap-3 group">
-      <img src="./img/escudo.png" alt="Logo" class="h-8 w-8 sm:h-12 sm:w-12 transition-transform group-hover:scale-110" onerror="this.style.display='none'">
+  <!-- Header transparente sobre el hero y blanco al desplazarse. -->
+  <header id="main-header" class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 sm:px-8 h-16 sm:h-20">
+    <a href="./" class="flex items-center gap-2 sm:gap-3 group" aria-label="JR Stars Cajamarca, inicio">
+      <img src="./img/escudo.png" alt="Escudo de la Academia de Fútbol JR Stars Cajamarca" width="400" height="400" decoding="async" class="h-8 w-8 sm:h-12 sm:w-12 transition-transform group-hover:scale-110" onerror="this.style.display='none'">
       <div class="flex flex-col leading-none w-min">
         <span class="font-display text-xl sm:text-[2rem] tracking-[0.05em] italic leading-none whitespace-nowrap">JR STARS</span>
         <span class="font-body text-[0.35rem] sm:text-[0.54rem] font-bold text-brand uppercase tracking-[0.29em] leading-none mt-1 whitespace-nowrap">ACADEMIA DE FÚTBOL</span>
       </div>
     </a>
-    <nav class="flex items-center gap-4 font-bold text-xs sm:text-sm tracking-wider uppercase">
+    <nav class="flex items-center gap-4 font-bold text-xs sm:text-sm tracking-wider uppercase" aria-label="Navegación principal">
       <a href="./portal/" id="nav-btn" class="bg-[#050505] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded text-[0.65rem] sm:text-sm hover:bg-brand hover:text-white transition-colors whitespace-nowrap">PORTAL JUGADOR</a>
-      <a href="https://wa.me/51955515693" target="_blank" id="nav-wa" class="hidden md:flex items-center gap-2 text-[#050505] hover:text-brand transition-colors">
+      <a href="https://wa.me/51955515693" target="_blank" rel="noopener noreferrer" id="nav-wa" class="hidden md:flex items-center gap-2 text-[#050505] hover:text-brand transition-colors" aria-label="Contactar a JR Stars por WhatsApp al +51 955 515 693">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.061-.3-.15-1.265-.462-2.406-1.477-.883-.788-1.48-1.761-1.653-2.059-.173-.295-.018-.458.13-.606.134-.133.3-.343.45-.514.149-.171.2-.295.3-.492.099-.195.05-.368-.025-.515-.075-.15-.672-1.62-.922-2.206-.24-.579-.481-.501-.672-.51l-.573-.008c-.198 0-.52.074-.792.369-.271.295-1.04 1.01-1.04 2.459 0 1.449 1.063 2.848 1.213 3.046.149.195 2.079 3.178 5.039 4.458.704.305 1.253.488 1.68.625.707.227 1.35.195 1.851.119.567-.085 1.767-.722 2.016-1.42.249-.697.249-1.294.175-1.42-.074-.125-.274-.2-.574-.35zM12 21.942A9.914 9.914 0 017 20.6l-.36-.214-3.53.926.945-3.441-.235-.373A9.91 9.91 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.12 1.545 5.864L0 24l6.284-1.646A11.91 11.91 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
         +51 955 515 693
       </a>
@@ -103,40 +149,40 @@
 
   <!-- HERO APEX SPORT DARK -->
   <main class="flex-grow">
-    <section id="hero" class="landing-stars landing-stars-dark relative min-h-[90svh] flex items-center justify-center overflow-hidden bg-[#050505] pt-12 sm:pt-16 pb-24 sm:pb-32">
+    <section id="hero" class="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-[#050505] pt-20 sm:pt-24 pb-10 sm:pb-12">
       <!-- Background Visuals -->
       <div class="absolute inset-0 z-0">
         <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-10 h-full w-full"></div>
-        <img class="w-full h-full object-cover opacity-30 mix-blend-screen filter grayscale" src="./img/hero.jpg" alt="Entrenamiento JR Stars" onerror="this.style.display='none'">
+        <img class="w-full h-full object-cover opacity-30 mix-blend-screen filter grayscale" src="./img/hero.jpg" alt="Entrenamiento de fútbol para niños y jóvenes en JR Stars Cajamarca" width="1376" height="768" fetchpriority="high" decoding="async" onerror="this.style.display='none'">
         <!-- Red glow accent -->
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[40vw] md:h-[40vw] bg-brand rounded-full blur-[150px] opacity-10"></div>
       </div>
       
-      <div class="container mx-auto px-4 sm:px-8 relative z-20 flex flex-col items-center text-center">
+      <div class="hero-content container mx-auto px-4 sm:px-8 relative z-20 flex flex-col items-center text-center">
 
-        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-1.5 rounded-full mb-8 mt-10 sm:mt-0">
+        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-1.5 rounded-full mb-5 mt-2 sm:mt-0">
           <span class="w-2 h-2 rounded-full bg-brand animate-pulse shadow-[0_0_8px_#E5191B]"></span>
           <span class="text-[0.65rem] sm:text-sm font-bold tracking-widest uppercase">Cajamarca • Inscripciones Abiertas</span>
         </div>
 
-        <h1 class="font-display text-[4rem] sm:text-[7rem] lg:text-[9rem] leading-tight uppercase italic text-white drop-shadow-2xl text-center mb-6">
+        <h1 class="font-display text-[3.75rem] sm:text-[5rem] lg:text-[5.5rem] xl:text-[5.75rem] leading-[0.82] uppercase italic text-white drop-shadow-2xl text-center mb-4">
           TU HIJO <br> MERECE <br>
           <span class="text-white bg-brand px-4 py-1 inline-block my-2">ENTRENAR</span> <br>
           <span class="text-[#F5A623] drop-shadow-[0_0_15px_rgba(245,166,35,0.3)] mt-2 inline-block">EN SERIO.</span>
         </h1>
 
-        <p class="font-body text-sm sm:text-xl text-gray-400 font-medium max-w-2xl mt-4 sm:mt-8 leading-relaxed px-4">
+        <p class="font-body text-sm sm:text-lg text-gray-300 font-medium max-w-2xl mt-2 sm:mt-4 leading-relaxed px-4">
           Metodología profesional de alto rendimiento. Métricas exactas, disciplina táctica y resultados medibles desde tu smartphone.
         </p>
 
-        <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mt-8 sm:mt-10 px-4 sm:px-0">
-          <a href="https://wa.me/51955515693?text=Hola,%20quiero%20separar%20un%20cupo%20para%20mi%20hijo%20en%20JR%20Stars." target="_blank" class="slant-btn flex items-center justify-center bg-brand text-white px-8 sm:px-10 py-4 sm:py-5 w-full sm:w-auto group border border-transparent">
+        <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mt-6 sm:mt-7 px-4 sm:px-0">
+          <a href="https://wa.me/51955515693?text=Hola,%20quiero%20separar%20un%20cupo%20para%20mi%20hijo%20en%20JR%20Stars." target="_blank" rel="noopener noreferrer" class="slant-btn flex items-center justify-center bg-brand text-white px-8 sm:px-10 py-3 sm:py-4 w-full sm:w-auto group border border-transparent">
             <span class="slant-btn-content font-display text-xl sm:text-2xl uppercase tracking-wider flex items-center gap-3">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.061-.3-.15-1.265-.462-2.406-1.477-.883-.788-1.48-1.761-1.653-2.059-.173-.295-.018-.458.13-.606.134-.133.3-.343.45-.514.149-.171.2-.295.3-.492.099-.195.05-.368-.025-.515-.075-.15-.672-1.62-.922-2.206-.24-.579-.481-.501-.672-.51l-.573-.008c-.198 0-.52.074-.792.369-.271.295-1.04 1.01-1.04 2.459 0 1.449 1.063 2.848 1.213 3.046.149.195 2.079 3.178 5.039 4.458.704.305 1.253.488 1.68.625.707.227 1.35.195 1.851.119.567-.085 1.767-.722 2.016-1.42.249-.697.249-1.294.175-1.42-.074-.125-.274-.2-.574-.35zM12 21.942A9.914 9.914 0 017 20.6l-.36-.214-3.53.926.945-3.441-.235-.373A9.91 9.91 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.12 1.545 5.864L0 24l6.284-1.646A11.91 11.91 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
               +51 955 515 693
             </span>
           </a>
-          <a href="./portal/" class="slant-btn flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 sm:px-10 py-4 sm:py-5 w-full sm:w-auto hover:bg-white hover:text-[#050505] transition-colors">
+          <a href="./portal/" class="slant-btn flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 sm:px-10 py-3 sm:py-4 w-full sm:w-auto hover:bg-white hover:text-[#050505] transition-colors">
             <span class="slant-btn-content font-display text-xl sm:text-2xl uppercase tracking-wider">
               PORTAL JUGADOR
             </span>
@@ -146,24 +192,7 @@
     </section>
 
     <!-- SECTION 2: BENTO GRID SPORT (Color Blocking - White Section) -->
-    <section class="landing-stars py-16 sm:py-20 px-4 sm:px-8 bg-white text-[#050505] rounded-t-[2rem] sm:rounded-t-[3rem] -mt-8 sm:-mt-10 relative z-30 overflow-hidden">
-      <!-- Watermark Estrellas (JR STARS) -->
-      <div class="absolute top-10 left-[-5%] text-brand/5 rotate-12 z-0 hidden sm:block">
-        <svg width="200" height="200" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      </div>
-      <div class="absolute top-1/4 right-[10%] text-brand/5 rotate-45 z-0">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      </div>
-      <div class="absolute bottom-1/3 left-[20%] text-brand/5 -rotate-12 z-0 hidden md:block">
-        <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      </div>
-      <div class="absolute bottom-10 right-[-10%] sm:right-10 text-brand/5 -rotate-12 z-0">
-        <svg width="150" height="150" sm:width="300" sm:height="300" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      </div>
-      <div class="absolute top-[60%] left-[-2%] text-brand/5 rotate-90 z-0">
-        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-      </div>
-
+    <section class="landing-stars py-16 sm:py-20 px-4 sm:px-8 bg-white text-[#050505] rounded-t-[2rem] sm:rounded-t-[3rem] relative z-30 overflow-hidden">
       <div class="container mx-auto relative z-10">
         <div class="max-w-3xl mb-10 sm:mb-12 flex flex-col items-center sm:items-start text-center sm:text-left">
           <div class="text-brand font-bold tracking-widest text-[0.7rem] sm:text-sm uppercase mb-4 flex items-center justify-center sm:justify-start gap-3">
@@ -174,7 +203,7 @@
         </div>
 
         <!-- BENTO GRID 2026 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 auto-rows-auto md:auto-rows-[250px]">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 auto-rows-auto md:auto-rows-[320px]">
 
           <!-- Card 1: Data (Dark) -->
           <div class="bento-card bg-[#050505] text-white p-6 sm:p-8 md:col-span-2 flex flex-col items-center sm:items-start text-center sm:text-left relative group">
@@ -210,7 +239,7 @@
               <h3 class="font-display text-2xl sm:text-4xl mb-2 uppercase italic tracking-wide text-[#050505]">Entrenamiento Real</h3>
               <p class="font-body text-gray-600 font-medium text-[0.8rem] sm:text-base max-w-xl px-2 sm:px-0">Metodología de clubes profesionales adaptada a nuestra geografía. Técnica y táctica del juego colectivo.</p>
             </div>
-            <img src="./img/escudo.png" alt="JR Stars" class="w-24 h-24 sm:w-32 sm:h-32 opacity-30 sm:opacity-20 object-contain grayscale" onerror="this.style.display='none'">
+            <img src="./img/escudo.png" alt="Escudo JR Stars" width="400" height="400" loading="lazy" decoding="async" class="w-24 h-24 sm:w-32 sm:h-32 opacity-30 sm:opacity-20 object-contain grayscale" onerror="this.style.display='none'">
           </div>
 
         </div>
@@ -218,7 +247,7 @@
     </section>
 
     <!-- SECTION 3: SEDES (Dark Blocking) -->
-    <section class="landing-stars landing-stars-dark py-20 px-4 sm:px-8 bg-[#050505] text-white overflow-hidden">
+    <section class="py-20 px-4 sm:px-8 bg-[#050505] text-white overflow-hidden">
       <div class="container mx-auto relative z-10">
         <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-6">
           <div>
@@ -243,11 +272,11 @@
   <footer class="bg-[#020202] text-white py-12 px-4 sm:px-8 border-t border-white/5">
     <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
       <div class="flex items-center gap-4 group">
-        <img src="./img/escudo.webp" alt="JR Stars" class="h-12 w-12 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" onerror="this.style.display='none'">
+        <img src="./img/escudo.webp" alt="Escudo JR Stars" width="400" height="400" loading="lazy" decoding="async" class="h-12 w-12 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" onerror="this.style.display='none'">
         <div class="font-display text-2xl italic tracking-wide text-gray-400 group-hover:text-white transition-colors">JR STARS <br> <span class="text-brand">CAJAMARCA</span></div>
       </div>
       <nav class="flex flex-wrap justify-center gap-x-8 gap-y-4 font-bold text-sm tracking-widest uppercase text-gray-500">
-        <a href="https://www.facebook.com/p/Academia-de-F%C3%BAtbol-JR-Stars-Cajamarca-100034777191797/" target="_blank" class="hover:text-white transition-colors">Facebook Oficial</a>
+        <a href="https://www.facebook.com/p/Academia-de-F%C3%BAtbol-JR-Stars-Cajamarca-100034777191797/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Facebook Oficial</a>
         <a href="./portal/" class="hover:text-white transition-colors">Portal Jugador</a>
         <a href="./admin/login.html" class="hover:text-brand transition-colors">Intranet</a>
       </nav>
@@ -264,8 +293,6 @@
       const updateHeader = () => {
         const visible = hero.getBoundingClientRect().bottom <= 0;
         header.classList.toggle('is-visible', visible);
-        header.inert = !visible;
-        header.setAttribute('aria-hidden', String(!visible));
       };
       let scrollPending = false;
       window.addEventListener('scroll', () => {
@@ -297,7 +324,7 @@
               <h3 class="font-display text-3xl sm:text-4xl uppercase italic mb-3 text-white group-hover:text-brand transition-colors">${s.nombre}</h3>
               <p class="font-body text-sm sm:text-base text-gray-400 mb-8 font-medium">${s.alias ? `<strong class="text-gray-300">${s.alias}.</strong> ` : ''}${s.descripcion}</p>
             </div>
-            <a href="${s.google_maps_url}" target="_blank" class="slant-btn inline-flex items-center justify-center bg-white/10 hover:bg-brand text-white px-6 py-3 font-display text-lg uppercase tracking-wide transition-all border border-white/10 hover:border-brand">
+            <a href="${s.google_maps_url}" target="_blank" rel="noopener noreferrer" class="slant-btn inline-flex items-center justify-center bg-white/10 hover:bg-brand text-white px-6 py-3 font-display text-lg uppercase tracking-wide transition-all border border-white/10 hover:border-brand">
               <span class="slant-btn-content flex items-center gap-2">ABRIR MAPA <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
             </a>
           </div>

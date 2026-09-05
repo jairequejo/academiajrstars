@@ -6,12 +6,14 @@
       const code = new URLSearchParams(window.location.search).get('code');
       if (!code) return;
       const isKiosko = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-      if (isKiosko) window.location.replace('/scanner?code=' + encodeURIComponent(code));
+      if (isKiosko) window.location.replace('../scanner/?code=' + encodeURIComponent(code));
   })();
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
   <title>Portal del Jugador | JR Stars 2026</title>
+  <link rel="icon" href="../img/favicons/favicon.ico" type="image/x-icon">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,7 +68,7 @@
         transition: all 0.3s ease;
       }
 
-      .hidden { display: none !important; }
+      .hidden { display: none; }
 
       .spinner {
         width: 20px; height: 20px;
@@ -78,61 +80,64 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
+  <link rel="stylesheet" href="../css/portal.css?v=20260904">
 </head>
 
-<body class="min-h-screen flex flex-col lg:flex-row font-body antialiased selection:bg-brand selection:text-white">
+<body class="portal-body min-h-screen flex flex-col lg:flex-row font-body antialiased selection:bg-brand selection:text-white">
 
   <!-- Hero Visual Izquierdo (Desktop) -->
-  <div class="hidden lg:flex relative w-1/2 min-h-screen items-center justify-center bg-[#000] border-r border-white/5 overflow-hidden">
+  <div class="portal-visual hidden lg:flex relative w-1/2 min-h-screen items-center justify-center bg-[#000] border-r border-white/5 overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-tr from-[#050505] via-transparent to-transparent z-10"></div>
-    <img src="../img/p1.jpg" alt="Jugador" class="absolute inset-0 w-full h-full object-cover opacity-20 grayscale mix-blend-screen" onerror="this.style.display='none'">
-
-    <div class="relative z-20 flex flex-col items-center text-center p-12">
-      <a href="../" class="flex flex-col items-center gap-4 group">
-        <img src="../img/escudo.png" alt="Logo" class="h-24 w-24 transition-transform group-hover:scale-110 drop-shadow-[0_0_20px_rgba(229,25,27,0.3)]" onerror="this.style.display='none'">
+    <div class="portal-visual-inner relative z-20 flex flex-col items-center text-center p-12">
+      <a href="../" class="portal-brand flex flex-col items-center gap-4 group">
+        <img src="../img/escudo.png" alt="Escudo JR Stars" class="h-24 w-24 transition-transform group-hover:scale-110 drop-shadow-[0_0_20px_rgba(229,25,27,0.3)]" onerror="this.style.display='none'">
         <div class="flex flex-col leading-none">
           <span class="font-display text-[3rem] tracking-wider italic">JR STARS</span>
           <span class="font-body text-[0.65rem] font-bold text-brand uppercase tracking-[0.3em] mt-2">Portal Jugador</span>
         </div>
       </a>
+      <div class="portal-visual-copy">
+        <span>PERFIL DE RENDIMIENTO · 2026</span>
+        <strong>LEE.<br>MIDE.<br><em>DOMINA.</em></strong>
+        <p>Tu temporada, tu disciplina y tu evolución en una sola ficha.</p>
+      </div>
     </div>
+    <div class="portal-season-mark" aria-hidden="true">26</div>
   </div>
 
   <!-- Contenido Interactivo -->
-  <main class="w-full lg:w-1/2 min-h-screen flex flex-col px-4 py-6 sm:p-12 relative overflow-y-auto bg-[#050505]">
+  <main class="portal-main w-full lg:w-1/2 min-h-screen flex flex-col px-4 py-6 sm:p-12 relative overflow-y-auto bg-[#050505]">
 
     <!-- Mobile Topbar -->
-    <div class="lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-      <a href="../" class="flex items-center gap-3">
-        <img src="../img/escudo.png" alt="Logo" class="h-10 w-10">
+    <div class="portal-topbar lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+      <a href="../" class="flex items-center gap-3" aria-label="Volver al inicio de JR Stars">
+        <img src="../img/escudo.png" alt="Escudo JR Stars" class="h-10 w-10">
         <div class="flex flex-col leading-none">
           <span class="font-display text-2xl tracking-wide italic">JR STARS</span>
           <span class="text-[0.55rem] font-bold tracking-[0.2em] text-brand uppercase mt-0.5">Portal Jugador</span>
         </div>
       </a>
+      <span class="portal-topbar-season">TEMPORADA 26</span>
     </div>
 
-    <div class="flex-grow flex flex-col w-full max-w-lg mx-auto">
+    <div class="portal-shell flex-grow flex flex-col w-full max-w-xl mx-auto">
 
       <!-- BÚSQUEDA -->
       <section id="p1" class="w-full transition-opacity duration-300">
-        <div class="inline-flex items-center gap-2 bg-white/5 text-gray-300 font-bold text-[0.65rem] uppercase tracking-widest px-3 py-1.5 rounded-full mb-6 border border-white/10">
-          <span class="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span> Sistema de Autenticación
-        </div>
-
-        <h1 class="font-display text-5xl sm:text-6xl uppercase italic leading-tight sm:leading-[0.85] mb-8 text-white">
+        <h1 class="portal-search-title font-display text-5xl sm:text-6xl uppercase italic leading-tight sm:leading-[0.85] mb-4 text-white">
           DNI <br><span class="text-brand">DEL JUGADOR</span>
         </h1>
 
-        <div class="bento-card p-6 sm:p-8 flex flex-col gap-5">
-          <input type="tel" id="dni" placeholder="76543210" maxlength="8" inputmode="numeric" autocomplete="off"
+        <div class="portal-search-card bento-card p-6 sm:p-8 flex flex-col gap-5">
+          <label for="dni" class="portal-input-label">DNI O CÓDIGO DEL JUGADOR</label>
+          <input type="tel" id="dni" aria-label="DNI o código del jugador" placeholder="76543210" maxlength="8" inputmode="numeric" enterkeyhint="go" autocomplete="off"
                  class="w-full bg-[#050505] border border-white/20 rounded-xl text-white font-display text-3xl tracking-[0.2em] px-6 py-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand text-center placeholder:text-gray-700 transition-all">
 
-          <button id="btnC" onclick="buscar()" class="slant-btn w-full bg-brand text-white px-8 py-4 rounded-xl border border-transparent">
+          <button type="button" id="btnC" onclick="buscar()" class="slant-btn w-full bg-brand text-white px-8 py-4 rounded-xl border border-transparent">
             <span class="slant-btn-content font-display text-2xl uppercase tracking-wider">VER ESTATUS</span>
           </button>
 
-          <button onclick="toggleScanner()" class="slant-btn w-full bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 mt-2">
+          <button type="button" onclick="toggleScanner()" class="slant-btn w-full bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 mt-2">
             <span class="slant-btn-content font-display text-xl uppercase tracking-wider flex items-center justify-center gap-2">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 9h6v6H9z"/></svg>
               ESCANEAR CÓDIGO QR
@@ -144,11 +149,11 @@
             <button onclick="toggleScanner()" class="font-display text-xl uppercase bg-white/10 text-white px-4 py-2 rounded-lg hover:bg-white/20">Cerrar</button>
           </div>
 
-          <div id="ld" class="hidden flex items-center justify-center gap-3 text-gray-400 font-bold uppercase tracking-widest text-sm mt-4 p-4 rounded-xl bg-white/5">
+          <div id="ld" role="status" aria-live="polite" class="hidden flex items-center justify-center gap-3 text-gray-400 font-bold uppercase tracking-widest text-sm mt-4 p-4 rounded-xl bg-white/5">
             <div class="spinner"></div><span>Procesando...</span>
           </div>
 
-          <div id="err" class="hidden flex flex-col gap-4 mt-4 bg-brand/10 border border-brand/30 rounded-xl p-6">
+          <div id="err" role="alert" class="hidden flex flex-col gap-4 mt-4 bg-brand/10 border border-brand/30 rounded-xl p-6">
             <div class="text-brand font-bold text-xs uppercase tracking-widest border-b border-brand/20 pb-2">Error 404</div>
             <div class="font-display text-3xl uppercase text-white leading-none">JUGADOR NO REGISTRADO</div>
             <a href="https://wa.me/51955515693" target="_blank" class="slant-btn bg-white/10 hover:bg-white/20 text-white font-display text-lg px-4 py-2 mt-2 rounded-lg border border-white/10">
@@ -164,7 +169,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           VOLVER AL BUSCADOR
         </button>
-        <div id="card-wrap" class="w-full"></div>
+        <div id="card-wrap" class="w-full" aria-live="polite"></div>
       </section>
 
       <!-- DASHBOARD (Kiosko + Ranking) -->
@@ -181,16 +186,16 @@
 
             <div class="bg-white/5 rounded-lg p-4 border border-white/5">
               <div class="flex justify-between text-[0.65rem] font-bold uppercase tracking-widest text-gray-400 mb-2">
-                <span>ENERGÍA</span><span class="text-brand">BAJA</span>
+                <span>ENERGÍA</span><span id="kiosk-energy-label" class="text-brand">BAJA</span>
               </div>
               <div class="w-full h-2 bg-black rounded-full overflow-hidden border border-white/10">
-                <div class="w-1/4 h-full bg-brand"></div>
+                <div id="kiosk-energy-bar" class="h-full bg-brand transition-all" style="width:0%"></div>
               </div>
             </div>
 
             <div class="flex flex-col gap-2 relative z-10">
               <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Saldo Disponible</span>
-              <div class="font-display text-4xl text-white">0 CRÉDITOS</div>
+              <div id="kiosk-credit-balance" class="font-display text-4xl text-white">0 CRÉDITOS</div>
               <button onclick="document.getElementById('modal-yape').classList.remove('hidden')" class="slant-btn bg-brand text-white px-6 py-3 rounded-xl mt-4 border border-transparent">
                 <span class="slant-btn-content font-display text-xl tracking-wider">RECARGAR (S/20)</span>
               </button>
@@ -232,6 +237,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
-  <script src="../js/home.js"></script>
+  <script src="../js/home.js?v=20260904"></script>
 </body>
 </html>

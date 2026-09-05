@@ -1631,8 +1631,9 @@ function renderEntrenadores() {
 }
 
 function copyMagicLink(token) {
-  const url = window.location.origin + '/entrenador/login.html?token=' + token;
-  navigator.clipboard.writeText(url).then(() => {
+  const url = new URL('../entrenador/login.html', window.location.href);
+  url.searchParams.set('token', token);
+  navigator.clipboard.writeText(url.href).then(() => {
     showToast('Enlace copiado. Envíalo por WhatsApp.');
   }).catch(err => {
     showToast('Error al copiar enlace', 'error');

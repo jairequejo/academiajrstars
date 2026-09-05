@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -10,15 +11,15 @@
     <meta http-equiv="Expires" content="0">
     <title>JR Stars — Scanner</title>
 
-    <link rel="manifest" href="../scanner/manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#da1212">
     <link rel="stylesheet" href="../css/theme.css">
-  <link rel="stylesheet" href="../css/style.css">
-    <link rel="icon" href="../favicon-scanner.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="../img/favicons/favicon-scanner.ico" type="image/x-icon">
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/scanner/sw.js', { scope: '/scanner' })
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
                 .then(reg => {
                     reg.update();
                     reg.addEventListener('updatefound', () => {
@@ -92,7 +93,7 @@
     <script>
         (function () {
             var s = document.createElement('script');
-            s.src = '/js/scanner.js?_=' + Date.now();
+            s.src = '../js/scanner.js?_=' + Date.now();
             document.body.appendChild(s);
         })();
     </script>

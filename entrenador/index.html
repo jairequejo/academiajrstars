@@ -4,17 +4,17 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
     <title>JR Stars — Panel Entrenador</title>
-    <link rel="stylesheet" href="../css/theme.css">
-    <link rel="stylesheet" href="../css/entrenador.css">
-    <link rel="icon" href="../img/escudo.png" type="image/png">
-    <style>
-        /* Clases utilitarias inline — alineadas al nuevo tema light */
-        .logo-escudo { width: 40px; height: auto; }
-        .flex-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-        .select-filter { font-size: 0.82rem; padding: 0.35rem 0.6rem; width: auto; }
-        .input-search  { font-size: 0.82rem; padding: 0.35rem 0.6rem; max-width: 160px; }
-    </style>
+    <meta name="theme-color" content="#0b0b0c">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JR Entrenador">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" sizes="180x180">
+    <link rel="stylesheet" href="../css/entrenador.css?v=20260905">
+    <link rel="icon" href="./icons/favicon-48.png" sizes="48x48" type="image/png">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabaseClient.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -24,16 +24,21 @@
 
     <!-- TOPBAR -->
     <header class="topbar">
-        <a href="../" class="topbar-brand">
+        <a href="../" class="topbar-brand" aria-label="Volver al inicio de JR Stars">
             <div class="topbar-logo-circle">
-                <img src="../img/escudo.png" alt="logo escudo jr stars" class="logo-escudo" onerror="this.style.display='none'">
+                <img src="../img/escudo.png" alt="Escudo JR Stars" class="logo-escudo" width="400" height="400" onerror="this.style.display='none'">
             </div>
-            <span class="topbar-name">JR <span>STARS</span></span>
+            <span class="topbar-name">JR <span>STARS</span><small>CUERPO TÉCNICO</small></span>
         </a>
         <div class="topbar-right">
-            <span class="offline-badge" id="offline-badge"></span>
-            <span class="topbar-role-badge">🏃 Entrenador</span>
-            <span class="topbar-email" id="coach-email"></span>
+            <span class="offline-badge" id="offline-badge" role="status" aria-live="polite"></span>
+            <div class="coach-profile">
+                <div class="coach-profile-copy">
+                    <span>ENTRENADOR JR STARS</span>
+                    <strong id="coach-email">Profe</strong>
+                </div>
+                <div class="coach-avatar" id="coach-avatar" aria-hidden="true">P</div>
+            </div>
         </div>
     </header>
 
@@ -52,18 +57,29 @@
         <!-- ── TAB: SCANNER ── -->
         <section class="tab-page active" id="tab-scanner">
             <header class="page-header">
-                <h1 class="page-title">📷 <span>Scanner</span></h1>
-                <div class="nfc-badge" id="nfc-badge">NFC</div>
+                <div>
+                    <span class="section-kicker">CONTROL DE INGRESO</span>
+                    <h2 class="page-title">ESCANEA. <span>CONFIRMA.</span></h2>
+                    <p class="page-subtitle">La asistencia se registra al instante y queda en cola si pierdes conexión.</p>
+                </div>
+                <div class="nfc-badge" id="nfc-badge"><i></i> NFC</div>
             </header>
 
             <article class="scanner-wrap">
                 <div class="scanner-box">
+                    <div class="scanner-box-head">
+                        <div><span class="scanner-live-dot"></span><strong>CÁMARA ACTIVA</strong></div>
+                        <small>QR / CREDENCIAL</small>
+                    </div>
                     <div id="reader"></div>
                     <p class="scan-hint">Acerca el QR o medallón NFC del alumno</p>
                 </div>
                 <aside class="scan-history-panel">
-                    <h2 class="history-title">ÚLTIMOS REGISTROS</h2>
-                    <ul id="scan-history"></ul>
+                    <div class="history-heading">
+                        <div><span>ACTIVIDAD</span><h3 class="history-title">ÚLTIMOS REGISTROS</h3></div>
+                        <span class="history-today">HOY</span>
+                    </div>
+                    <ul id="scan-history"><li class="history-empty">Los próximos ingresos aparecerán aquí.</li></ul>
                 </aside>
             </article>
         </section>
@@ -71,44 +87,32 @@
         <!-- ── TAB: ASISTENCIA ── -->
         <section class="tab-page" id="tab-asistencia">
             <header class="page-header">
-                <h1 class="page-title">📋 <span>Asistencia Hoy</span></h1>
-                <button class="btn btn-outline" onclick="loadAsistencia()">⟳ Actualizar</button>
+                <div>
+                    <span class="section-kicker">TU EQUIPO HOY</span>
+                    <h2 class="page-title">CONTROL DE <span>ASISTENCIA</span></h2>
+                    <p class="page-subtitle">Revisa quién llegó y registra sus controles físicos sin perder tiempo.</p>
+                </div>
+                <button type="button" class="btn btn-outline btn-refresh" onclick="loadAsistencia()" aria-label="Actualizar asistencia"><span aria-hidden="true">↻</span> Actualizar</button>
             </header>
 
             <div class="asistencia-stats" id="asistencia-stats"></div>
 
-            <nav class="asistencia-filtros">
-                <button class="chip active" id="chip-todos"     onclick="setFiltroAsist('todos', this)">Todos</button>
-                <button class="chip"         id="chip-presentes" onclick="setFiltroAsist('presentes', this)">✅ Presentes</button>
-                <button class="chip"         id="chip-ausentes"  onclick="setFiltroAsist('ausentes', this)">❌ Ausentes</button>
-                <button class="chip chip-rojo" id="chip-deudores" onclick="setFiltroAsist('deudores', this)">⚠️ Deben</button>
-            </nav>
+            <section class="attendance-tools" aria-label="Buscar y filtrar jugadores">
+                <div class="attendance-tools-head"><strong>ENCUENTRA A TU GRUPO</strong><button type="button" onclick="resetAsistenciaFilters()">Limpiar filtros</button></div>
+                <nav class="asistencia-filtros asistencia-chips" aria-label="Filtrar asistencia por estado">
+                    <button type="button" class="chip active" id="chip-todos" onclick="setFiltroAsist('todos', this)">Todos</button>
+                    <button type="button" class="chip" id="chip-presentes" onclick="setFiltroAsist('presentes', this)">Presentes</button>
+                    <button type="button" class="chip" id="chip-ausentes" onclick="setFiltroAsist('ausentes', this)">Ausentes</button>
+                    <button type="button" class="chip chip-rojo" id="chip-deudores" onclick="setFiltroAsist('deudores', this)">Deben</button>
+                </nav>
 
-            <!-- Filtros de Sede y Grupo -->
-            <nav class="asistencia-filtros flex-wrap">
-                <select id="filtro-ent-turno" class="input-jr select-jr select-filter" onchange="renderAsistencia()">
-                    <option value="">Todos los turnos</option>
-                    <option value="mañana">Mañana</option>
-                    <option value="tarde">Tarde</option>
-                </select>
-                <select id="filtro-ent-sede" class="input-jr select-jr select-filter" onchange="renderAsistencia()">
-                    <option value="">Todas las sedes</option>
-                    <option value="El Bosque">El Bosque</option>
-                    <option value="Centro">Centro</option>
-                    <option value="Norte">Norte</option>
-                    <option value="Sur">Sur</option>
-                </select>
-                <select id="filtro-ent-grupo" class="input-jr select-jr select-filter" onchange="renderAsistencia()">
-                    <option value="">Todos los grupos</option>
-                    <option value="A">Grupo A</option>
-                    <option value="B">Grupo B</option>
-                    <option value="C">Grupo C</option>
-                    <option value="D">Grupo D</option>
-                    <option value="E">Grupo E</option>
-                </select>
-                <input type="text" id="filtro-ent-nombre" class="input-jr input-search"
-                    placeholder="🔍 Buscar nombre..." oninput="renderAsistencia()">
-            </nav>
+                <nav class="asistencia-filtros asistencia-controls" aria-label="Filtros de jugadores">
+                    <div class="filter-field"><label for="filtro-ent-nombre">Jugador</label><input type="search" id="filtro-ent-nombre" aria-label="Buscar jugador por nombre" class="input-jr input-search" placeholder="Buscar por nombre" oninput="renderAsistencia()"></div>
+                    <div class="filter-field"><label for="filtro-ent-turno">Turno</label><select id="filtro-ent-turno" aria-label="Filtrar por turno" class="input-jr select-jr select-filter" onchange="renderAsistencia()"><option value="">Todos</option></select></div>
+                    <div class="filter-field"><label for="filtro-ent-sede">Sede</label><select id="filtro-ent-sede" aria-label="Filtrar por sede" class="input-jr select-jr select-filter" onchange="renderAsistencia()"><option value="">Todas</option></select></div>
+                    <div class="filter-field"><label for="filtro-ent-grupo">Grupo</label><select id="filtro-ent-grupo" aria-label="Filtrar por grupo" class="input-jr select-jr select-filter" onchange="renderAsistencia()"><option value="">Todos</option></select></div>
+                </nav>
+            </section>
 
             <div id="asistencia-list">
                 <p class="loading-msg">Cargando...</p>
@@ -140,15 +144,17 @@
 
     <!-- NAV INFERIOR -->
     <nav class="bottom-nav">
-        <button class="bnav-btn active" id="bnav-scanner" onclick="goTab('scanner', this)">
-            <span>📷</span><span class="bnav-label">Scanner</span>
+        <button type="button" class="bnav-btn active" id="bnav-scanner" onclick="goTab('scanner', this)" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4M8 8h8v8H8z"/></svg><span class="bnav-label">Escanear</span>
         </button>
-        <button class="bnav-btn" id="bnav-asistencia" onclick="goTab('asistencia', this)">
-            <span>📋</span><span class="bnav-label">Asistencia</span>
+        <button type="button" class="bnav-btn" id="bnav-asistencia" onclick="goTab('asistencia', this)" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l2 2 4-4M5 4h14v16H5zM8 4V2M16 4V2"/></svg><span class="bnav-label">Mi equipo</span>
         </button>
     </nav>
 
-    <script src="../js/entrenador.js"></script>
+    <div class="coach-toast" id="coach-toast" role="status" aria-live="polite"></div>
+
+    <script src="../js/entrenador.js?v=20260905"></script>
 </body>
 
 </html>
