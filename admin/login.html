@@ -106,6 +106,12 @@
   </div>
 
 <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
+      console.warn('PWA de administración no disponible:', error.message);
+    });
+  }
+
   // Supabase conserva y renueva la sesión; no duplicamos el access token manualmente.
   window.supabaseClient.auth.getSession().then(({ data }) => {
     if (data.session) window.location.replace('index.html');

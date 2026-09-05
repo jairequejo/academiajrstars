@@ -235,9 +235,22 @@ async function handleScan(decodedText) {
     processing = true;
     if (qrScanner) qrScanner.pause();
 
-    // Extraer código limpio
-    const raw = decodedText.trim();
-    const code = raw.includes('?code=') ? raw.split('?code=')[1] : raw;
+    // Acepta la credencial sola o la URL del Portal incluida en los QR nuevos.
+    let code = String(decodedText || '').replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
+    try {
+        const url = new URL(code);
+        code = url.searchParams.get('code') || code;
+    } catch {
+        const match = code.match(/[?&]code=([^&]+)/i);
+        if (match) {
+            try { code = decodeURIComponent(match[1]); } catch { code = match[1]; }
+        }
+    }
+    code = code.trim();
+    if (!code) {
+        scheduleResume();
+        return;
+    }
 
     // ── FORMATO OFFLINE (JRS:) ────────────────────────────
     if (code.startsWith('JRS:')) {

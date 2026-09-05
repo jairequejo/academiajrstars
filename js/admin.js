@@ -97,6 +97,27 @@ function generate_jrs_code() {
   return `STU-${opaqueId}`;
 }
 
+function getPortalCredentialUrl(code) {
+  const portalUrl = new URL('../portal/', window.location.href);
+  portalUrl.searchParams.set('code', code);
+  return portalUrl.href;
+}
+
+function extractQrCredential(value) {
+  let raw = String(value || '').replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
+  if (!raw) return '';
+  try {
+    const url = new URL(raw);
+    raw = url.searchParams.get('code') || raw;
+  } catch {
+    const match = raw.match(/[?&]code=([^&]+)/i);
+    if (match) {
+      try { raw = decodeURIComponent(match[1]); } catch { raw = match[1]; }
+    }
+  }
+  return raw.trim();
+}
+
 async function loadStats() {
   try {
     const hoy = new Date();
@@ -145,14 +166,7 @@ function initAdminScanner() {
             return _adminScanner.start(
                 camId,
                 { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
-                    // Extraer código JRS si viene en URL
-                    let code = decodedText;
-                    if (decodedText.includes('?code=')) {
-                        code = decodedText.split('?code=')[1];
-                    }
-                    onAdminQRScanned(code);
-                },
+                (decodedText) => onAdminQRScanned(extractQrCredential(decodedText)),
                 () => { /* frame sin QR, ignorar */ }
             );
         })
@@ -566,19 +580,21 @@ function toggleEstadoAlumno(id, nombre, reactivar) {
 async function verQR(studentId, inline = false) {
   try {
     const { data, error } = await window.supabaseClient.from('credentials').select('code').eq('student_id', studentId).eq('is_active', true).limit(1);
-    if (error) throw error;
-    let codeStr = '';
-    if (data && data.length > 0) {
+    let codeStr = studentId;
+    if (!error && data && data.length > 0) {
       codeStr = data[0].code;
-    } else {
+    } else if (!error) {
       showToast('Generando nuevo QR...', 'ok');
       const { data: stData, error: stError } = await window.supabaseClient.from('students').select('full_name, valid_until').eq('id', studentId).single();
       if (stError) throw stError;
-      codeStr = await generate_jrs_code(studentId, stData?.full_name || '', stData?.valid_until);
-      const { error: credError } = await window.supabaseClient.from('credentials').insert({student_id: studentId, code: codeStr, is_active: true});
-      if (credError) throw credError;
+      const generatedCode = await generate_jrs_code(studentId, stData?.full_name || '', stData?.valid_until);
+      const { error: credError } = await window.supabaseClient.from('credentials').insert({student_id: studentId, code: generatedCode, is_active: true});
+      if (!credError) codeStr = generatedCode;
+    } else {
+      console.warn('La credencial no es legible con la política actual; se usará el identificador seguro del alumno.');
     }
-    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(codeStr)}`;
+    const portalUrl = getPortalCredentialUrl(codeStr);
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(portalUrl)}`;
     if (!inline) window.open(qrImageUrl, '_blank');
     return qrImageUrl;
   } catch {
@@ -1081,9 +1097,18 @@ document.addEventListener('click', (e) => {
 
 
 // ── INIT ──────────────────────────────────────────────
-requireAdminSession().then(isValid => {
-  if (isValid) loadStats();
-});
+window.addEventListener('DOMContentLoaded', () => {
+  requireAdminSession().then(isValid => {
+    if (!isValid) return;
+    const requestedSection = new URLSearchParams(window.location.search).get('section');
+    if (requestedSection && document.getElementById(`page-${requestedSection}`)) {
+      goTo(requestedSection);
+      window.history.replaceState({}, '', window.location.pathname);
+      return;
+    }
+    loadStats();
+  });
+}, { once: true });
 
 // ── ASISTENCIA GLOBAL (CALENDARIO MAESTRO) ────────────
 const CAL_MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -1285,43 +1310,75 @@ function renderCalendario() {
 let _bioStudents = [];
 let _bioSelected = null;
 
-function resetBioSearch() {
+async function loadBioStudents(refresh = false) {
+  if (_bioStudents.length && !refresh) return _bioStudents;
+  const { data, error } = await window.supabaseClient
+    .from('students')
+    .select('id, full_name, dni, sede, horario')
+    .eq('is_active', true)
+    .order('full_name');
+  if (error) throw error;
+  _bioStudents = data || [];
+  return _bioStudents;
+}
+
+function renderBioStudents(query = '') {
+  const el = document.getElementById('bio-search-results');
+  if (!el) return;
+  const normalized = query.trim().toLocaleLowerCase('es');
+  const hits = _bioStudents.filter(student => {
+    if (!normalized) return true;
+    return String(student.full_name || '').toLocaleLowerCase('es').includes(normalized)
+      || String(student.dni || '').includes(normalized);
+  }).slice(0, 12);
+
+  if (!hits.length) {
+    el.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray);font-size:.85rem">No encontramos alumnos activos.</p>';
+    return;
+  }
+
+  el.innerHTML = hits.map(student => `
+    <button type="button" class="alumno-card bio-student-option" data-bio-student="${escapeAdminHtml(student.id)}">
+      <span style="font-family:var(--font-cond);font-weight:700">${escapeAdminHtml(student.full_name || 'Alumno sin nombre')}</span>
+      <span style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray);margin-left:.5rem">${escapeAdminHtml(student.dni || '')}</span>
+    </button>`).join('');
+
+  el.querySelectorAll('[data-bio-student]').forEach(button => {
+    button.addEventListener('click', () => {
+      const student = _bioStudents.find(item => String(item.id) === button.dataset.bioStudent);
+      if (student) seleccionarBioAlumno(student.id, student.full_name || 'Alumno sin nombre');
+    });
+  });
+}
+
+async function resetBioSearch() {
   const inp = document.getElementById('bio-search');
   if (inp) inp.value = '';
-  document.getElementById('bio-search-results').innerHTML = '';
+  const results = document.getElementById('bio-search-results');
+  if (results) results.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray);font-size:.85rem">Cargando alumnos...</p>';
   document.getElementById('bio-form-card').style.display = 'none';
   _bioSelected = null;
+  try {
+    await loadBioStudents(true);
+    renderBioStudents();
+  } catch (error) {
+    console.error('Error cargando alumnos para Rendimiento:', error);
+    if (results) results.innerHTML = '<p style="font-family:var(--font-cond);color:var(--red2);font-size:.85rem">No se pudieron cargar los alumnos. Intenta nuevamente.</p>';
+  }
 }
 
 
 async function buscarParaBio() {
   const q = document.getElementById('bio-search').value.trim().toLowerCase();
   const el = document.getElementById('bio-search-results');
-  if (q.length < 2) { el.innerHTML = ''; return; }
-
-  if (!_bioStudents.length) {
-    const { data } = await window.supabaseClient.from('students').select('*').order('full_name');
-    _bioStudents = data || [];
+  if (!el) return;
+  try {
+    await loadBioStudents();
+    renderBioStudents(q);
+  } catch (error) {
+    console.error('Error buscando alumnos para Rendimiento:', error);
+    el.innerHTML = '<p style="font-family:var(--font-cond);color:var(--red2);font-size:.85rem">No se pudieron cargar los alumnos.</p>';
   }
-
-  const hits = _bioStudents.filter(s =>
-    s.full_name.toLowerCase().includes(q) ||
-    (s.dni || '').includes(q)
-  ).slice(0, 6);
-
-  if (!hits.length) {
-    el.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray);font-size:.85rem">Sin resultados.</p>';
-    return;
-  }
-
-  el.innerHTML = hits.map(s => `
-    <div class="alumno-card" style="cursor:pointer;margin-bottom:.5rem;padding:.6rem 1rem"
-         onclick="seleccionarBioAlumno('${s.id}','${s.full_name.replace(/'/g, "\\'")}')"
-         onmouseenter="this.style.borderColor='var(--gold)'"
-         onmouseleave="this.style.borderColor='var(--border)'">
-      <span style="font-family:var(--font-cond);font-weight:700">${s.full_name}</span>
-      <span style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray);margin-left:.5rem">${s.dni || ''}</span>
-    </div>`).join('');
 }
 
 
@@ -1439,7 +1496,8 @@ function cancelarBio() {
 async function cargarRanking() {
   const campo = document.getElementById('rk-campo')?.value || 'talla';
   const sede = document.getElementById('rk-sede')?.value || '';
-  const cat = document.getElementById('rk-cat')?.value || '';
+  const horarioSelect = document.getElementById('rk-cat');
+  let cat = horarioSelect?.value || '';
   const wrap = document.getElementById('ranking-table-wrap');
   if (!wrap) return;
 
@@ -1452,13 +1510,27 @@ async function cargarRanking() {
     const { data: students_list, error: err1 } = await q;
     if (err1) throw err1;
 
+    if (horarioSelect) {
+      const horarios = [...new Set((students_list || [])
+        .map(student => String(student.horario || '').trim())
+        .filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+      const previous = cat;
+      horarioSelect.replaceChildren(new Option('Todos', ''));
+      horarios.forEach(horario => horarioSelect.add(new Option(horario, horario)));
+      cat = horarios.includes(previous) ? previous : '';
+      horarioSelect.value = cat;
+    }
+
     let filtered_students = students_list || [];
     if (cat) {
-        filtered_students = filtered_students.filter(s => (s.horario || "") === cat);
+        filtered_students = filtered_students.filter(student => (
+          String(student.horario || '').trim().toUpperCase() === cat.trim().toUpperCase()
+        ));
     }
     
     if (filtered_students.length === 0) {
-        wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">Sin datos aún. Registra mediciones en la sección Rendimiento.</p>';
+        wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">No hay alumnos activos con estos filtros.</p>';
         return;
     }
 
@@ -1471,36 +1543,48 @@ async function cargarRanking() {
         if (!last_bio[r.student_id]) last_bio[r.student_id] = r;
     });
 
-    const result = [];
-    filtered_students.forEach(st => {
+    const result = filtered_students.map(st => {
         const bio = last_bio[st.id];
-        if (!bio) return;
-        const val = bio[campo];
-        if (val === null || val === undefined) return;
-        
-        result.push({
+        const parsedValue = Number.parseFloat(bio?.[campo]);
+        return {
             student_id: st.id,
-            full_name: st.full_name,
+            full_name: st.full_name || 'Alumno sin nombre',
             sede: st.sede || "",
             horario: st.horario || "",
-            fecha: bio.fecha,
-            valor: parseFloat(val)
-        });
+            fecha: bio?.fecha || '',
+            valor: Number.isFinite(parsedValue) ? parsedValue : null
+        };
     });
 
-    result.sort((a, b) => b.valor - a.valor);
-    const data = result.slice(0, 20);
-
-    if (!data.length) {
-      wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">Sin datos aún. Registra mediciones en la sección Rendimiento.</p>';
-      return;
-    }
+    result.sort((a, b) => {
+      if (a.valor === null) return 1;
+      if (b.valor === null) return -1;
+      return b.valor - a.valor;
+    });
+    const data = result;
 
     const label = campo === 'talla' ? 'Talla' : 'Peso';
     const unit = campo === 'talla' ? 'm' : 'kg';
     const measurementIcon = adminIcon(campo === 'talla' ? 'ruler' : 'scale');
+    const measuredCount = data.filter(row => row.valor !== null).length;
+    let rankPosition = 0;
+    const rowsHtml = data.map(row => {
+      const hasMeasurement = row.valor !== null;
+      const rank = hasMeasurement ? ++rankPosition : null;
+      const isFirst = rank === 1;
+      return `
+        <tr style="border-bottom:1px solid rgba(255,255,255,.04);${isFirst ? 'background:rgba(212,160,23,.07)' : ''}">
+          <td style="padding:.5rem .7rem;text-align:center;font-family:var(--font-display);font-size:${isFirst ? '1.4rem' : '1.1rem'};color:${isFirst ? 'var(--gold)' : 'var(--gray)'}">${rank || '—'}</td>
+          <td style="padding:.5rem .7rem;font-weight:700;color:var(--white)">${escapeAdminHtml(row.full_name)}</td>
+          <td style="padding:.5rem .7rem;text-align:center;color:var(--gray);font-size:.88rem">${escapeAdminHtml(row.sede || '—')}</td>
+          <td style="padding:.5rem .7rem;text-align:center;color:var(--gray);font-size:.88rem">${escapeAdminHtml(row.horario || '—')}</td>
+          <td style="padding:.5rem .7rem;text-align:center;font-size:${hasMeasurement ? '1.1rem' : '.82rem'};font-weight:700;color:${hasMeasurement ? 'var(--white)' : 'var(--gray)'}">${hasMeasurement ? `${row.valor}${unit}` : 'Sin registro'}</td>
+          <td style="padding:.5rem .7rem;text-align:center;color:var(--gray);font-size:.82rem">${escapeAdminHtml(row.fecha || '—')}</td>
+        </tr>`;
+    }).join('');
 
     wrap.innerHTML = `
+      <p style="font-family:var(--font-cond);color:var(--gray);margin:0 0 .7rem">${data.length} alumnos · ${measuredCount} con ${label.toLocaleLowerCase('es')} registrada</p>
       <div style="overflow-x:auto">
         <table style="width:100%;border-collapse:collapse;font-family:var(--font-cond)">
           <thead>
@@ -1514,22 +1598,12 @@ async function cargarRanking() {
             </tr>
           </thead>
           <tbody>
-            ${data.map((r, i) => `
-              <tr style="border-bottom:1px solid rgba(255,255,255,.04);${i === 0 ? 'background:rgba(212,160,23,.07)' : ''}"
-                  onmouseenter="this.style.background='rgba(255,255,255,.04)'"
-                  onmouseleave="this.style.background='${i === 0 ? 'rgba(212,160,23,.07)' : ''}'"
-              >
-                <td style="padding:.5rem .7rem;text-align:center;font-family:var(--font-display);font-size:${i === 0 ? '1.4rem' : '1.1rem'};color:${i === 0 ? 'var(--gold)' : 'var(--gray)'}">${i + 1}</td>
-                <td style="padding:.5rem .7rem;font-weight:700;color:var(--white)">${r.full_name}</td>
-                <td style="padding:.5rem .7rem;text-align:center;color:var(--gray);font-size:.88rem">${r.sede || '—'}</td>
-                <td style="padding:.5rem .7rem;text-align:center;color:var(--gray);font-size:.88rem">${r.horario || '—'}</td>
-                <td style="padding:.5rem .7rem;text-align:center;font-size:1.1rem;font-weight:700;color:var(--white)">${r.valor}${unit}</td>
-                <td style="padding:.5rem .7rem;text-align:center;color:var(--gray);font-size:.82rem">${r.fecha || '—'}</td>
-              </tr>`).join('')}
+            ${rowsHtml}
           </tbody>
         </table>
       </div>`;
   } catch (e) {
+    console.error('Error cargando Ranking:', e);
     wrap.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond)">Error al cargar ranking.</p>';
   }
 }
@@ -1692,17 +1766,19 @@ async function imprimirPlanchaQRs() {
   const items = [];
   for (const a of activos) {
     try {
-      let codeStr = '';
-      const { data } = await window.supabaseClient.from('credentials').select('code').eq('student_id', a.id).eq('is_active', true).limit(1);
-      if (data && data.length > 0) {
+      let codeStr = a.id;
+      const { data, error: credentialReadError } = await window.supabaseClient.from('credentials').select('code').eq('student_id', a.id).eq('is_active', true).limit(1);
+      if (!credentialReadError && data && data.length > 0) {
         codeStr = data[0].code;
-      } else {
-        codeStr = await generate_jrs_code(a.id, a.full_name, a.valid_until);
-        await window.supabaseClient.from('credentials').insert({student_id: a.id, code: codeStr, is_active: true});
+      } else if (!credentialReadError) {
+        const generatedCode = await generate_jrs_code(a.id, a.full_name, a.valid_until);
+        const { error: credentialInsertError } = await window.supabaseClient.from('credentials').insert({student_id: a.id, code: generatedCode, is_active: true});
+        if (!credentialInsertError) codeStr = generatedCode;
       }
       items.push({
         name: a.full_name,
         code: codeStr,
+        portalUrl: getPortalCredentialUrl(codeStr),
         dni: a.dni || ''
       });
     } catch (e) {
@@ -1791,7 +1867,7 @@ async function imprimirPlanchaQRs() {
     <div class="grid">
       ${items.map(item => `
         <div class="sticker">
-          <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(item.code)}" />
+          <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(item.portalUrl)}" />
           <div class="name">${item.name}</div>
           <div class="dni">${item.dni || ''}</div>
         </div>

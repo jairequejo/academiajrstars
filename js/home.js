@@ -3,6 +3,21 @@
 // ── HELPERS ──────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+function extractPortalCredential(value) {
+    let raw = String(value || '').replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
+    if (!raw) return '';
+    try {
+        const url = new URL(raw);
+        raw = url.searchParams.get('code') || raw;
+    } catch {
+        const match = raw.match(/[?&]code=([^&]+)/i);
+        if (match) {
+            try { raw = decodeURIComponent(match[1]); } catch { raw = match[1]; }
+        }
+    }
+    return raw.trim();
+}
+
 // ── INIT ─────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     // Leer ?code= de la URL (viene de chip NFC)
@@ -31,7 +46,8 @@ async function buscar() {
     const ldEl  = $('ld');
     if (!dniEl) return;
 
-    const dni_or_id = dniEl.value.trim();
+    const dni_or_id = extractPortalCredential(dniEl.value);
+    dniEl.value = dni_or_id;
     if (errEl) errEl.classList.add('hidden');
 
     if (dni_or_id.length < 8) {
@@ -45,7 +61,17 @@ async function buscar() {
 
     try {
         let student_id_resolved = null;
-        if (dni_or_id.startsWith("JRS:")) {
+        const { data: exactCredentials, error: credentialError } = await window.supabaseClient
+            .from('credentials')
+            .select('student_id')
+            .eq('code', dni_or_id)
+            .eq('is_active', true)
+            .limit(1);
+        if (!credentialError && exactCredentials?.length) {
+            student_id_resolved = exactCredentials[0].student_id;
+        }
+
+        if (!student_id_resolved && dni_or_id.startsWith("JRS:")) {
             const parts = dni_or_id.split(":");
             if (parts.length >= 2) {
                 const short_id = parts[1];
@@ -258,21 +284,7 @@ function toggleScanner() {
 
 // ── HANDLE CÓDIGO (QR o NFC) ──────────────────────────
 function handleScanCode(rawCode) {
-    let raw = rawCode.replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
-
-    // Extraer ?code= si viene en URL completa
-    if (raw.startsWith('http://') || raw.startsWith('https://')) {
-        try {
-            const url = new URL(raw);
-            const param = url.searchParams.get('code');
-            if (param) raw = decodeURIComponent(param);
-        } catch {
-            const idx = raw.indexOf('?code=');
-            if (idx !== -1) raw = decodeURIComponent(raw.slice(idx + 6));
-        }
-    } else if (raw.includes('?code=')) {
-        raw = decodeURIComponent(raw.split('?code=')[1]);
-    }
+    const raw = extractPortalCredential(rawCode);
 
     const dniEl = $('dni');
     if (dniEl) dniEl.value = raw;

@@ -8,7 +8,7 @@
   <title>JR Stars — Admin Panel</title>
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20260904">
-  <link rel="stylesheet" href="../css/admin.css?v=20260905">
+  <link rel="stylesheet" href="../css/admin.css?v=20260905b">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260904">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
   <meta name="theme-color" content="#E30D13">
@@ -179,6 +179,14 @@
           <div class="cobranzas-note">
             <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#clock"></use></svg>
             <span>Para evitar mensajes repetidos, cada alumno puede notificarse una vez cada 24 horas.</span>
+          </div>
+
+          <div class="cobranzas-alerts" id="cobranzas-alerts">
+            <div>
+              <strong>Alertas de vencimiento</strong>
+              <span id="cobranzas-alerts-status">Actívalas para recibir un aviso al entrar o volver a la PWA.</span>
+            </div>
+            <button class="cobranzas-alerts-button" id="cobranzas-alerts-button" type="button">Activar alertas</button>
           </div>
 
           <div class="cobranzas-list" id="cobranzas-list" aria-live="polite">
@@ -370,8 +378,6 @@
               <label class="form-label">Horario</label>
               <select class="select-jr" id="rk-cat" onchange="cargarRanking()">
                 <option value="">Todos</option>
-                <option value="LMV">LMV</option>
-                <option value="MJS">MJS</option>
               </select>
             </div>
           </div>
@@ -810,10 +816,10 @@
 
   <script src="../js/admin-icons.js?v=20260904"></script>
   <script src="../js/admin-sedes.js?v=20260904"></script>
-  <script src="../js/admin.js?v=20260905"></script>
+  <script src="../js/admin.js?v=20260905b"></script>
   <script src="../js/alumno-ficha.js?v=20260904"></script>
   <script src="../js/inscripcion.js?v=20260904"></script>
-  <script src="../js/admin-cobranzas.js?v=20260905"></script>
+  <script src="../js/admin-cobranzas.js?v=20260905b"></script>
 </body>
 
 </html>

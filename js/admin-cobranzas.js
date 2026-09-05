@@ -1,5 +1,8 @@
 // Cobranzas y recordatorios del panel administrativo.
 const cobranzasById = new Map();
+const COBRANZAS_ALERTS_ENABLED_KEY = 'jr_admin_cobranzas_alerts_enabled';
+const COBRANZAS_LAST_ALERT_KEY = 'jr_admin_cobranzas_last_alert';
+let adminServiceWorkerRegistration = null;
 
 function escapeCobranzasHtml(value) {
     return String(value ?? '').replace(/[&<>'"]/g, char => ({
@@ -11,6 +14,112 @@ function getCobranzasLimit() {
     const limit = new Date();
     limit.setDate(limit.getDate() + 2);
     return limit.toISOString().split('T')[0];
+}
+
+function getLocalDateKey() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+function updateCobranzasAlertsUi() {
+    const container = document.getElementById('cobranzas-alerts');
+    const status = document.getElementById('cobranzas-alerts-status');
+    const button = document.getElementById('cobranzas-alerts-button');
+    if (!container || !status || !button) return;
+
+    container.classList.remove('is-enabled', 'is-denied');
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+        status.textContent = 'Este navegador no admite notificaciones de la PWA.';
+        button.textContent = 'No disponible';
+        button.disabled = true;
+        return;
+    }
+
+    const enabled = Notification.permission === 'granted'
+        && localStorage.getItem(COBRANZAS_ALERTS_ENABLED_KEY) === 'true';
+    if (enabled) {
+        container.classList.add('is-enabled');
+        status.textContent = 'Activas. Revisaremos vencimientos al abrir o volver a la aplicación.';
+        button.textContent = 'Alertas activas';
+        button.disabled = true;
+        return;
+    }
+
+    if (Notification.permission === 'denied') {
+        container.classList.add('is-denied');
+        status.textContent = 'El navegador bloqueó las notificaciones. Habilítalas desde los permisos del sitio.';
+        button.textContent = 'Bloqueadas';
+        button.disabled = true;
+        return;
+    }
+
+    status.textContent = 'Actívalas para recibir un aviso al entrar o volver a la PWA.';
+    button.textContent = 'Activar alertas';
+    button.disabled = false;
+}
+
+async function registerAdminPwa() {
+    if (!('serviceWorker' in navigator)) {
+        updateCobranzasAlertsUi();
+        return null;
+    }
+    try {
+        adminServiceWorkerRegistration = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+        updateCobranzasAlertsUi();
+        return adminServiceWorkerRegistration;
+    } catch (error) {
+        console.warn('No se pudo registrar la PWA de administración:', error);
+        updateCobranzasAlertsUi();
+        return null;
+    }
+}
+
+async function activateCobranzasAlerts() {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+        localStorage.setItem(COBRANZAS_ALERTS_ENABLED_KEY, 'true');
+        await registerAdminPwa();
+        showToast('Alertas de cobros activadas.');
+        await refreshCobranzasNavState();
+    }
+    updateCobranzasAlertsUi();
+}
+
+async function maybeNotifyCobranzas(rows = []) {
+    if (!('Notification' in window) || !rows.length || Notification.permission !== 'granted') return;
+    if (localStorage.getItem(COBRANZAS_ALERTS_ENABLED_KEY) !== 'true') return;
+
+    const signature = rows.map(student => `${student.id}:${student.valid_until || ''}`).sort().join('|');
+    const current = { date: getLocalDateKey(), signature };
+    try {
+        const previous = JSON.parse(localStorage.getItem(COBRANZAS_LAST_ALERT_KEY) || 'null');
+        if (previous?.date === current.date && previous?.signature === signature) return;
+    } catch {
+        localStorage.removeItem(COBRANZAS_LAST_ALERT_KEY);
+    }
+
+    const registration = adminServiceWorkerRegistration || await registerAdminPwa();
+    if (!registration) return;
+
+    const now = new Date();
+    const expired = rows.filter(student => (
+        new Date(`${student.valid_until}T23:59:59`) < now
+    )).length;
+    const upcoming = rows.length - expired;
+    const parts = [];
+    if (expired) parts.push(`${expired} vencido${expired === 1 ? '' : 's'}`);
+    if (upcoming) parts.push(`${upcoming} por vencer`);
+
+    await registration.showNotification('JR Stars · Cobros por atender', {
+        body: `${parts.join(' y ')}. Toca para revisar Cobranzas.`,
+        icon: './icons/red-white/pwa-admin-192.png',
+        badge: './icons/red-white/favicon-32.png',
+        tag: 'jr-admin-cobranzas',
+        renotify: true,
+        data: { url: './?section=cobranzas' }
+    });
+    localStorage.setItem(COBRANZAS_LAST_ALERT_KEY, JSON.stringify(current));
 }
 
 function setCobranzasNavState(pendingCount = null) {
@@ -28,13 +137,16 @@ function setCobranzasNavState(pendingCount = null) {
 }
 
 async function refreshCobranzasNavState() {
-    const { count, error } = await window.supabaseClient
+    if (!window.supabaseClient) return;
+    const { data, error } = await window.supabaseClient
         .from('students')
-        .select('id', { count: 'exact', head: true })
+        .select('id, full_name, valid_until')
         .eq('is_active', true)
         .lte('valid_until', getCobranzasLimit());
 
-    setCobranzasNavState(error ? null : (count || 0));
+    const rows = data || [];
+    setCobranzasNavState(error ? null : rows.length);
+    if (!error) maybeNotifyCobranzas(rows).catch(console.warn);
 }
 
 function setCobranzasMetrics(total = 0, expired = 0) {
@@ -82,6 +194,7 @@ async function loadCobranzas() {
 
         setCobranzasMetrics(rows.length, expired);
         setCobranzasNavState(rows.length);
+        maybeNotifyCobranzas(rows).catch(console.warn);
         cobranzasById.clear();
         rows.forEach(student => cobranzasById.set(String(student.id), student));
 
@@ -197,6 +310,7 @@ async function inhabilitarMoroso(studentId) {
 }
 
 document.getElementById('cobranzas-refresh')?.addEventListener('click', loadCobranzas);
+document.getElementById('cobranzas-alerts-button')?.addEventListener('click', activateCobranzasAlerts);
 document.getElementById('cobranzas-list')?.addEventListener('click', event => {
     const button = event.target.closest('[data-cobranza-action]');
     if (!button || button.disabled) return;
@@ -204,4 +318,8 @@ document.getElementById('cobranzas-list')?.addEventListener('click', event => {
     if (button.dataset.cobranzaAction === 'disable') inhabilitarMoroso(button.dataset.studentId);
 });
 
-refreshCobranzasNavState();
+registerAdminPwa().then(() => refreshCobranzasNavState());
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshCobranzasNavState();
+});
+setInterval(refreshCobranzasNavState, 30 * 60 * 1000);

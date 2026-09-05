@@ -258,6 +258,20 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
 .cobranza-metric--warning strong { color: #9a6700; }
 .cobranzas-note { display: flex; align-items: center; gap: .7rem; margin-bottom: 1rem; padding: .85rem 1rem; color: #5b6473; background: #fff9df; border: 1px solid #f5df89; border-radius: 13px !important; font-size: .88rem; font-weight: 600; }
 .cobranzas-note .admin-icon { flex: 0 0 auto; color: #9a6700; font-size: 1.25rem; }
+.cobranzas-alerts { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; padding: .9rem 1rem; color: #dce4ef; background: #111318; border: 1px solid #292e37; border-radius: 14px !important; }
+.cobranzas-alerts > div { min-width: 0; }
+.cobranzas-alerts strong, .cobranzas-alerts span { display: block; }
+.cobranzas-alerts strong { color: #fff; font-size: .88rem; }
+.cobranzas-alerts span { margin-top: .22rem; color: #9da8b8; font-size: .76rem; line-height: 1.35; }
+.cobranzas-alerts-button { flex: 0 0 auto; min-height: 42px; padding: .65rem .9rem; color: #111; background: #ffc107; border: 0; border-radius: 10px !important; font: 800 .78rem/1 var(--font-body); cursor: pointer; }
+.cobranzas-alerts-button:hover { background: #ffd54f; }
+.cobranzas-alerts-button:disabled { color: #d5d9df; background: #303641; cursor: default; }
+.cobranzas-alerts.is-enabled { border-color: rgba(32, 216, 121, .4); }
+.cobranzas-alerts.is-enabled .cobranzas-alerts-button { color: #072c1b; background: #20d879; }
+.cobranzas-alerts.is-denied { border-color: rgba(255, 32, 53, .45); }
+.cobranzas-alerts.is-denied .cobranzas-alerts-button { color: #fff; background: #b91c2b; }
+.bio-student-option { width: 100%; margin-bottom: .5rem; padding: .7rem 1rem; color: inherit; text-align: left; cursor: pointer; }
+.bio-student-option:hover, .bio-student-option:focus-visible { border-color: var(--gold); outline: none; }
 
 .cobranzas-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .cobranza-card { min-width: 0; padding: 1.25rem; background: #fff; border: 1px solid #e3e7ed; border-top: 5px solid #ffc107; border-radius: 19px !important; box-shadow: 0 8px 28px rgba(15, 23, 42, .07); }
@@ -310,6 +324,11 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
 @media (prefers-reduced-motion: reduce) {
   #bnav-cobranzas.has-pending .bnav-cobranzas-icon,
   #bnav-cobranzas.has-pending .bnav-label { animation: none; }
+}
+
+@media (max-width: 520px) {
+  .cobranzas-alerts { align-items: stretch; flex-direction: column; }
+  .cobranzas-alerts-button { width: 100%; }
 }
 
 @media (min-width: 701px) and (max-width: 1200px) {

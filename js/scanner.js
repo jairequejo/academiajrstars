@@ -546,9 +546,25 @@ async function _doOnlineScan(code) {
     }
 }
 
+function extractScannerCredential(value) {
+    let raw = String(value || '').replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
+    if (!raw) return '';
+    try {
+        const url = new URL(raw);
+        raw = url.searchParams.get('code') || raw;
+    } catch {
+        const match = raw.match(/[?&]code=([^&]+)/i);
+        if (match) {
+            try { raw = decodeURIComponent(match[1]); } catch { raw = match[1]; }
+        }
+    }
+    return raw.trim();
+}
+
 function handleScan(decodedText) {
     if (isProcessing) return;
-    const code = decodedText.includes('?code=') ? decodedText.split('?code=')[1] : decodedText;
+    const code = extractScannerCredential(decodedText);
+    if (!code) return;
     const statusEl = document.getElementById('status-text');
     if (statusEl) statusEl.textContent = 'Procesando...';
     if (!navigator.onLine) { isProcessing = true; _armSafety(); processOfflineScan(code); return; }
