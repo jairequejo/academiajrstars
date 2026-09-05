@@ -53,6 +53,7 @@ function goTo(page, ev) {
   document.getElementById(`page-${page}`).classList.add('active');
   const navItem = document.getElementById(`nav-${page}`);
   if (navItem) navItem.classList.add('active');
+  setBottomNav(page);
 
   paginaActual = page;
   closeSidebar();
