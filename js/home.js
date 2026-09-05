@@ -263,6 +263,36 @@ function mostrarPaneles(vista) {
     }
 }
 
+function toggleHistorial() {
+    const list = document.getElementById('pc-history-list');
+    const btn  = document.getElementById('pc-history-toggle');
+    if (!list || !btn) return;
+    const expanded = btn.getAttribute('aria-expanded') === 'true';
+    list.querySelectorAll('.pc-history-hidden, .pc-history-row').forEach((row, i) => {
+        if (i >= 3) {
+            if (expanded) {
+                row.classList.add('pc-history-hidden');
+            } else {
+                row.classList.remove('pc-history-hidden');
+            }
+        }
+    });
+    btn.setAttribute('aria-expanded', String(!expanded));
+    const countEl = btn.querySelector('.pc-history-toggle-count');
+    const iconEl  = btn.querySelector('.pc-history-toggle-icon');
+    const textEl  = btn.querySelector('span:first-child');
+    if (!expanded) {
+        if (textEl) textEl.textContent  = 'VER MENOS';
+        if (countEl) countEl.textContent = '';
+        if (iconEl)  iconEl.textContent  = '▲';
+    } else {
+        const total = list.querySelectorAll('.pc-history-row').length;
+        if (textEl) textEl.textContent  = 'VER TODAS LAS MEDICIONES';
+        if (countEl) countEl.textContent = `${total - 3} más`;
+        if (iconEl)  iconEl.textContent  = '▼';
+    }
+}
+
 function volver() {
     localStorage.removeItem('jrstars_portal_session');
     mostrarPaneles('buscar');
@@ -568,15 +598,16 @@ function renderCard(d) {
         ${buildMetricSparkline(historyData, 'sprint_10m_seg', 's', 'Sprint 10m')}
       </div>` : '';
 
+    const PREVIEW = 3;
     const metricHistory = historyData.length ? `
       <div>
         <div class="pc-history-head">
           <div><span>Registro por registro</span><h4>Historial de métricas</h4></div>
           <strong>${physicalRecords}</strong>
         </div>
-        <div class="pc-history-list">
+        <div class="pc-history-list" id="pc-history-list">
           ${historyData.map((item, index) => `
-            <div class="pc-history-row${index === 0 ? ' is-latest' : ''}">
+            <div class="pc-history-row${index === 0 ? ' is-latest' : ''}${index >= PREVIEW ? ' pc-history-hidden' : ''}">
               <div>
                 <span>${index === 0 ? 'ÚLTIMO CONTROL' : 'CONTROL'}</span>
                 <strong>${escapePortalHtml(item.fecha || 'Sin fecha')}</strong>
@@ -589,6 +620,10 @@ function renderCard(d) {
               </dl>
             </div>`).join('')}
         </div>
+        ${historyData.length > PREVIEW ? `
+        <button class="pc-history-toggle" id="pc-history-toggle" onclick="toggleHistorial()" aria-expanded="false">
+          <span>VER TODAS LAS MEDICIONES</span><span class="pc-history-toggle-count">${historyData.length - PREVIEW} más</span><span class="pc-history-toggle-icon">▼</span>
+        </button>` : ''}
       </div>` : `
       <div class="performance-empty">
         <span aria-hidden="true">＋</span>
