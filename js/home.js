@@ -172,7 +172,7 @@ async function buscar() {
         
         const { data: bioData } = await window.supabaseClient
             .from('biometria')
-            .select('fecha, talla, peso')
+            .select('fecha, talla, peso, salto_cm, sprint_10m_seg')
             .eq('student_id', sid)
             .order('created_at', { ascending: false })
             .limit(12);
@@ -462,32 +462,38 @@ function renderCard(d) {
     const streakCopy = streak > 0
         ? `${streak} ${streak === 1 ? 'sesión consecutiva' : 'sesiones consecutivas'} construyendo disciplina.`
         : 'El próximo entrenamiento enciende tu estrella.';
+    const lastBio = historyData[0] || {};
+    const saltoCmLatest = Number.isFinite(lastBio.salto_cm) ? `${lastBio.salto_cm}cm` : '—';
+    const sprintLatest = Number.isFinite(lastBio.sprint_10m_seg) ? `${lastBio.sprint_10m_seg}s` : '—';
+
     const playerPanel = `
-      <section class="epic-player-panel player-overview">
-        <div class="epic-player-topline"><span>JR STARS · TEMPORADA ${season}</span>${status}</div>
-        <div class="player-overview-grid">
-          <div class="player-identity-block">
-            <img class="player-crest" src="../img/escudo.png" alt="Escudo JR Stars" width="96" height="96">
-            <span class="epic-kicker">Perfil de alto rendimiento</span>
-            <h2 class="epic-name">${name}</h2>
-            <div class="epic-meta">${meta}</div>
+      <div class="pc-hero">
+        <div class="pc-topline">
+          <span>JR STARS · TEMPORADA ${season}</span>
+          ${d.debe
+            ? '<span class="pc-status-locked">Acceso restringido</span>'
+            : '<span class="pc-status-active">Jugador activo</span>'}
+        </div>
+        <div class="pc-hero-body">
+          <img class="pc-avatar"
+            src="${d.foto_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=e5191b&color=fff&size=256`}"
+            alt="Foto de ${name}"
+            onerror="this.src='../img/escudo.png'; this.style.objectFit='contain'; this.style.padding='8px';">
+          <div class="pc-identity">
+            <span class="pc-kicker">Perfil de alto rendimiento</span>
+            <h2 class="pc-name">${name}</h2>
+            <div class="pc-meta">${[d.category, d.sede && `Sede ${d.sede}`, d.grupo && `Grupo ${d.grupo}`, d.turno, d.horario].filter(Boolean).map(i => `<span class="pc-chip">${escapePortalHtml(i)}</span>`).join('')}</div>
           </div>
-          <div class="streak-stage${streak > 0 ? ' is-active' : ''}">
-            <span class="streak-overline">Disciplina en juego</span>
-            <div class="streak-star-shell" aria-label="${streak} sesiones de racha">
-              <span class="streak-spark streak-spark--one" aria-hidden="true">★</span>
-              <span class="streak-spark streak-spark--two" aria-hidden="true">★</span>
-              <svg class="streak-star" viewBox="0 0 200 190" aria-hidden="true">
-                <defs><linearGradient id="streak-gradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff176"></stop><stop offset=".42" stop-color="#ffb300"></stop><stop offset="1" stop-color="#ff1744"></stop></linearGradient></defs>
-                <path d="M100 8 123 69 188 72 137 113 154 178 100 141 46 178 63 113 12 72 77 69Z"></path>
-              </svg>
-              <div class="streak-value"><strong>${streak}</strong><span>${streak === 1 ? 'SESIÓN' : 'SESIONES'}</span></div>
-            </div>
-            <strong class="streak-title">${streakTitle}</strong>
-            <p>${streakCopy}</p>
+          <div class="pc-streak">
+            <span class="pc-streak-label">Disciplina</span>
+            <div class="pc-streak-flame" aria-hidden="true">🔥</div>
+            <div class="pc-streak-number">${streak}</div>
+            <div class="pc-streak-unit">${streak === 1 ? 'SESIÓN' : 'SESIONES'}</div>
+            <div class="pc-streak-title">${streakTitle}</div>
+            <p class="pc-streak-copy">${streakCopy}</p>
           </div>
         </div>
-      </section>`;
+      </div>`;
 
     if (d.debe) {
         wrap.innerHTML = `
@@ -512,61 +518,97 @@ function renderCard(d) {
         `Revisa el Portal del Jugador → ${window.location.origin}/portal/`
     );
     const hasPhysicalData = Boolean(d.talla_actual || d.peso_actual);
-    const metricHistory = historyData.length ? `
-      <section class="metric-history">
-        <div class="metric-history-head"><div><span>Registro por registro</span><h4>Historial de métricas</h4></div><strong>${physicalRecords}</strong></div>
-        <div class="metric-history-list">
-          ${historyData.map((item, index) => `
-            <article class="metric-history-row${index === 0 ? ' is-latest' : ''}">
-              <div><span>${index === 0 ? 'ÚLTIMO CONTROL' : 'CONTROL'}</span><strong>${escapePortalHtml(item.fecha || 'Sin fecha')}</strong></div>
-              <dl><div><dt>Estatura</dt><dd>${Number.isFinite(item.talla) ? `${item.talla}m` : '—'}</dd></div><div><dt>Peso</dt><dd>${Number.isFinite(item.peso) ? `${item.peso}kg` : '—'}</dd></div></dl>
-            </article>`).join('')}
-        </div>
-      </section>` : `
-      <div class="performance-empty">
-        <span aria-hidden="true">＋</span><div><strong>Primera medición pendiente</strong><p>Cuando el entrenador registre talla y peso, aquí aparecerá toda su evolución.</p></div>
-      </div>`;
+
     const charts = historyData.length ? `
-      <div class="metric-charts">
+      <div class="pc-charts">
         ${buildMetricSparkline(historyData, 'talla', 'm', 'Estatura')}
         ${buildMetricSparkline(historyData, 'peso', 'kg', 'Peso')}
+        ${buildMetricSparkline(historyData, 'salto_cm', 'cm', 'Salto CMJ')}
+        ${buildMetricSparkline(historyData, 'sprint_10m_seg', 's', 'Sprint 10m')}
       </div>` : '';
+
+    const metricHistory = historyData.length ? `
+      <div>
+        <div class="pc-history-head">
+          <div><span>Registro por registro</span><h4>Historial de métricas</h4></div>
+          <strong>${physicalRecords}</strong>
+        </div>
+        <div class="pc-history-list">
+          ${historyData.map((item, index) => `
+            <div class="pc-history-row${index === 0 ? ' is-latest' : ''}">
+              <div>
+                <span>${index === 0 ? 'ÚLTIMO CONTROL' : 'CONTROL'}</span>
+                <strong>${escapePortalHtml(item.fecha || 'Sin fecha')}</strong>
+              </div>
+              <dl class="pc-history-dl">
+                <div><dt>Estatura</dt><dd>${Number.isFinite(item.talla) ? `${item.talla}m` : '—'}</dd></div>
+                <div><dt>Peso</dt><dd>${Number.isFinite(item.peso) ? `${item.peso}kg` : '—'}</dd></div>
+                <div><dt>Salto</dt><dd>${Number.isFinite(item.salto_cm) ? `${item.salto_cm}cm` : '—'}</dd></div>
+                <div><dt>Sprint</dt><dd>${Number.isFinite(item.sprint_10m_seg) ? `${item.sprint_10m_seg}s` : '—'}</dd></div>
+              </dl>
+            </div>`).join('')}
+        </div>
+      </div>` : `
+      <div class="performance-empty">
+        <span aria-hidden="true">＋</span>
+        <div><strong>Primera medición pendiente</strong><p>Cuando el entrenador registre talla y peso, aquí aparecerá toda su evolución.</p></div>
+      </div>`;
 
     wrap.innerHTML = `
       <article class="epic-card">
         ${playerPanel}
-        <section class="epic-data-panel">
-          <section class="performance-zone">
-            <div class="performance-heading">
-              <div><span>Rendimiento primero</span><h3>EVOLUCIÓN FÍSICA</h3></div>
-              <b>${physicalRecords} ${physicalRecords === 1 ? 'CONTROL' : 'CONTROLES'}</b>
+        <div class="pc-body">
+          <div class="pc-section-head">
+            <div class="pc-section-head-left">
+              <span>Rendimiento primero</span>
+              <h3>EVOLUCIÓN FÍSICA</h3>
             </div>
-            <div class="performance-metrics">
-              <article class="performance-metric performance-metric--height"><span>Estatura actual</span><strong>${escapePortalHtml(d.talla_actual || '—')}</strong><em>${escapePortalHtml(d.delta_talla || 'Sin tendencia')}</em></article>
-              <article class="performance-metric performance-metric--weight"><span>Peso actual</span><strong>${escapePortalHtml(d.peso_actual || '—')}</strong><em>${escapePortalHtml(d.delta_peso || 'Sin tendencia')}</em></article>
-              <article class="performance-metric performance-metric--score"><span>Controles</span><strong>${physicalRecords}</strong><em>${hasPhysicalData ? 'Progreso medible' : 'Por comenzar'}</em></article>
-            </div>
-            ${charts}
-            ${metricHistory}
-          </section>
+            <span class="pc-section-badge">${physicalRecords} ${physicalRecords === 1 ? 'CONTROL' : 'CONTROLES'}</span>
+          </div>
 
-          <section class="attendance-zone">
-            <div class="epic-section-title">Disciplina y asistencia</div>
-            <div class="attendance-grid">
-              <article><strong>${totalSessions}</strong><span>Sesiones del ciclo</span></article>
-              <article><strong>${monthSessions}</strong><span>Este mes</span></article>
-              <article><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong><span>Último entreno</span></article>
+          <div class="pc-metrics-grid">
+            <div class="pc-metric">
+              <span class="pc-metric-label">Estatura actual</span>
+              <span class="pc-metric-value">${escapePortalHtml(d.talla_actual || '—')}</span>
+              <span class="pc-metric-delta">${escapePortalHtml(d.delta_talla || 'Sin tendencia')}</span>
             </div>
-            <div class="momentum-strip"><span class="momentum-mark" aria-hidden="true">↗</span><div><strong>${streakTitle}</strong><p>${streakCopy}</p></div></div>
-          </section>
+            <div class="pc-metric pc-metric--gold">
+              <span class="pc-metric-label">Peso actual</span>
+              <span class="pc-metric-value">${escapePortalHtml(d.peso_actual || '—')}</span>
+              <span class="pc-metric-delta">${escapePortalHtml(d.delta_peso || 'Sin tendencia')}</span>
+            </div>
+            <div class="pc-metric pc-metric--green">
+              <span class="pc-metric-label">Salto Vertical</span>
+              <span class="pc-metric-value">${saltoCmLatest}</span>
+              <span class="pc-metric-delta" style="color:#16a34a;">Potencia CMJ</span>
+            </div>
+            <div class="pc-metric pc-metric--purple">
+              <span class="pc-metric-label">Sprint 10m</span>
+              <span class="pc-metric-value">${sprintLatest}</span>
+              <span class="pc-metric-delta">Aceleración</span>
+            </div>
+          </div>
 
-          <section class="player-facts">
-            <div><span>Sede</span><strong>${escapePortalHtml(d.sede || 'Por asignar')}</strong></div>
-            <div><span>Horario</span><strong>${escapePortalHtml(d.horario || 'Por asignar')}</strong></div>
-            <div><span>Estado</span><strong>Al día</strong></div>
-          </section>
-          <div class="epic-actions"><a href="https://wa.me/?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="epic-share"><span>COMPARTIR PROGRESO</span><b>↗</b></a></div>
-        </section>
+          ${charts}
+          ${metricHistory}
+
+          <div class="pc-divider"></div>
+
+          <div class="pc-att-label">Disciplina y asistencia</div>
+          <div class="pc-att-grid">
+            <div class="pc-att-card"><strong>${totalSessions}</strong><span>Sesiones del ciclo</span></div>
+            <div class="pc-att-card"><strong>${monthSessions}</strong><span>Este mes</span></div>
+            <div class="pc-att-card"><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong><span>Último entreno</span></div>
+          </div>
+          <div class="pc-momentum">
+            <div class="pc-momentum-icon" aria-hidden="true">↗</div>
+            <div><strong>${streakTitle}</strong><p>${streakCopy}</p></div>
+          </div>
+
+          <a href="https://wa.me/?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="pc-share">
+            <span>COMPARTIR PROGRESO</span><b>↗</b>
+          </a>
+        </div>
       </article>`;
 }
 
