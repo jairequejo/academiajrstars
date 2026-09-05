@@ -44,9 +44,57 @@ async function loadCobranzas() {
         const phoneDisplay = telStr ? telStr : 'Sin teléfono';
         const tarifaStr = st.tarifa_mensual ? parseFloat(st.tarifa_mensual).toFixed(2) : '---';
         
-        let notifClass = "w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition-colors flex justify-center items-center gap-2";
-        let notifText = "📱 Notificar (S/ " + tarifaStr + ")";
+        let notifClass = "flex-1 bg-[#25D366] hover:bg-[#1DA851] text-white font-[800] py-3 px-4 rounded-full transition-colors flex justify-center items-center gap-2 shadow-sm text-sm uppercase";
+        let notifText = "📱 Notificar S/ " + tarifaStr;
         let notifAction = `onclick="notificarWhatsApp('${st.id}', '${st.full_name}', '${st.parent_name}', '${telStr}', '${fechaVenc}', '${tarifaStr}')"`;
+
+        if (!puedeNotificar) {
+            notifClass = "flex-1 bg-gray-200 text-gray-500 font-[800] py-3 px-4 rounded-full cursor-not-allowed flex justify-center items-center text-sm uppercase";
+            notifText = "✓ Notificado";
+            notifAction = "disabled";
+        } else if (!telStr) {
+            notifClass = "flex-1 bg-gray-200 text-gray-500 font-[800] py-3 px-4 rounded-full cursor-not-allowed flex justify-center items-center text-sm uppercase";
+            notifText = "⚠️ Sin número";
+            notifAction = "disabled";
+        }
+
+        const badgeClass = vencido ? 'bg-[#da1212] text-white' : 'bg-black text-white';
+        const statusText = vencido ? 'VENCIDO' : 'VENCE PRONTO';
+
+        html += `
+        <div class="bg-white rounded-[20px] shadow-sm border-[2px] border-[#e6e9ee] overflow-hidden flex flex-col mb-4 relative">
+            
+            <div class="absolute top-0 right-0 ${badgeClass} font-[800] text-xs px-3 py-1 rounded-bl-[12px] uppercase tracking-wide">
+                ${statusText}
+            </div>
+
+            <div class="p-5 flex flex-col gap-1 border-b border-[#e6e9ee]">
+                <h3 class="text-black text-2xl font-[800] leading-none pr-20 uppercase" style="font-family: var(--font-display);">${st.full_name}</h3>
+                <p class="text-sm text-gray-600 mt-2 font-[600]">Apoderado: <span class="text-black">${st.parent_name || 'Desconocido'}</span></p>
+                <div class="flex justify-between items-end mt-1">
+                    <p class="text-sm text-gray-600 font-[600]">Tel: <span class="font-mono text-black">${phoneDisplay}</span></p>
+                    <div class="text-right">
+                        <p class="text-[0.7rem] text-gray-500 uppercase font-[800]">Vencimiento</p>
+                        <p class="text-lg font-[800] leading-none ${vencido ? 'text-[#da1212]' : 'text-black'}">${fechaVenc}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 px-5 py-3 flex justify-between items-center text-sm border-b border-[#e6e9ee]">
+                <span class="text-gray-500 font-[600]">Última Notif: <span class="text-black">${lastNotifText}</span></span>
+                <span class="font-[800] text-black text-base">S/ ${tarifaStr}</span>
+            </div>
+
+            <div class="p-4 flex gap-3 bg-white">
+                <button class="${notifClass}" ${notifAction}>
+                    ${notifText}
+                </button>
+                <button onclick="inhabilitarMoroso('${st.id}', '${st.full_name}')" class="bg-black hover:bg-gray-800 text-white font-[800] py-3 px-6 rounded-full transition-colors shadow-sm text-sm uppercase">
+                    Inhabilitar
+                </button>
+            </div>
+        </div>
+        `;
 
         if (!puedeNotificar) {
             notifClass = "w-full bg-gray-300 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed flex justify-center items-center";
