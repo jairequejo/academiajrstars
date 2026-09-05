@@ -179,7 +179,7 @@ async function loadCobranzas() {
     try {
         const { data, error } = await window.supabaseClient
             .from('students')
-            .select('id, full_name, valid_until, parent_name, parent_phone, last_notified_at, tarifa_mensual')
+            .select('id, full_name, valid_until, parent_name, parent_phone, tarifa_mensual, historial_notificaciones(fecha_envio)')
             .eq('is_active', true)
             .lte('valid_until', getCobranzasLimit())
             .order('valid_until', { ascending: true });
@@ -208,7 +208,29 @@ async function loadCobranzas() {
             return;
         }
 
+        
+        // Pre-procesar notificaciones para ordenamiento
+        rows.forEach(student => {
+            const notifs = student.historial_notificaciones || [];
+            let last_notified_at = notifs.length > 0 ? notifs.reduce((max, n) => new Date(n.fecha_envio) > new Date(max.fecha_envio) ? n : max).fecha_envio : null;
+            student._last_notified_at = last_notified_at;
+            const phone = normalizePeruPhone(student.parent_phone);
+            let canNotify = Boolean(phone);
+            if (last_notified_at) {
+                canNotify = canNotify && ((now - new Date(last_notified_at)) / 36e5 >= 24);
+            }
+            student._canNotify = canNotify;
+        });
+
+        // Ordenar: canNotify (true arriba), luego fecha ascendente
+        rows.sort((a, b) => {
+            if (a._canNotify && !b._canNotify) return -1;
+            if (!a._canNotify && b._canNotify) return 1;
+            return new Date(a.valid_until) - new Date(b.valid_until);
+        });
+
         list.innerHTML = rows.map(student => renderCobranzaCard(student, now)).join('');
+
     } catch (error) {
         console.error(error);
         setCobranzasMetrics();
@@ -234,13 +256,24 @@ function renderCobranzaCard(student, now) {
     const dueDate = formatCobranzasDate(student.valid_until, {
         day: '2-digit', month: 'short', year: 'numeric'
     });
-    const expired = new Date(`${student.valid_until}T23:59:59`) < now;
+    const dateNow = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const dateValid = new Date(student.valid_until + "T00:00:00");
+    const diffTime = dateValid - dateNow;
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    const expired = diffDays < 0;
 
-    let canNotify = Boolean(phone);
+    let statusText = 'Por atender';
+    if (diffDays < 0) statusText = 'Vencido';
+    else if (diffDays === 0) statusText = 'Vence hoy';
+    else if (diffDays === 1) statusText = 'Vence mañana';
+
+    let canNotify = student._canNotify !== undefined ? student._canNotify : Boolean(phone);
     let notifiedText = 'Sin recordatorios enviados';
-    if (student.last_notified_at) {
-        const lastNotification = new Date(student.last_notified_at);
-        canNotify = canNotify && ((now - lastNotification) / 36e5 >= 24);
+    if (student._last_notified_at) {
+        const lastNotification = new Date(student._last_notified_at);
+        if (student._canNotify === undefined) {
+            canNotify = canNotify && ((now - lastNotification) / 36e5 >= 24);
+        }
         notifiedText = `Último aviso: ${lastNotification.toLocaleDateString('es-PE', {
             day: '2-digit', month: 'short'
         })}, ${lastNotification.toLocaleTimeString('es-PE', {
@@ -255,7 +288,7 @@ function renderCobranzaCard(student, now) {
     return `
         <article class="cobranza-card ${expired ? 'is-expired' : 'is-upcoming'}">
             <div class="cobranza-card-head">
-                <span class="cobranza-status">${expired ? 'Vencido' : 'Vence pronto'}</span>
+                <span class="cobranza-status">${statusText}</span>
                 <div class="cobranza-due"><span>Vencimiento</span><strong>${escapeCobranzasHtml(dueDate)}</strong></div>
             </div>
             <div class="cobranza-person">
@@ -283,9 +316,8 @@ async function notificarWhatsApp(studentId) {
     if (!student || !phone) return showToast('Registra un teléfono válido para el apoderado', 'error');
 
     const { error } = await window.supabaseClient
-        .from('students')
-        .update({ last_notified_at: new Date().toISOString() })
-        .eq('id', student.id);
+        .from('historial_notificaciones')
+        .insert({ alumno_id: student.id, tipo_aviso: 'WhatsApp', mensaje: 'Aviso manual desde panel administrativo' });
     if (error) return showToast('No se pudo registrar la notificación', 'error');
 
     const tarifaStr = student.tarifa_mensual ? parseFloat(student.tarifa_mensual).toFixed(2) : '0.00';

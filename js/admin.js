@@ -1541,14 +1541,16 @@ async function cargarRanking() {
   const campo = document.getElementById('rk-campo')?.value || 'talla';
   const sede = document.getElementById('rk-sede')?.value || '';
   const horarioSelect = document.getElementById('rk-cat');
-  let cat = horarioSelect?.value || '';
+  let horarioVal = horarioSelect?.value || '';
+  const categoriaSelect = document.getElementById('rk-categoria');
+  let categoriaVal = categoriaSelect?.value || '';
   const wrap = document.getElementById('ranking-table-wrap');
   if (!wrap) return;
 
   wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">Cargando...</p>';
 
   try {
-    let q = window.supabaseClient.from('students').select('id, full_name, horario, sede').eq('is_active', true);
+    let q = window.supabaseClient.from('students').select('id, full_name, horario, sede, categoria').eq('is_active', true);
     if (sede) q = q.eq('sede', sede);
     
     const { data: students_list, error: err1 } = await q;
@@ -1559,17 +1561,34 @@ async function cargarRanking() {
         .map(student => String(student.horario || '').trim())
         .filter(Boolean))]
         .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
-      const previous = cat;
+      const previous = horarioVal;
       horarioSelect.replaceChildren(new Option('Todos', ''));
       horarios.forEach(horario => horarioSelect.add(new Option(horario, horario)));
-      cat = horarios.includes(previous) ? previous : '';
-      horarioSelect.value = cat;
+      horarioVal = horarios.includes(previous) ? previous : '';
+      horarioSelect.value = horarioVal;
+    }
+
+    if (categoriaSelect) {
+      const categorias = [...new Set((students_list || [])
+        .map(student => String(student.categoria || '').trim())
+        .filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'es', { numeric: true }));
+      const previous = categoriaVal;
+      categoriaSelect.replaceChildren(new Option('Todas', ''));
+      categorias.forEach(c => categoriaSelect.add(new Option(c, c)));
+      categoriaVal = categorias.includes(previous) ? previous : '';
+      categoriaSelect.value = categoriaVal;
     }
 
     let filtered_students = students_list || [];
-    if (cat) {
+    if (horarioVal) {
         filtered_students = filtered_students.filter(student => (
-          String(student.horario || '').trim().toUpperCase() === cat.trim().toUpperCase()
+          String(student.horario || '').trim().toUpperCase() === horarioVal.trim().toUpperCase()
+        ));
+    }
+    if (categoriaVal) {
+        filtered_students = filtered_students.filter(student => (
+          String(student.categoria || '').trim().toUpperCase() === categoriaVal.trim().toUpperCase()
         ));
     }
     

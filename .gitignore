@@ -22,3 +22,6 @@ test-results/
 coverage/
 .cache/
 *.tmp
+demo_seed.sql
+demo_seed_200.sql
+demo_fix_biometria.sql

@@ -26,6 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nfcCode) {
         window.history.replaceState({}, '', window.location.pathname);
         handleScanCode(nfcCode.trim());
+    } else {
+        const storedDni = localStorage.getItem('jrstars_portal_session');
+        if (storedDni) {
+            const dniEl = document.getElementById('dni');
+            if (dniEl) dniEl.value = storedDni;
+            setTimeout(buscar, 100);
+        }
     }
 
     loadRanking();
@@ -229,6 +236,7 @@ async function buscar() {
 
         renderCard(data);
         mostrarPaneles('ficha');
+        localStorage.setItem('jrstars_portal_session', dni_or_id);
         dniEl.value = '';
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -256,6 +264,7 @@ function mostrarPaneles(vista) {
 }
 
 function volver() {
+    localStorage.removeItem('jrstars_portal_session');
     mostrarPaneles('buscar');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
