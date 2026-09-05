@@ -1,6 +1,6 @@
 async function loadCobranzas() {
-    const tbody = document.getElementById('cobranzas-tbody');
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Cargando...</td></tr>';
+    const grid = document.getElementById('cobranzas-grid');
+    grid.innerHTML = '<div class="text-center text-gray-500 py-6">Cargando data...</div>';
     
     const limite = new Date();
     limite.setDate(limite.getDate() + 2);
@@ -14,12 +14,12 @@ async function loadCobranzas() {
         .order('valid_until', { ascending: true });
         
     if (error) {
-        tbody.innerHTML = `<tr><td colspan="4" style="color:var(--danger); text-align:center;">Error cargando datos</td></tr>`;
+        grid.innerHTML = '<div class="text-center text-red-500 py-6 font-bold">Error cargando datos</div>';
         return;
     }
     
     if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No hay pagos pendientes ni próximos a vencer en los próximos 2 días.</td></tr>`;
+        grid.innerHTML = '<div class="text-center text-gray-500 py-8 bg-gray-50 rounded-xl border border-gray-200">✅ No hay pagos pendientes ni próximos a vencer.</div>';
         return;
     }
     
@@ -39,40 +39,61 @@ async function loadCobranzas() {
         
         const fechaVenc = new Date(st.valid_until + "T12:00:00").toLocaleDateString('es-PE');
         const vencido = (new Date(st.valid_until + "T23:59:59") < hoy);
-        const colorVenc = vencido ? 'color:var(--danger); font-weight:bold;' : 'color:var(--warning);';
         
         const telStr = st.parent_phone ? st.parent_phone.replace(/\D/g, '') : '';
-        const tarifaStr = st.tarifa_mensual ? parseFloat(st.tarifa_mensual).toFixed(2) : '---';
         const phoneDisplay = telStr ? telStr : 'Sin teléfono';
+        const tarifaStr = st.tarifa_mensual ? parseFloat(st.tarifa_mensual).toFixed(2) : '---';
         
-        let notifBtn = `<button class="btn" style="background:var(--success); color:white; width:100%; margin-bottom:5px;" onclick="notificarWhatsApp('${st.id}', '${st.full_name}', '${st.parent_name}', '${telStr}', '${fechaVenc}', '${tarifaStr}')">
-            <svg style="vertical-align:middle;" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.061-.3-.15-1.265-.462-2.406-1.477-.883-.788-1.48-1.761-1.653-2.059-.173-.295-.018-.458.13-.606.134-.133.3-.343.45-.514.149-.171.2-.295.3-.492.099-.195.05-.368-.025-.515-.075-.15-.672-1.62-.922-2.206-.24-.579-.481-.501-.672-.51l-.573-.008c-.198 0-.52.074-.792.369-.271.295-1.04 1.01-1.04 2.459 0 1.449 1.063 2.848 1.213 3.046.149.195 2.079 3.178 5.039 4.458.704.305 1.253.488 1.68.625.707.227 1.35.195 1.851.119.567-.085 1.767-.722 2.016-1.42.249-.697.249-1.294.175-1.42-.074-.125-.274-.2-.574-.35zM12 21.942A9.914 9.914 0 017 20.6l-.36-.214-3.53.926.945-3.441-.235-.373A9.91 9.91 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.12 1.545 5.864L0 24l6.284-1.646A11.91 11.91 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg> Notificar (Hoy)
-        </button>`;
-        
+        let notifClass = "w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded-lg transition-colors flex justify-center items-center gap-2";
+        let notifText = "📱 Notificar (S/ " + tarifaStr + ")";
+        let notifAction = `onclick="notificarWhatsApp('${st.id}', '${st.full_name}', '${st.parent_name}', '${telStr}', '${fechaVenc}', '${tarifaStr}')"`;
+
         if (!puedeNotificar) {
-            notifBtn = `<button class="btn" style="background:#555; color:white; width:100%; margin-bottom:5px; cursor:not-allowed;" disabled>Ya notificado hoy</button>`;
+            notifClass = "w-full bg-gray-300 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed flex justify-center items-center";
+            notifText = "✓ Ya notificado hoy";
+            notifAction = "disabled";
+        } else if (!telStr) {
+            notifClass = "w-full bg-gray-300 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed flex justify-center items-center";
+            notifText = "⚠️ Sin teléfono";
+            notifAction = "disabled";
         }
-        if (!telStr) {
-            notifBtn = `<button class="btn" style="background:#555; color:white; width:100%; margin-bottom:5px; cursor:not-allowed;" disabled>Sin Teléfono</button>`;
-        }
-        
+
+        const badgeClass = vencido ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-amber-100 text-amber-700 border border-amber-200';
+        const statusText = vencido ? 'VENCIDO' : 'VENCE PRONTO';
+
         html += `
-        <tr>
-            <td>
-                <strong>${st.full_name}</strong><br>
-                <span style="font-size:0.8rem; color:var(--text-gray);">Notificado: ${lastNotifText}</span>
-            </td>
-            <td style="${colorVenc}">${vencido ? 'VENCIDO' : 'Vence'}<br>${fechaVenc}</td>
-            <td>${st.parent_name || 'Desconocido'}<br><span style="font-size:0.8rem;">${phoneDisplay}</span></td>
-            <td>
-                ${notifBtn}
-                <button class="btn" style="width:100%; background:var(--danger); color:white; border-color:var(--danger);" onclick="inhabilitarMoroso('${st.id}', '${st.full_name}')">Inhabilitar</button>
-            </td>
-        </tr>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col mb-3">
+            <div class="p-4 flex justify-between items-start border-b border-gray-100">
+                <div>
+                    <h3 class="font-bold text-gray-900 text-lg leading-tight">${st.full_name}</h3>
+                    <p class="text-sm text-gray-600 mt-1">Padre: <span class="font-semibold text-gray-800">${st.parent_name || 'Desconocido'}</span></p>
+                    <p class="text-sm text-gray-600">Tel: <span class="font-mono text-gray-800">${phoneDisplay}</span></p>
+                </div>
+                <div class="flex flex-col items-end text-right">
+                    <span class="px-2 py-1 text-[0.65rem] font-bold rounded-full uppercase tracking-wide ${badgeClass}">
+                        ${statusText}
+                    </span>
+                    <p class="text-sm font-black mt-2 ${vencido ? 'text-red-600' : 'text-amber-600'}">${fechaVenc}</p>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 px-4 py-2 flex justify-between items-center text-xs text-gray-500 border-b border-gray-100">
+                <span>⏱️ Última: <span class="font-semibold text-gray-700">${lastNotifText}</span></span>
+            </div>
+
+            <div class="p-3 grid grid-cols-2 gap-2 bg-gray-50">
+                <button class="${notifClass}" ${notifAction}>
+                    ${notifText}
+                </button>
+                <button onclick="inhabilitarMoroso('${st.id}', '${st.full_name}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition-colors shadow-sm">
+                    🚫 Inhabilitar
+                </button>
+            </div>
+        </div>
         `;
     });
     
-    tbody.innerHTML = html;
+    grid.innerHTML = html;
 }
 
 async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, fechaVencimiento, tarifa) {
@@ -81,18 +102,14 @@ async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, f
         return;
     }
     
-    // Sanear el número (Si ya empieza con 51, no lo duplicamos. Si no, se lo ponemos)
     let finalPhone = parentPhone.replace(/\D/g, '');
     if (finalPhone.length === 9) {
         finalPhone = '51' + finalPhone;
     } else if (finalPhone.startsWith('51') && finalPhone.length === 11) {
-        // Ya tiene el código de Perú, lo dejamos tal cual
-    } else {
-        // En caso de números internacionales u otros formatos
+        // ok
     }
     
     const { error } = await window.supabaseClient
-
         .from('students')
         .update({ last_notified_at: new Date().toISOString() })
         .eq('id', studentId);
