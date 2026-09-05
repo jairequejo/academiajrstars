@@ -8,7 +8,7 @@ async function loadCobranzas() {
     
     const { data, error } = await window.supabaseClient
         .from('students')
-        .select('id, full_name, valid_until, parent_name, parent_phone, last_notified_at')
+        .select('id, full_name, valid_until, parent_name, parent_phone, last_notified_at, tarifa_mensual')
         .eq('is_active', true)
         .lte('valid_until', limiteStr)
         .order('valid_until', { ascending: true });
@@ -42,9 +42,10 @@ async function loadCobranzas() {
         const colorVenc = vencido ? 'color:var(--danger); font-weight:bold;' : 'color:var(--warning);';
         
         const telStr = st.parent_phone ? st.parent_phone.replace(/\D/g, '') : '';
+        const tarifaStr = st.tarifa_mensual ? parseFloat(st.tarifa_mensual).toFixed(2) : '---';
         const phoneDisplay = telStr ? telStr : 'Sin teléfono';
         
-        let notifBtn = `<button class="btn" style="background:var(--success); color:white; width:100%; margin-bottom:5px;" onclick="notificarWhatsApp('${st.id}', '${st.full_name}', '${st.parent_name}', '${telStr}', '${fechaVenc}')">
+        let notifBtn = `<button class="btn" style="background:var(--success); color:white; width:100%; margin-bottom:5px;" onclick="notificarWhatsApp('${st.id}', '${st.full_name}', '${st.parent_name}', '${telStr}', '${fechaVenc}', '${tarifaStr}')">
             <svg style="vertical-align:middle;" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.061-.3-.15-1.265-.462-2.406-1.477-.883-.788-1.48-1.761-1.653-2.059-.173-.295-.018-.458.13-.606.134-.133.3-.343.45-.514.149-.171.2-.295.3-.492.099-.195.05-.368-.025-.515-.075-.15-.672-1.62-.922-2.206-.24-.579-.481-.501-.672-.51l-.573-.008c-.198 0-.52.074-.792.369-.271.295-1.04 1.01-1.04 2.459 0 1.449 1.063 2.848 1.213 3.046.149.195 2.079 3.178 5.039 4.458.704.305 1.253.488 1.68.625.707.227 1.35.195 1.851.119.567-.085 1.767-.722 2.016-1.42.249-.697.249-1.294.175-1.42-.074-.125-.274-.2-.574-.35zM12 21.942A9.914 9.914 0 017 20.6l-.36-.214-3.53.926.945-3.441-.235-.373A9.91 9.91 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.12 1.545 5.864L0 24l6.284-1.646A11.91 11.91 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg> Notificar (Hoy)
         </button>`;
         
@@ -74,7 +75,7 @@ async function loadCobranzas() {
     tbody.innerHTML = html;
 }
 
-async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, fechaVencimiento) {
+async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, fechaVencimiento, tarifa) {
     if (!parentPhone || parentPhone.length < 9) {
         showToast('El teléfono no parece válido', 'error');
         return;
@@ -102,7 +103,7 @@ async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, f
     }
     
     const apoderado = parentName && parentName !== 'null' ? parentName : 'Apoderado';
-    const text = `¡Hola ${apoderado}! 👋\nLe escribimos de la Academia *JR Stars*. Le recordamos que la mensualidad del jugador *${fullName}* vence el *${fechaVencimiento}*.\n\nPuede regularizar el pago presencialmente o mediante Yape al 955515693 (Envíe la captura por este medio). ¡Gracias por su compromiso! ⚽`;
+    const text = `Hola ${apoderado}.\nLe escribimos de la Academia *JR Stars*. Le recordamos que la mensualidad del jugador *${fullName}* por el monto de *S/ ${tarifa}* vence el *${fechaVencimiento}*.\n\nPuede regularizar el pago presencialmente o mediante Yape al 955515693 (Envíe la captura por este medio). Gracias por su compromiso.`;
     
     const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`;
     
