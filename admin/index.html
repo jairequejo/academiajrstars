@@ -8,7 +8,7 @@
   <title>JR Stars — Admin Panel</title>
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20260904">
-  <link rel="stylesheet" href="../css/admin.css?v=20260904">
+  <link rel="stylesheet" href="../css/admin.css?v=20260905">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260904">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
   <meta name="theme-color" content="#E30D13">
@@ -151,20 +151,40 @@
       
       <!-- ── COBRANZAS ── -->
       <div class="page" id="page-cobranzas">
-        <div class="header">
-          <h1>Cobranzas & Notificaciones</h1>
-        </div>
-        <div class="search-bar">
-          <button class="btn btn-primary" onclick="loadCobranzas()">
-            Refrescar Lista
-          </button>
-        </div>
-        <div style="margin-bottom:1rem; color:var(--text-gray); font-size:0.9rem;">
-          Se muestran alumnos cuyo pago vence en los próximos 2 días, o que ya vencieron. Solo se puede notificar 1 vez cada 24 horas.
-        </div>
-        <div id="cobranzas-grid" class="flex flex-col gap-3 mt-4 pb-10">
-            <!-- JS Inject -->
-        </div>
+        <section class="cobranzas-shell" aria-labelledby="cobranzas-title">
+          <header class="cobranzas-hero">
+            <div>
+              <span class="cobranzas-eyebrow">Control de mensualidades</span>
+              <h1 id="cobranzas-title">Cobros por atender</h1>
+              <p>Contacta al apoderado, registra el pago y mantén la cartera al día desde un solo lugar.</p>
+            </div>
+            <button class="cobranzas-refresh" id="cobranzas-refresh" type="button">
+              <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#refresh"></use></svg>
+              Actualizar
+            </button>
+          </header>
+
+          <div class="cobranzas-metrics" aria-label="Resumen de cobranzas">
+            <article class="cobranza-metric cobranza-metric--total">
+              <span>Por atender</span><strong id="cobranzas-total">0</strong>
+            </article>
+            <article class="cobranza-metric cobranza-metric--danger">
+              <span>Vencidos</span><strong id="cobranzas-vencidos">0</strong>
+            </article>
+            <article class="cobranza-metric cobranza-metric--warning">
+              <span>Próximos 2 días</span><strong id="cobranzas-proximos">0</strong>
+            </article>
+          </div>
+
+          <div class="cobranzas-note">
+            <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#clock"></use></svg>
+            <span>Para evitar mensajes repetidos, cada alumno puede notificarse una vez cada 24 horas.</span>
+          </div>
+
+          <div class="cobranzas-list" id="cobranzas-list" aria-live="polite">
+            <div class="cobranzas-state">Abre esta sección para cargar los cobros pendientes.</div>
+          </div>
+        </section>
       </div>
 
       <!-- ── ALUMNOS ── -->
@@ -457,20 +477,23 @@
   </div>
 
   <nav class="bottom-nav" id="bottom-nav">
-    <button class="bottom-nav-item active" id="bnav-stats" onclick="goTo('stats', event); setBottomNav('stats')">
+    <button class="bottom-nav-item active" id="bnav-stats" onclick="goTo('stats', event)">
       <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#chart"></use></svg></span><span class="bnav-label">Stats</span>
     </button>
-    <button class="bottom-nav-item" id="bnav-alumnos" onclick="goTo('alumnos', event); setBottomNav('alumnos')">
+    <button class="bottom-nav-item" id="bnav-alumnos" onclick="goTo('alumnos', event)">
       <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#users"></use></svg></span><span class="bnav-label">Alumnos</span>
     </button>
-        <button class="bottom-nav-item" id="bnav-cobranzas" onclick="goTo('cobranzas', event); setBottomNav('cobranzas')">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    <button class="bottom-nav-item" id="bnav-cobranzas" onclick="goTo('cobranzas', event)" aria-label="Cobranzas">
+      <span class="bnav-cobranzas-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </span>
+      <span class="bnav-label">Cobros</span>
     </button>
-    <button class="bottom-nav-item" id="bnav-batidos" onclick="goTo('batidos', event); setBottomNav('batidos')">
+    <button class="bottom-nav-item" id="bnav-batidos" onclick="goTo('batidos', event)">
       <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg></span><span class="bnav-label">Caja</span>
     </button>
     <button class="bottom-nav-item" id="bnav-calendario"
-      onclick="goTo('calendario', event); setBottomNav('calendario')">
+      onclick="goTo('calendario', event)">
       <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#calendar"></use></svg></span><span class="bnav-label">Asistencia</span>
     </button>
   </nav>
@@ -790,7 +813,7 @@
   <script src="../js/admin.js?v=20260905"></script>
   <script src="../js/alumno-ficha.js?v=20260904"></script>
   <script src="../js/inscripcion.js?v=20260904"></script>
-  <script src="../js/admin-cobranzas.js"></script>
+  <script src="../js/admin-cobranzas.js?v=20260905"></script>
 </body>
 
 </html>

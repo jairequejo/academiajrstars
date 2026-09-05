@@ -1,197 +1,207 @@
-async function loadCobranzas() {
-    const grid = document.getElementById('cobranzas-grid');
-    grid.innerHTML = '<div class="text-center text-gray-500 py-6">Cargando data...</div>';
-    
-    const limite = new Date();
-    limite.setDate(limite.getDate() + 2);
-    const limiteStr = limite.toISOString().split('T')[0];
-    
-    const { data, error } = await window.supabaseClient
-        .from('students')
-        .select('id, full_name, valid_until, parent_name, parent_phone, last_notified_at, tarifa_mensual')
-        .eq('is_active', true)
-        .lte('valid_until', limiteStr)
-        .order('valid_until', { ascending: true });
-        
-    if (error) {
-        grid.innerHTML = '<div class="text-center text-red-500 py-6 font-bold">Error cargando datos</div>';
-        return;
-    }
-    
-    if (!data || data.length === 0) {
-        grid.innerHTML = '<div class="text-center text-gray-500 py-8 bg-gray-50 rounded-xl border border-gray-200">✅ No hay pagos pendientes ni próximos a vencer.</div>';
-        return;
-    }
-    
-    const hoy = new Date();
-    let html = '';
-    
-    data.forEach(st => {
-        let puedeNotificar = true;
-        let lastNotifText = 'Nunca';
-        
-        if (st.last_notified_at) {
-            const lastNotif = new Date(st.last_notified_at);
-            const diffHours = (hoy - lastNotif) / (1000 * 60 * 60);
-            if (diffHours < 24) puedeNotificar = false;
-            lastNotifText = lastNotif.toLocaleDateString('es-PE') + ' ' + lastNotif.toLocaleTimeString('es-PE', {hour:'2-digit', minute:'2-digit'});
-        }
-        
-        const fechaVenc = new Date(st.valid_until + "T12:00:00").toLocaleDateString('es-PE');
-        const vencido = (new Date(st.valid_until + "T23:59:59") < hoy);
-        
-        const telStr = st.parent_phone ? st.parent_phone.replace(/\D/g, '') : '';
-        const phoneDisplay = telStr ? telStr : 'Sin teléfono';
-        const tarifaStr = st.tarifa_mensual ? parseFloat(st.tarifa_mensual).toFixed(2) : '---';
-        
-        let notifClass = "flex-1 bg-[#25D366] hover:bg-[#1DA851] text-white font-[800] py-3 px-4 rounded-full transition-colors flex justify-center items-center gap-2 shadow-sm text-sm uppercase";
-        let notifText = "📱 Notificar S/ " + tarifaStr;
-        let notifAction = `onclick="notificarWhatsApp('${st.id}', '${st.full_name}', '${st.parent_name}', '${telStr}', '${fechaVenc}', '${tarifaStr}')"`;
+// Cobranzas y recordatorios del panel administrativo.
+const cobranzasById = new Map();
 
-        if (!puedeNotificar) {
-            notifClass = "flex-1 bg-gray-200 text-gray-500 font-[800] py-3 px-4 rounded-full cursor-not-allowed flex justify-center items-center text-sm uppercase";
-            notifText = "✓ Notificado";
-            notifAction = "disabled";
-        } else if (!telStr) {
-            notifClass = "flex-1 bg-gray-200 text-gray-500 font-[800] py-3 px-4 rounded-full cursor-not-allowed flex justify-center items-center text-sm uppercase";
-            notifText = "⚠️ Sin número";
-            notifAction = "disabled";
-        }
-
-        const badgeClass = vencido ? 'bg-[#da1212] text-white' : 'bg-black text-white';
-        const statusText = vencido ? 'VENCIDO' : 'VENCE PRONTO';
-
-        html += `
-        <div class="bg-white rounded-[20px] shadow-sm border-[2px] border-[#e6e9ee] overflow-hidden flex flex-col mb-4 relative">
-            
-            <div class="absolute top-0 right-0 ${badgeClass} font-[800] text-xs px-3 py-1 rounded-bl-[12px] uppercase tracking-wide">
-                ${statusText}
-            </div>
-
-            <div class="p-5 flex flex-col gap-1 border-b border-[#e6e9ee]">
-                <h3 class="text-black text-2xl font-[800] leading-none pr-20 uppercase" style="font-family: var(--font-display);">${st.full_name}</h3>
-                <p class="text-sm text-gray-600 mt-2 font-[600]">Apoderado: <span class="text-black">${st.parent_name || 'Desconocido'}</span></p>
-                <div class="flex justify-between items-end mt-1">
-                    <p class="text-sm text-gray-600 font-[600]">Tel: <span class="font-mono text-black">${phoneDisplay}</span></p>
-                    <div class="text-right">
-                        <p class="text-[0.7rem] text-gray-500 uppercase font-[800]">Vencimiento</p>
-                        <p class="text-lg font-[800] leading-none ${vencido ? 'text-[#da1212]' : 'text-black'}">${fechaVenc}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="bg-gray-50 px-5 py-3 flex justify-between items-center text-sm border-b border-[#e6e9ee]">
-                <span class="text-gray-500 font-[600]">Última Notif: <span class="text-black">${lastNotifText}</span></span>
-                <span class="font-[800] text-black text-base">S/ ${tarifaStr}</span>
-            </div>
-
-            <div class="p-4 flex gap-3 bg-white">
-                <button class="${notifClass}" ${notifAction}>
-                    ${notifText}
-                </button>
-                <button onclick="inhabilitarMoroso('${st.id}', '${st.full_name}')" class="bg-black hover:bg-gray-800 text-white font-[800] py-3 px-6 rounded-full transition-colors shadow-sm text-sm uppercase">
-                    Inhabilitar
-                </button>
-            </div>
-        </div>
-        `;
-
-        if (!puedeNotificar) {
-            notifClass = "w-full bg-gray-300 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed flex justify-center items-center";
-            notifText = "✓ Ya notificado hoy";
-            notifAction = "disabled";
-        } else if (!telStr) {
-            notifClass = "w-full bg-gray-300 text-gray-500 font-bold py-2 rounded-lg cursor-not-allowed flex justify-center items-center";
-            notifText = "⚠️ Sin teléfono";
-            notifAction = "disabled";
-        }
-
-        const badgeClass = vencido ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-amber-100 text-amber-700 border border-amber-200';
-        const statusText = vencido ? 'VENCIDO' : 'VENCE PRONTO';
-
-        html += `
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col mb-3">
-            <div class="p-4 flex justify-between items-start border-b border-gray-100">
-                <div>
-                    <h3 class="font-bold text-gray-900 text-lg leading-tight">${st.full_name}</h3>
-                    <p class="text-sm text-gray-600 mt-1">Padre: <span class="font-semibold text-gray-800">${st.parent_name || 'Desconocido'}</span></p>
-                    <p class="text-sm text-gray-600">Tel: <span class="font-mono text-gray-800">${phoneDisplay}</span></p>
-                </div>
-                <div class="flex flex-col items-end text-right">
-                    <span class="px-2 py-1 text-[0.65rem] font-bold rounded-full uppercase tracking-wide ${badgeClass}">
-                        ${statusText}
-                    </span>
-                    <p class="text-sm font-black mt-2 ${vencido ? 'text-red-600' : 'text-amber-600'}">${fechaVenc}</p>
-                </div>
-            </div>
-            
-            <div class="bg-gray-50 px-4 py-2 flex justify-between items-center text-xs text-gray-500 border-b border-gray-100">
-                <span>⏱️ Última: <span class="font-semibold text-gray-700">${lastNotifText}</span></span>
-            </div>
-
-            <div class="p-3 grid grid-cols-2 gap-2 bg-gray-50">
-                <button class="${notifClass}" ${notifAction}>
-                    ${notifText}
-                </button>
-                <button onclick="inhabilitarMoroso('${st.id}', '${st.full_name}')" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition-colors shadow-sm">
-                    🚫 Inhabilitar
-                </button>
-            </div>
-        </div>
-        `;
-    });
-    
-    grid.innerHTML = html;
+function escapeCobranzasHtml(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[char]));
 }
 
-async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, fechaVencimiento, tarifa) {
-    if (!parentPhone || parentPhone.length < 9) {
-        showToast('El teléfono no parece válido', 'error');
-        return;
+function getCobranzasLimit() {
+    const limit = new Date();
+    limit.setDate(limit.getDate() + 2);
+    return limit.toISOString().split('T')[0];
+}
+
+function setCobranzasNavState(pendingCount = null) {
+    const button = document.getElementById('bnav-cobranzas');
+    if (!button) return;
+    button.classList.remove('has-pending', 'is-clear');
+    if (pendingCount === null) return;
+
+    const hasPending = pendingCount > 0;
+    button.classList.add(hasPending ? 'has-pending' : 'is-clear');
+    button.setAttribute(
+        'aria-label',
+        hasPending ? `${pendingCount} cobros pendientes` : 'Cobranzas al día'
+    );
+}
+
+async function refreshCobranzasNavState() {
+    const { count, error } = await window.supabaseClient
+        .from('students')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_active', true)
+        .lte('valid_until', getCobranzasLimit());
+
+    setCobranzasNavState(error ? null : (count || 0));
+}
+
+function setCobranzasMetrics(total = 0, expired = 0) {
+    document.getElementById('cobranzas-total').textContent = total;
+    document.getElementById('cobranzas-vencidos').textContent = expired;
+    document.getElementById('cobranzas-proximos').textContent = Math.max(0, total - expired);
+}
+
+function formatCobranzasDate(value, options = {}) {
+    if (!value) return 'Sin fecha';
+    return new Date(`${value}T12:00:00`).toLocaleDateString('es-PE', options);
+}
+
+function normalizePeruPhone(value) {
+    const digits = String(value ?? '').replace(/\D/g, '');
+    if (digits.length === 11 && digits.startsWith('51')) return digits;
+    if (digits.length === 9) return `51${digits}`;
+    return '';
+}
+
+async function loadCobranzas() {
+    const list = document.getElementById('cobranzas-list');
+    const refresh = document.getElementById('cobranzas-refresh');
+    if (!list) return;
+
+    list.innerHTML = '<div class="cobranzas-state cobranzas-state--loading"><span></span>Cargando cobros pendientes...</div>';
+    refresh?.classList.add('is-loading');
+    refresh?.setAttribute('disabled', '');
+
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('students')
+            .select('id, full_name, valid_until, parent_name, parent_phone, last_notified_at, tarifa_mensual')
+            .eq('is_active', true)
+            .lte('valid_until', getCobranzasLimit())
+            .order('valid_until', { ascending: true });
+
+        if (error) throw error;
+
+        const rows = data || [];
+        const now = new Date();
+        const expired = rows.filter(student => (
+            new Date(`${student.valid_until}T23:59:59`) < now
+        )).length;
+
+        setCobranzasMetrics(rows.length, expired);
+        setCobranzasNavState(rows.length);
+        cobranzasById.clear();
+        rows.forEach(student => cobranzasById.set(String(student.id), student));
+
+        if (!rows.length) {
+            list.innerHTML = `
+                <div class="cobranzas-state cobranzas-state--empty">
+                    <span class="cobranzas-state-icon">✓</span>
+                    <strong>Todo al día</strong>
+                    <p>No hay pagos vencidos ni próximos a vencer.</p>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = rows.map(student => renderCobranzaCard(student, now)).join('');
+    } catch (error) {
+        console.error(error);
+        setCobranzasMetrics();
+        setCobranzasNavState(null);
+        list.innerHTML = `
+            <div class="cobranzas-state cobranzas-state--error">
+                <strong>No pudimos cargar las cobranzas</strong>
+                <p>Revisa tu conexión e inténtalo nuevamente.</p>
+            </div>`;
+    } finally {
+        refresh?.classList.remove('is-loading');
+        refresh?.removeAttribute('disabled');
     }
-    
-    let finalPhone = parentPhone.replace(/\D/g, '');
-    if (finalPhone.length === 9) {
-        finalPhone = '51' + finalPhone;
-    } else if (finalPhone.startsWith('51') && finalPhone.length === 11) {
-        // ok
+}
+
+function renderCobranzaCard(student, now) {
+    const id = escapeCobranzasHtml(student.id);
+    const rawName = student.full_name || 'Alumno sin nombre';
+    const fullName = escapeCobranzasHtml(rawName);
+    const parentName = escapeCobranzasHtml(student.parent_name || 'Apoderado no registrado');
+    const phone = normalizePeruPhone(student.parent_phone);
+    const phoneDisplay = phone ? `+${phone}` : 'Sin teléfono registrado';
+    const dueDate = formatCobranzasDate(student.valid_until, {
+        day: '2-digit', month: 'short', year: 'numeric'
+    });
+    const expired = new Date(`${student.valid_until}T23:59:59`) < now;
+
+    let canNotify = Boolean(phone);
+    let notifiedText = 'Sin recordatorios enviados';
+    if (student.last_notified_at) {
+        const lastNotification = new Date(student.last_notified_at);
+        canNotify = canNotify && ((now - lastNotification) / 36e5 >= 24);
+        notifiedText = `Último aviso: ${lastNotification.toLocaleDateString('es-PE', {
+            day: '2-digit', month: 'short'
+        })}, ${lastNotification.toLocaleTimeString('es-PE', {
+            hour: '2-digit', minute: '2-digit'
+        })}`;
     }
-    
+
+    const notifyLabel = !phone
+        ? 'Falta teléfono'
+        : canNotify ? 'Notificar por WhatsApp' : 'Notificado hoy';
+
+    return `
+        <article class="cobranza-card ${expired ? 'is-expired' : 'is-upcoming'}">
+            <div class="cobranza-card-head">
+                <span class="cobranza-status">${expired ? 'Vencido' : 'Vence pronto'}</span>
+                <div class="cobranza-due"><span>Vencimiento</span><strong>${escapeCobranzasHtml(dueDate)}</strong></div>
+            </div>
+            <div class="cobranza-person">
+                <span class="cobranza-avatar" aria-hidden="true">${escapeCobranzasHtml(rawName.charAt(0).toUpperCase())}</span>
+                <div><h2>${fullName}</h2><p>${escapeCobranzasHtml(notifiedText)}</p></div>
+            </div>
+            <div class="cobranza-contact">
+                <span>Apoderado</span><strong>${parentName}</strong><small>${escapeCobranzasHtml(phoneDisplay)}</small>
+            </div>
+            <div class="cobranza-actions">
+                <button class="cobranza-action cobranza-action--notify" type="button" data-cobranza-action="notify" data-student-id="${id}" ${canNotify ? '' : 'disabled'}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.4.2-.7.1-1.7-.8-2.9-1.7-3.8-3.5-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5L9.3 6.7c-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.8 1.2 3c.2.2 2.1 3.2 5 4.5 1.9.8 2.6.9 3.6.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1 0-.4-.1-.7-.2ZM12 22a10 10 0 0 1-5-1.3L2 22l1.3-4.9A10 10 0 1 1 12 22Z"/></svg>
+                    <span>${notifyLabel}</span>
+                </button>
+                <button class="cobranza-action cobranza-action--disable" type="button" data-cobranza-action="disable" data-student-id="${id}">
+                    <span>Inhabilitar</span>
+                </button>
+            </div>
+        </article>`;
+}
+
+async function notificarWhatsApp(studentId) {
+    const student = cobranzasById.get(String(studentId));
+    const phone = normalizePeruPhone(student?.parent_phone);
+    if (!student || !phone) return showToast('Registra un teléfono válido para el apoderado', 'error');
+
     const { error } = await window.supabaseClient
         .from('students')
         .update({ last_notified_at: new Date().toISOString() })
-        .eq('id', studentId);
-        
-    if (error) {
-        showToast('Error al registrar notificación en BD', 'error');
-        return;
-    }
-    
-    const apoderado = parentName && parentName !== 'null' ? parentName : 'Apoderado';
-    const text = `Hola ${apoderado}.\nLe escribimos de la Academia *JR Stars*. Le recordamos que la mensualidad del jugador *${fullName}* por el monto de *S/ ${tarifa}* vence el *${fechaVencimiento}*.\n\nPuede regularizar el pago presencialmente o mediante Yape al 955515693 (Envíe la captura por este medio). Gracias por su compromiso.`;
-    
-    const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`;
-    
-    window.open(url, '_blank');
+        .eq('id', student.id);
+    if (error) return showToast('No se pudo registrar la notificación', 'error');
+
+    const tarifaStr = student.tarifa_mensual ? parseFloat(student.tarifa_mensual).toFixed(2) : '0.00';
+    const text = `Hola ${student.parent_name || 'apoderado'}.\nLe escribimos de la Academia *JR Stars*. Le recordamos que la mensualidad del jugador *${student.full_name}* por el monto de *S/ ${tarifaStr}* vence el *${formatCobranzasDate(student.valid_until)}*.\n\nPuede regularizar el pago presencialmente o mediante Yape al 955515693. Envíe la captura por este medio. Gracias por su compromiso.`;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
+    showToast('Recordatorio registrado. Abriendo WhatsApp.');
     loadCobranzas();
-    showToast('Notificación enviada y registrada.');
 }
 
-async function inhabilitarMoroso(studentId, fullName) {
-    if (!confirm(`¿Estás seguro de inhabilitar al alumno ${fullName}? No podrá registrar asistencia hasta que regularice su pago.`)) {
-        return;
-    }
-    
+async function inhabilitarMoroso(studentId) {
+    const student = cobranzasById.get(String(studentId));
+    if (!student || !confirm(`¿Inhabilitar a ${student.full_name}? No podrá registrar asistencia hasta regularizar el pago.`)) return;
+
     const { error } = await window.supabaseClient
         .from('students')
         .update({ is_active: false })
-        .eq('id', studentId);
-        
-    if (error) {
-        showToast('Error al inhabilitar alumno.', 'error');
-        return;
-    }
-    
-    showToast(`${fullName} inhabilitado correctamente.`);
-    loadCobranzas(); 
+        .eq('id', student.id);
+    if (error) return showToast('No se pudo inhabilitar al alumno', 'error');
+
+    showToast(`${student.full_name} fue inhabilitado.`);
+    loadCobranzas();
 }
+
+document.getElementById('cobranzas-refresh')?.addEventListener('click', loadCobranzas);
+document.getElementById('cobranzas-list')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-cobranza-action]');
+    if (!button || button.disabled) return;
+    if (button.dataset.cobranzaAction === 'notify') notificarWhatsApp(button.dataset.studentId);
+    if (button.dataset.cobranzaAction === 'disable') inhabilitarMoroso(button.dataset.studentId);
+});
+
+refreshCobranzasNavState();

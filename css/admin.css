@@ -218,6 +218,100 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
 .pago-historial-metodo { text-align: right; }
 .pago-historial-monto { color: #202938; font-weight: 700; white-space: nowrap; }
 
+/* Cobranzas: acción operativa clara y tarjetas legibles en cualquier ancho. */
+.cobranzas-shell { width: min(100%, 1180px); margin-inline: auto; }
+.cobranzas-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  overflow: hidden;
+  padding: clamp(1.4rem, 3vw, 2.4rem);
+  color: #fff;
+  background:
+    radial-gradient(circle at 86% 10%, rgba(255, 193, 7, .25), transparent 30%),
+    linear-gradient(135deg, #0b0b0c 0%, #202020 100%);
+  border: 1px solid #2d2d2d;
+  border-radius: 24px !important;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, .14);
+}
+.cobranzas-hero::after { content: ''; position: absolute; right: -40px; bottom: -80px; width: 210px; height: 210px; border: 28px solid rgba(255, 193, 7, .08); border-radius: 50%; pointer-events: none; }
+.cobranzas-hero > * { position: relative; z-index: 1; }
+.cobranzas-eyebrow { display: block; margin-bottom: .55rem; color: #ffc107; font-size: .72rem; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+.cobranzas-hero h1 { margin: 0; color: #fff; font: 900 clamp(2rem, 5vw, 3.4rem)/.98 var(--font-display); letter-spacing: -.02em; text-transform: uppercase; }
+.cobranzas-hero p { max-width: 650px; margin: .9rem 0 0; color: #cbd5e1; font-size: 1rem; font-weight: 500; line-height: 1.55; }
+.cobranzas-refresh { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-width: 140px; min-height: 48px; padding: .75rem 1rem; color: #111; background: #ffc107; border: 0; border-radius: 999px !important; box-shadow: 0 9px 24px rgba(255, 193, 7, .25); font: 800 .9rem/1 var(--font-body); cursor: pointer; }
+.cobranzas-refresh:hover { background: #ffd54f; transform: translateY(-1px); }
+.cobranzas-refresh:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.cobranzas-refresh.is-loading .admin-icon { animation: cobranza-spin .8s linear infinite; }
+@keyframes cobranza-spin { to { transform: rotate(360deg); } }
+
+.cobranzas-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin: 1rem 0; }
+.cobranza-metric { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-width: 0; padding: 1rem 1.2rem; background: #fff; border: 1px solid #e4e8ee; border-radius: 16px !important; }
+.cobranza-metric span { color: #64748b; font-size: .76rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.cobranza-metric strong { color: #111; font: 900 2rem/1 var(--font-display); }
+.cobranza-metric--total { border-left: 5px solid #111; }
+.cobranza-metric--danger { border-left: 5px solid #dc2626; }
+.cobranza-metric--danger strong { color: #c81e1e; }
+.cobranza-metric--warning { border-left: 5px solid #ffc107; }
+.cobranza-metric--warning strong { color: #9a6700; }
+.cobranzas-note { display: flex; align-items: center; gap: .7rem; margin-bottom: 1rem; padding: .85rem 1rem; color: #5b6473; background: #fff9df; border: 1px solid #f5df89; border-radius: 13px !important; font-size: .88rem; font-weight: 600; }
+.cobranzas-note .admin-icon { flex: 0 0 auto; color: #9a6700; font-size: 1.25rem; }
+
+.cobranzas-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.cobranza-card { min-width: 0; padding: 1.25rem; background: #fff; border: 1px solid #e3e7ed; border-top: 5px solid #ffc107; border-radius: 19px !important; box-shadow: 0 8px 28px rgba(15, 23, 42, .07); }
+.cobranza-card.is-expired { border-top-color: #dc2626; }
+.cobranza-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.cobranza-status { display: inline-flex; align-items: center; min-height: 28px; padding: .35rem .65rem; color: #714c00; background: #fff3c4; border-radius: 999px !important; font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.is-expired .cobranza-status { color: #991b1b; background: #fee2e2; }
+.cobranza-due { text-align: right; }
+.cobranza-due span, .cobranza-contact > span { display: block; color: #7b8798; font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.cobranza-due strong { display: block; margin-top: .25rem; color: #202938; font-size: .94rem; }
+.cobranza-person { display: flex; align-items: center; gap: .85rem; min-width: 0; margin: 1.2rem 0; }
+.cobranza-avatar { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 48px; width: 48px; height: 48px; color: #111; background: #ffc107; border-radius: 50% !important; font: 900 1.35rem/1 var(--font-display); }
+.cobranza-person > div { min-width: 0; }
+.cobranza-person h2 { margin: 0; overflow-wrap: anywhere; color: #111827; font: 800 1.08rem/1.25 var(--font-body); }
+.cobranza-person p { margin: .3rem 0 0; color: #7b8798; font-size: .78rem; font-weight: 500; }
+.cobranza-contact { padding: .85rem; background: #f7f8fa; border: 1px solid #edf0f3; border-radius: 12px !important; }
+.cobranza-contact strong, .cobranza-contact small { display: block; overflow-wrap: anywhere; }
+.cobranza-contact strong { margin-top: .35rem; color: #202938; font-size: .93rem; }
+.cobranza-contact small { margin-top: .2rem; color: #64748b; font-size: .8rem; }
+.cobranza-actions { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: .65rem; margin-top: 1rem; }
+.cobranza-action { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; min-width: 0; min-height: 48px; padding: .7rem .75rem; border-radius: 12px !important; font: 800 .8rem/1.2 var(--font-body); cursor: pointer; }
+.cobranza-action svg { flex: 0 0 19px; width: 19px; height: 19px; }
+.cobranza-action--notify { color: #fff; background: #128c4b; border: 1px solid #128c4b; }
+.cobranza-action--notify svg { fill: currentColor; }
+.cobranza-action--notify:hover { background: #0d733d; }
+.cobranza-action--disable { color: #fff; background: #dc2626; border: 1px solid #dc2626; }
+.cobranza-action--disable:hover { background: #b91c1c; }
+.cobranza-action:disabled { color: #7b8798; background: #edf0f3; border-color: #e1e5ea; cursor: not-allowed; }
+.cobranzas-state { grid-column: 1 / -1; padding: 3rem 1.25rem; color: #64748b; background: #fff; border: 1px dashed #cbd5e1; border-radius: 18px !important; text-align: center; }
+.cobranzas-state strong, .cobranzas-state p { display: block; margin: 0; }
+.cobranzas-state p { margin-top: .35rem; font-weight: 500; }
+.cobranzas-state-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; margin-bottom: .75rem; color: #fff; background: #128c4b; border-radius: 50% !important; font-size: 1.5rem; }
+.cobranzas-state--loading { display: flex; align-items: center; justify-content: center; gap: .7rem; }
+.cobranzas-state--loading > span { width: 18px; height: 18px; border: 2px solid #d7dce3; border-top-color: #111; border-radius: 50% !important; animation: cobranza-spin .8s linear infinite; }
+.cobranzas-state--error { color: #991b1b; background: #fff7f7; border-color: #fecaca; }
+
+/* El botón conserva la misma forma que el resto y comunica el estado con color. */
+#bnav-cobranzas .bnav-cobranzas-icon { display: inline-flex; align-items: center; justify-content: center; }
+#bnav-cobranzas .bnav-cobranzas-icon svg { width: 24px; height: 24px; }
+#bnav-cobranzas.is-clear { color: #20d879; border-top-color: #20d879; }
+#bnav-cobranzas.has-pending { color: #ff2035; border-top-color: #ff2035; }
+#bnav-cobranzas.has-pending .bnav-cobranzas-icon,
+#bnav-cobranzas.has-pending .bnav-label { animation: cobranza-heartbeat 1.35s ease-in-out infinite; }
+@keyframes cobranza-heartbeat {
+  0%, 42%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255, 32, 53, 0)); }
+  12% { transform: scale(1.16); filter: drop-shadow(0 0 5px rgba(255, 32, 53, .8)); }
+  24% { transform: scale(1.03); filter: drop-shadow(0 0 2px rgba(255, 32, 53, .45)); }
+  32% { transform: scale(1.11); filter: drop-shadow(0 0 4px rgba(255, 32, 53, .65)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #bnav-cobranzas.has-pending .bnav-cobranzas-icon,
+  #bnav-cobranzas.has-pending .bnav-label { animation: none; }
+}
+
 @media (min-width: 701px) and (max-width: 1200px) {
   .filtros-controles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filtro-group-sede, .filtro-group-search { grid-column: 1 / -1; }
@@ -255,4 +349,24 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
   .month-btn { width: 44px; height: 44px; }
   .ranking-filters .form-card-title, .ranking-filters .form-label { text-align: left; }
   .ranking-filters .select-jr { min-height: 48px; text-align: left; text-align-last: left; }
+  .cobranzas-hero { align-items: stretch; flex-direction: column; gap: 1.1rem; padding: 1.25rem; border-radius: 19px !important; }
+  .cobranzas-hero h1 { font-size: clamp(1.8rem, 10vw, 2.65rem); }
+  .cobranzas-hero p { font-size: .9rem; }
+  .cobranzas-refresh { width: 100%; }
+  .cobranzas-metrics { gap: .45rem; }
+  .cobranza-metric { align-items: flex-start; flex-direction: column-reverse; gap: .4rem; padding: .8rem .7rem; border-left-width: 1px; border-top: 4px solid #111; }
+  .cobranza-metric--danger { border-top-color: #dc2626; }
+  .cobranza-metric--warning { border-top-color: #ffc107; }
+  .cobranza-metric span { font-size: .59rem; line-height: 1.25; }
+  .cobranza-metric strong { font-size: 1.65rem; }
+  .cobranzas-note { align-items: flex-start; font-size: .8rem; }
+  .cobranzas-list { grid-template-columns: minmax(0, 1fr); }
+  .cobranza-card { padding: 1rem; border-radius: 16px !important; }
+  .cobranza-actions { grid-template-columns: minmax(0, 1fr); }
+  .cobranza-action { min-height: 50px; font-size: .84rem; }
+  #bottom-nav { height: calc(70px + env(safe-area-inset-bottom)); padding: 0 4px env(safe-area-inset-bottom); align-items: stretch; overflow: visible; }
+  #bottom-nav .bottom-nav-item { min-width: 0; padding: 8px 1px 6px !important; }
+  #bottom-nav .bottom-nav-item .admin-icon { width: 21px; height: 21px; }
+  #bottom-nav .bnav-label { max-width: 100%; overflow: hidden; font-size: .61rem !important; letter-spacing: 0 !important; text-overflow: ellipsis; white-space: nowrap; }
+  .main-content { padding-bottom: calc(94px + env(safe-area-inset-bottom)) !important; }
 }
