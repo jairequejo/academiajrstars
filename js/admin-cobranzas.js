@@ -65,7 +65,7 @@ async function loadCobranzas() {
             <td>${st.parent_name || 'Desconocido'}<br><span style="font-size:0.8rem;">${phoneDisplay}</span></td>
             <td>
                 ${notifBtn}
-                <button class="btn" style="width:100%;" onclick="renovarPago('${st.id}')">Registrar Pago</button>
+                <button class="btn" style="width:100%; background:var(--danger); color:white; border-color:var(--danger);" onclick="inhabilitarMoroso('${st.id}', '${st.full_name}')">Inhabilitar</button>
             </td>
         </tr>
         `;
@@ -111,10 +111,21 @@ async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, f
     showToast('Notificación enviada y registrada.');
 }
 
-function renovarPago(studentId) {
-    if (typeof abrirPago === 'function') {
-        abrirPago(studentId);
-    } else {
-        showToast('Función de pago no encontrada. Renueva desde Ficha.', 'error');
+async function inhabilitarMoroso(studentId, fullName) {
+    if (!confirm(`¿Estás seguro de inhabilitar al alumno ${fullName}? No podrá registrar asistencia hasta que regularice su pago.`)) {
+        return;
     }
+    
+    const { error } = await window.supabaseClient
+        .from('students')
+        .update({ is_active: false })
+        .eq('id', studentId);
+        
+    if (error) {
+        showToast('Error al inhabilitar alumno.', 'error');
+        return;
+    }
+    
+    showToast(`${fullName} inhabilitado correctamente.`);
+    loadCobranzas(); 
 }
