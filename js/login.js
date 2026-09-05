@@ -10,7 +10,9 @@ if ('serviceWorker' in navigator) {
 }
 
 async function init() {
-    const urlToken = new URLSearchParams(location.search).get('token');
+    const hashToken = new URLSearchParams(location.hash.slice(1)).get('token');
+    const legacyQueryToken = new URLSearchParams(location.search).get('token');
+    const urlToken = hashToken || legacyQueryToken;
 
     // Si llegó un token nuevo en la URL, guardarlo y limpiar la URL
     if (urlToken) {
@@ -21,15 +23,13 @@ async function init() {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) return showNoAccess();
 
-    // Verificar el token consultando a Supabase
+    // La función SQL compara el hash; la tabla y los tokens no quedan expuestos al navegador.
     try {
-        const { data, error } = await window.supabaseClient
-            .from('entrenadores')
-            .select('nombre, is_active')
-            .eq('token', token)
-            .single();
+        const { data, error } = await window.supabaseClient.rpc('verify_entrenador_access', {
+            p_token: token
+        });
 
-        if (error || !data || !data.is_active) {
+        if (error || !data?.valid) {
             // Token inválido o revocado
             localStorage.removeItem(TOKEN_KEY);
             localStorage.removeItem('jr_entrenador_nombre');

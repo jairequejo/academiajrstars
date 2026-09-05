@@ -68,7 +68,7 @@
   <link rel="icon" href="./icons/red-white/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="./icons/red-white/apple-touch-icon-admin.png" sizes="180x180">
   <link rel="manifest" href="./manifest.webmanifest">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
   <script src="../js/supabaseClient.js"></script>
   <link rel="stylesheet" href="../css/admin-icons.css?v=20260904">
 </head>
@@ -120,9 +120,10 @@
   </div>
 
 <script>
-  // Si ya tiene token válido, redirigir directo
-  const token = localStorage.getItem('jr_admin_token');
-  if (token) window.location.href = 'index.html';
+  // Supabase conserva y renueva la sesión; no duplicamos el access token manualmente.
+  window.supabaseClient.auth.getSession().then(({ data }) => {
+    if (data.session) window.location.replace('index.html');
+  });
 
   async function login() {
     const email    = document.getElementById('email').value.trim();
@@ -141,9 +142,7 @@
       const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      localStorage.setItem('jr_admin_token', data.session.access_token);
-      localStorage.setItem('jr_admin_email', data.user.email);
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
 
     } catch (e) {
       console.error(e);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jr-entrenador-v7';
+const CACHE_NAME = 'jr-entrenador-v8';
 const assetUrl = path => new URL(path, self.location.href).href;
 const APP_SHELL = [
   './',

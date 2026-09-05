@@ -1,12 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Define SUPABASE_URL y SUPABASE_ANON_KEY antes de ejecutar el seed.');
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Define SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY en un .env local antes de ejecutar el seed.');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false }
+});
 
 const nombres = ['Carlos Pérez', 'Luis Gómez', 'Miguel Torres', 'Juan Mamani', 'Diego Rojas', 'Mateo Quispe', 'Leo Silva', 'André Vargas', 'Thiago Mendoza', 'Hugo Castillo'];
 const sedes = ['El Bosque', 'Las Torrecitas', 'Víctor Raúl'];
@@ -55,11 +57,6 @@ async function seed() {
 
         await supabase.from('attendance').insert({ student_id: student.id });
     }
-
-    await supabase.from('entrenadores').insert([
-        { nombre: 'Profe Jair', token: 'MAGIC_TOKEN_JAIR' },
-        { nombre: 'Profe Luis', token: 'MAGIC_TOKEN_LUIS' }
-    ]);
 
     console.log('Carga de prueba completada.');
 }

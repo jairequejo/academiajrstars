@@ -1,12 +1,13 @@
 // --- LÓGICA DEL PIN ---
 let pinActual = "";
+let cajaPin = "";
 let html5QrcodeScanner = null;
 
 function addPin(num) {
-  if (pinActual.length < 4) {
+  if (pinActual.length < 6) {
     pinActual += num;
     actualizarDots();
-    if (pinActual.length === 4) verificarPin();
+    if (pinActual.length === 6) verificarPin();
   }
 }
 
@@ -21,13 +22,21 @@ function actualizarDots() {
 }
 
 async function verificarPin() {
-  if (pinActual === "1234") {
+  const { data, error } = await window.supabaseClient.rpc('verify_caja_pin', {
+    p_pin: pinActual
+  });
+  if (!error && data === true) {
+    cajaPin = pinActual;
+    pinActual = "";
     document.getElementById('pin-screen').style.display = 'none';
     document.getElementById('caja-layout').style.display = 'block';
     initNFC();
     initQR();
   } else {
-    setTimeout(() => { alert("PIN Incorrecto"); clearPin(); }, 100);
+    const message = error
+      ? 'Caja no configurada. Aplica la migración de seguridad y define el PIN.'
+      : 'PIN incorrecto';
+    setTimeout(() => { alert(message); clearPin(); }, 100);
   }
 }
 
@@ -131,59 +140,14 @@ let alumnoActual = null;
 
 async function consultarAtleta(code) {
   try {
-    let studentId = null;
     const cleanCode = code.trim();
     const supabase = window.supabaseClient;
+    const { data: studentData, error: stuError } = await supabase.rpc('caja_consultar_atleta', {
+      p_pin: cajaPin,
+      p_code: cleanCode
+    });
 
-    if (cleanCode.startsWith("JRS:")) {
-      const parts = cleanCode.substring(4).split(":");
-      if (parts.length !== 4) throw new Error("QR JRS inválido");
-      const shortId = parts[0];
-
-      let { data: credData } = await supabase
-        .from('credentials')
-        .select('student_id')
-        .like('code', `JRS:${shortId}:%`)
-        .eq('is_active', true)
-        .limit(1);
-      
-      if (credData && credData.length > 0) {
-        studentId = credData[0].student_id;
-      } else {
-        let { data: stuData } = await supabase
-          .from('students')
-          .select('id')
-          .ilike('id', `${shortId}%`)
-          .eq('is_active', true)
-          .limit(1);
-        
-        if (stuData && stuData.length > 0) {
-          studentId = stuData[0].id;
-        }
-      }
-    } else {
-      let { data: credData } = await supabase
-        .from('credentials')
-        .select('student_id')
-        .eq('code', cleanCode)
-        .eq('is_active', true)
-        .limit(1);
-        
-      if (credData && credData.length > 0) {
-        studentId = credData[0].student_id;
-      }
-    }
-
-    if (!studentId) throw new Error("Credencial inválida o alumno inactivo");
-
-    const { data: studentData, error: stuError } = await supabase
-      .from('students')
-      .select('id, full_name, batido_credits')
-      .eq('id', studentId)
-      .eq('is_active', true)
-      .single();
-
-    if (stuError || !studentData) throw new Error("Alumno no encontrado");
+    if (stuError || !studentData?.id) throw new Error("Alumno no encontrado");
 
     alumnoActual = {
       id: studentData.id,
@@ -219,7 +183,8 @@ async function cobrar(nombreBatido, costo, emoji) {
 
   try {
     const supabase = window.supabaseClient;
-    const { data, error } = await supabase.rpc('canjear_batido', {
+    const { data, error } = await supabase.rpc('caja_canjear_batido', {
+      p_pin: cajaPin,
       p_student_id: alumnoActual.id,
       p_batido_name: nombreBatido,
       p_credits_used: costo,

@@ -1,21 +1,30 @@
 // admin/admin.js — Panel de administración JR Stars
 
 // ── AUTH ──────────────────────────────────────────────
-const token = localStorage.getItem('jr_admin_token');
-if (!token) window.location.href = './login.html';
+async function requireAdminSession() {
+  try {
+    const { data, error } = await window.supabaseClient.auth.getSession();
+    const session = data?.session;
+    if (error || !session) throw error || new Error('Sesión no disponible');
 
-document.getElementById('admin-email').textContent =
-  localStorage.getItem('jr_admin_email') || '';
+    document.getElementById('admin-email').textContent = session.user?.email || '';
+    return true;
+  } catch {
+    await window.supabaseClient?.auth?.signOut().catch(() => {});
+    window.location.replace('./login.html');
+    return false;
+  }
+}
 
-const H = {
-  'Content-Type': 'application/json',
-  'Authorization': `Bearer ${token}`
-};
+async function logout() {
+  await window.supabaseClient.auth.signOut();
+  window.location.replace('./login.html');
+}
 
-function logout() {
-  localStorage.removeItem('jr_admin_token');
-  localStorage.removeItem('jr_admin_email');
-  window.location.href = './login.html';
+function escapeAdminHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  }[char]));
 }
 
 // ── SIDEBAR MOBILE ────────────────────────────────────
@@ -80,65 +89,10 @@ function showToast(msg, type = 'ok') {
 }
 
 // ── STATS ─────────────────────────────────────────────
-async function generate_jrs_code(student_id, full_name, valid_until) {
-    const short_id = student_id.substring(0, 8);
-    let valid_until_str = "20991231";
-    if (valid_until) {
-        const d = new Date(valid_until);
-        d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
-        if (!isNaN(d)) {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            valid_until_str = `${y}${m}${dd}`;
-        }
-    }
-    const firstName = full_name ? full_name.trim().split(' ')[0] : "USER";
-    const name_b64url = btoa(unescape(encodeURIComponent(firstName))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    
-    const message = `${short_id}|${valid_until_str}|${name_b64url}`;
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-        'raw', enc.encode('default_secret_key_123'),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false, ['sign']
-    );
-    const signature = await crypto.subtle.sign('HMAC', key, enc.encode(message));
-    const hashArray = Array.from(new Uint8Array(signature));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    return `JRS:${short_id}:${valid_until_str}:${name_b64url}:${hashHex.substring(0, 16)}`;
-}
-
-
-async function generate_jrs_code(student_id, full_name, valid_until) {
-    const short_id = student_id.substring(0, 8);
-    let valid_until_str = "20991231";
-    if (valid_until) {
-        const d = new Date(valid_until);
-        d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
-        if (!isNaN(d)) {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            valid_until_str = `${y}${m}${dd}`;
-        }
-    }
-    const firstName = full_name ? full_name.trim().split(' ')[0] : "USER";
-    const name_b64url = btoa(unescape(encodeURIComponent(firstName))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    
-    const message = `${short_id}|${valid_until_str}|${name_b64url}`;
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-        'raw', enc.encode('default_secret_key_123'),
-        { name: 'HMAC', hash: 'SHA-256' },
-        false, ['sign']
-    );
-    const signature = await crypto.subtle.sign('HMAC', key, enc.encode(message));
-    const hashArray = Array.from(new Uint8Array(signature));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    return `JRS:${short_id}:${valid_until_str}:${name_b64url}:${hashHex.substring(0, 16)}`;
+function generate_jrs_code() {
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  const opaqueId = Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  return `STU-${opaqueId}`;
 }
 
 async function loadStats() {
@@ -1125,7 +1079,9 @@ document.addEventListener('click', (e) => {
 
 
 // ── INIT ──────────────────────────────────────────────
-loadStats();
+requireAdminSession().then(isValid => {
+  if (isValid) loadStats();
+});
 
 // ── ASISTENCIA GLOBAL (CALENDARIO MAESTRO) ────────────
 const CAL_MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -1588,12 +1544,13 @@ async function loadEntrenadores() {
   if (!el) return;
   el.innerHTML = '<p style="color:var(--gray);font-family:var(--font-cond)">Cargando...</p>';
   try {
-    const { data, error } = await window.supabaseClient.from('entrenadores').select('id, nombre, token, is_active, created_at, last_used_at').order('nombre');
+    const { data, error } = await window.supabaseClient.rpc('admin_list_entrenadores');
     if (error) throw error;
-    _entrenadoresData = data || [];
+    _entrenadoresData = Array.isArray(data) ? data : [];
     renderEntrenadores();
-  } catch {
-    el.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond)">Error al cargar.</p>';
+  } catch (error) {
+    console.error(error);
+    el.innerHTML = '<p style="color:var(--red2);font-family:var(--font-cond)">Aplica la migración de seguridad para gestionar entrenadores.</p>';
   }
 }
 
@@ -1608,34 +1565,46 @@ function renderEntrenadores() {
     <div class="alumno-card" style="opacity:${e.is_active ? '1' : '0.5'};flex-direction:column;align-items:stretch;gap:1rem;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-          <div class="alumno-card-name"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#activity"></use></svg> ${e.nombre}</div>
+          <div class="alumno-card-name"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#activity"></use></svg> ${escapeAdminHtml(e.nombre)}</div>
           <div style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray)">${e.is_active ? '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#check"></use></svg> Acceso habilitado' : '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ban"></use></svg> Acceso revocado'}</div>
         </div>
         <div class="alumno-card-actions">
           ${e.is_active
-      ? `<button class="btn btn-red" style="font-size:.75rem;padding:.3rem .9rem"
-                 onclick="toggleEntrenador('${e.id}', '${e.nombre.replace(/'/g, "\\'")}', false)">Revocar</button>`
-      : `<button class="btn btn-outline" style="font-size:.75rem;padding:.3rem .9rem;border-color:#00ff88;color:#00ff88"
-                 onclick="toggleEntrenador('${e.id}', '${e.nombre.replace(/'/g, "\\'")}', true)">Reactivar</button>`
+      ? `<button class="btn btn-red" data-ent-action="toggle" data-ent-id="${escapeAdminHtml(e.id)}" data-ent-name="${escapeAdminHtml(e.nombre)}" data-ent-active="false" style="font-size:.75rem;padding:.3rem .9rem">Revocar</button>`
+      : `<button class="btn btn-outline" data-ent-action="toggle" data-ent-id="${escapeAdminHtml(e.id)}" data-ent-name="${escapeAdminHtml(e.nombre)}" data-ent-active="true" style="font-size:.75rem;padding:.3rem .9rem;border-color:#00ff88;color:#00ff88">Reactivar</button>`
     }
         </div>
       </div>
       ${e.is_active ? `
       <div style="background:var(--dark);padding:10px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
         <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--gold);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-right:10px;">
-          /entrenador/login?token=${e.token.substring(0, 8)}...
+          El enlace es secreto y solo se muestra al crearlo o rotarlo.
         </div>
-        <button class="btn btn-gold" style="font-size:0.75rem;padding:0.4rem 0.8rem;" onclick="copyMagicLink('${e.token}')"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#clipboard"></use></svg> Copiar Enlace</button>
+        <button class="btn btn-gold" data-ent-action="rotate" data-ent-id="${escapeAdminHtml(e.id)}" data-ent-name="${escapeAdminHtml(e.nombre)}" style="font-size:0.75rem;padding:0.4rem 0.8rem;"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#clipboard"></use></svg> Rotar enlace</button>
       </div>` : ''}
     </div>`).join('');
+
+  el.querySelectorAll('[data-ent-action="toggle"]').forEach(button => {
+    button.addEventListener('click', () => toggleEntrenador(
+      button.dataset.entId,
+      button.dataset.entName,
+      button.dataset.entActive === 'true'
+    ));
+  });
+  el.querySelectorAll('[data-ent-action="rotate"]').forEach(button => {
+    button.addEventListener('click', () => rotateEntrenadorAccess(
+      button.dataset.entId,
+      button.dataset.entName
+    ));
+  });
 }
 
 function copyMagicLink(token) {
   const url = new URL('../entrenador/login.html', window.location.href);
-  url.searchParams.set('token', token);
+  url.hash = new URLSearchParams({ token }).toString();
   navigator.clipboard.writeText(url.href).then(() => {
     showToast('Enlace copiado. Envíalo por WhatsApp.');
-  }).catch(err => {
+  }).catch(() => {
     showToast('Error al copiar enlace', 'error');
   });
 }
@@ -1645,22 +1614,34 @@ async function crearEntrenador() {
   const nombre = document.getElementById('ent-nombre')?.value.trim();
   if (!nombre) return showToast('Completa el nombre', 'error');
 
-  const token = btoa(Math.random().toString()).substring(0, 24);
-  const { data, error } = await window.supabaseClient.from('entrenadores').insert({ nombre, token, is_active: true }).select();
+  const { data, error } = await window.supabaseClient.rpc('admin_create_entrenador', { p_nombre: nombre });
   
   if (error || !data) return showToast('Error al crear', 'error');
 
   document.getElementById('ent-nombre').value = '';
-  showToast('Entrenador creado.');
-  copyMagicLink(data[0].token);
+  showToast('Entrenador creado. Guarda su enlace ahora.');
+  copyMagicLink(data.token);
   loadEntrenadores();
+}
+
+async function rotateEntrenadorAccess(id, nombre) {
+  if (!confirm(`¿Rotar el enlace de ${nombre}? El enlace anterior dejará de funcionar.`)) return;
+  const { data, error } = await window.supabaseClient.rpc('admin_rotate_entrenador_access', {
+    p_entrenador_id: id
+  });
+  if (error || !data?.token) return showToast('No se pudo rotar el enlace', 'error');
+  copyMagicLink(data.token);
 }
 
 
 
 async function toggleEntrenador(id, nombre, reactivar) {
   if (!confirm(`¿${reactivar ? 'Reactivar' : 'Desactivar'} a ${nombre}?`)) return;
-  await window.supabaseClient.from('entrenadores').update({is_active: reactivar}).eq('id', id);
+  const { error } = await window.supabaseClient.rpc('admin_set_entrenador_active', {
+    p_entrenador_id: id,
+    p_is_active: reactivar
+  });
+  if (error) return showToast('No se pudo actualizar', 'error');
   showToast('Actualizado');
   loadEntrenadores();
 }
