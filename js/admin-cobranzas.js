@@ -80,7 +80,18 @@ async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, f
         return;
     }
     
+    // Sanear el número (Si ya empieza con 51, no lo duplicamos. Si no, se lo ponemos)
+    let finalPhone = parentPhone.replace(/\D/g, '');
+    if (finalPhone.length === 9) {
+        finalPhone = '51' + finalPhone;
+    } else if (finalPhone.startsWith('51') && finalPhone.length === 11) {
+        // Ya tiene el código de Perú, lo dejamos tal cual
+    } else {
+        // En caso de números internacionales u otros formatos
+    }
+    
     const { error } = await window.supabaseClient
+
         .from('students')
         .update({ last_notified_at: new Date().toISOString() })
         .eq('id', studentId);
@@ -93,7 +104,7 @@ async function notificarWhatsApp(studentId, fullName, parentName, parentPhone, f
     const apoderado = parentName && parentName !== 'null' ? parentName : 'Apoderado';
     const text = `¡Hola ${apoderado}! 👋\nLe escribimos de la Academia *JR Stars*. Le recordamos que la mensualidad del jugador *${fullName}* vence el *${fechaVencimiento}*.\n\nPuede regularizar el pago presencialmente o mediante Yape al 955515693 (Envíe la captura por este medio). ¡Gracias por su compromiso! ⚽`;
     
-    const url = `https://wa.me/51${parentPhone}?text=${encodeURIComponent(text)}`;
+    const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`;
     
     window.open(url, '_blank');
     loadCobranzas();
