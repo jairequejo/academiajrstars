@@ -403,30 +403,69 @@ function buildMetricSparkline(history, key, unit, label) {
     const points = [...history].reverse().filter(item => Number.isFinite(item[key]));
     if (!points.length) return '';
 
-    const width = 300;
-    const height = 92;
-    const inset = 10;
+    const W = 300, H = 100, PAD = 12;
     const values = points.map(item => item[key]);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const range = max - min || 1;
-    const coordinates = points.map((item, index) => {
-        const x = points.length === 1 ? width / 2 : inset + (index * (width - inset * 2) / (points.length - 1));
-        const y = height - inset - ((item[key] - min) / range) * (height - inset * 2);
-        return { x: x.toFixed(1), y: y.toFixed(1) };
+    const coords = points.map((item, i) => {
+        const x = points.length === 1 ? W / 2 : PAD + (i * (W - PAD * 2) / (points.length - 1));
+        const y = H - PAD - ((item[key] - min) / range) * (H - PAD * 2);
+        return { x: +x.toFixed(1), y: +y.toFixed(1), val: item[key], fecha: item.fecha };
     });
-    const line = coordinates.map(point => `${point.x},${point.y}`).join(' ');
+
+    const linePts = coords.map(p => `${p.x},${p.y}`).join(' ');
+    // Area fill: close path at bottom
+    const first = coords[0], last2 = coords[coords.length - 1];
+    const areaPath = `M${first.x},${first.y} ` + coords.slice(1).map(p => `L${p.x},${p.y}`).join(' ') + ` L${last2.x},${H} L${first.x},${H} Z`;
+
     const last = points[points.length - 1];
+    const prev = points[points.length - 2];
+    const diff = prev ? (last[key] - prev[key]) : 0;
+    const trendArrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+    const trendColor = diff > 0 ? '#4ade80' : diff < 0 ? '#f87171' : '#a1a1aa';
+    // For sprint, lower is better — invert trend color
+    const isInverse = key === 'sprint_10m_seg';
+    const finalColor = isInverse ? (diff < 0 ? '#4ade80' : diff > 0 ? '#f87171' : '#a1a1aa') : trendColor;
+
+    const gradId = `sg-${key}`;
+    const colors = {
+        talla: { line: '#e5191b', glow: 'rgba(229,25,27,.55)', fill: 'rgba(229,25,27,.15)' },
+        peso:  { line: '#f5a623', glow: 'rgba(245,166,35,.5)',  fill: 'rgba(245,166,35,.12)' },
+        salto_cm:      { line: '#4ade80', glow: 'rgba(74,222,128,.5)', fill: 'rgba(74,222,128,.12)' },
+        sprint_10m_seg: { line: '#818cf8', glow: 'rgba(129,140,248,.5)', fill: 'rgba(129,140,248,.12)' },
+    };
+    const c = colors[key] || colors.talla;
 
     return `
-      <article class="metric-spark metric-spark--${key}">
-        <div class="metric-spark-head"><span>${escapePortalHtml(label)}</span><strong>${escapePortalHtml(last[key])}${unit}</strong></div>
-        <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolución de ${escapePortalHtml(label.toLowerCase())}">
-          <path class="metric-grid-line" d="M10 22H290M10 46H290M10 70H290"></path>
-          <polyline class="metric-line" points="${line}"></polyline>
-          ${coordinates.map((point, index) => `<circle class="metric-dot${index === coordinates.length - 1 ? ' is-current' : ''}" cx="${point.x}" cy="${point.y}" r="${index === coordinates.length - 1 ? 5 : 3}"></circle>`).join('')}
+      <article class="ms-card ms-card--${key}">
+        <div class="ms-head">
+          <div class="ms-head-left">
+            <span class="ms-label">${escapePortalHtml(label)}</span>
+            <span class="ms-value">${escapePortalHtml(last[key])}${unit}</span>
+          </div>
+          <span class="ms-trend" style="color:${finalColor};">${trendArrow} ${Math.abs(diff).toFixed(diff % 1 === 0 ? 0 : 1)}${unit}</span>
+        </div>
+        <svg viewBox="0 0 ${W} ${H}" class="ms-svg" role="img" aria-label="Evolución de ${escapePortalHtml(label.toLowerCase())}">
+          <defs>
+            <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${c.line}" stop-opacity=".35"/>
+              <stop offset="100%" stop-color="${c.line}" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="${areaPath}" fill="url(#${gradId})"/>
+          <path class="ms-grid" d="M${PAD} ${Math.round(H*0.25)}H${W-PAD}M${PAD} ${Math.round(H*0.5)}H${W-PAD}M${PAD} ${Math.round(H*0.75)}H${W-PAD}"/>
+          <polyline points="${linePts}" fill="none" stroke="${c.line}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px ${c.glow})"/>
+          ${coords.map((p, i) => i === coords.length - 1
+            ? `<circle cx="${p.x}" cy="${p.y}" r="5" fill="#fff" stroke="${c.line}" stroke-width="3"/>`
+            : `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="${c.line}" opacity=".6"/>`
+          ).join('')}
         </svg>
-        <div class="metric-spark-foot"><span>${escapePortalHtml(points[0].fecha || 'Inicio')}</span><span>${escapePortalHtml(last.fecha || 'Actual')}</span></div>
+        <div class="ms-foot">
+          <span>${escapePortalHtml(points[0].fecha || 'Inicio')}</span>
+          <span class="ms-minmax">MIN ${min}${unit} · MAX ${max}${unit}</span>
+          <span>${escapePortalHtml(last.fecha || 'Hoy')}</span>
+        </div>
       </article>`;
 }
 
@@ -570,24 +609,24 @@ function renderCard(d) {
 
           <div class="pc-metrics-grid">
             <div class="pc-metric">
-              <span class="pc-metric-label">Estatura actual</span>
+              <span class="pc-metric-label">📏 Estatura actual</span>
               <span class="pc-metric-value">${escapePortalHtml(d.talla_actual || '—')}</span>
-              <span class="pc-metric-delta">${escapePortalHtml(d.delta_talla || 'Sin tendencia')}</span>
+              <span class="pc-metric-delta" style="${d.delta_talla ? 'color:#16a34a;' : 'color:#aaa;'}">${escapePortalHtml(d.delta_talla || 'Sin tendencia')}</span>
             </div>
             <div class="pc-metric pc-metric--gold">
-              <span class="pc-metric-label">Peso actual</span>
+              <span class="pc-metric-label">⚖️ Peso actual</span>
               <span class="pc-metric-value">${escapePortalHtml(d.peso_actual || '—')}</span>
-              <span class="pc-metric-delta">${escapePortalHtml(d.delta_peso || 'Sin tendencia')}</span>
+              <span class="pc-metric-delta" style="${d.delta_peso ? 'color:#d97706;' : 'color:#aaa;'}">${escapePortalHtml(d.delta_peso || 'Sin tendencia')}</span>
             </div>
             <div class="pc-metric pc-metric--green">
-              <span class="pc-metric-label">Salto Vertical</span>
-              <span class="pc-metric-value">${saltoCmLatest}</span>
-              <span class="pc-metric-delta" style="color:#16a34a;">Potencia CMJ</span>
+              <span class="pc-metric-label">🦵 Salto Vertical</span>
+              <span class="pc-metric-value" style="${saltoCmLatest === '—' ? 'color:#bbb;font-size:32px;' : ''}">${saltoCmLatest}</span>
+              <span class="pc-metric-delta" style="${saltoCmLatest === '—' ? 'color:#bbb;font-size:9px;background:#f3f3f0;padding:3px 7px;border-radius:6px;' : 'color:#16a34a;'}">${saltoCmLatest === '—' ? 'Pendiente de medir' : 'Potencia CMJ'}</span>
             </div>
             <div class="pc-metric pc-metric--purple">
-              <span class="pc-metric-label">Sprint 10m</span>
-              <span class="pc-metric-value">${sprintLatest}</span>
-              <span class="pc-metric-delta">Aceleración</span>
+              <span class="pc-metric-label">⚡ Sprint 10m</span>
+              <span class="pc-metric-value" style="${sprintLatest === '—' ? 'color:#bbb;font-size:32px;' : ''}">${sprintLatest}</span>
+              <span class="pc-metric-delta" style="${sprintLatest === '—' ? 'color:#bbb;font-size:9px;background:rgba(255,255,255,.08);padding:3px 7px;border-radius:6px;' : ''}">${sprintLatest === '—' ? 'Pendiente de medir' : 'Aceleración'}</span>
             </div>
           </div>
 
