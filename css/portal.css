@@ -145,31 +145,31 @@ body {
 .epic-player-panel {
   position: relative;
   isolation: isolate;
-  min-height: 310px;
   overflow: hidden;
   color: #fff;
   background:
-    radial-gradient(circle at 72% 26%, rgba(229, 25, 27, .48), transparent 30%),
-    linear-gradient(155deg, #1d1d20 0%, #050505 50%, #160405 100%);
+    radial-gradient(circle at 78% 42%, rgba(255, 183, 0, .19), transparent 24%),
+    radial-gradient(circle at 13% 86%, rgba(229, 25, 27, .35), transparent 32%),
+    linear-gradient(145deg, #16161a 0%, #050505 52%, #1c0508 100%);
 }
 .epic-player-panel::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  opacity: .44;
+  opacity: .52;
   background:
-    linear-gradient(117deg, transparent 0 47%, rgba(255, 255, 255, .08) 47% 48%, transparent 48%),
-    repeating-linear-gradient(90deg, transparent 0 39px, rgba(255, 255, 255, .025) 40px);
+    radial-gradient(circle, rgba(255,255,255,.28) 0 1px, transparent 1.5px) 0 0 / 34px 34px,
+    linear-gradient(117deg, transparent 0 47%, rgba(255, 255, 255, .07) 47% 48%, transparent 48%);
 }
 .epic-player-panel::after {
   content: "";
   position: absolute;
-  inset: auto -60px -100px 35%;
+  inset: auto -75px -120px auto;
   z-index: -1;
   width: 330px;
   height: 330px;
-  border: 42px solid rgba(229, 25, 27, .16);
+  border: 42px solid rgba(255, 183, 0, .09);
   border-radius: 50%;
 }
 .epic-player-topline {
@@ -179,7 +179,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 24px 26px;
+  padding: 22px clamp(20px, 4vw, 42px) 0;
   color: #a6a6ad;
   font-size: 9px;
   font-weight: 800;
@@ -189,29 +189,30 @@ body {
 .epic-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, .75); }
 .epic-status.is-locked { color: #ffacae; }
 .epic-status.is-locked::before { background: var(--portal-red); box-shadow: 0 0 12px rgba(229, 25, 27, .75); }
-.epic-rating { position: absolute; top: 66px; left: 21px; z-index: 5; text-align: center; }
-.epic-rating strong { display: block; font-family: "Bebas Neue", Impact, sans-serif; font-size: 58px; font-weight: 400; line-height: .78; }
-.epic-rating span { display: block; margin-top: 9px; color: var(--portal-gold); font-size: 13px; font-weight: 900; letter-spacing: .14em; }
-.epic-player-art { position: absolute; top: 56px; right: 8px; bottom: 88px; left: 88px; overflow: hidden; }
-.epic-player-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, #070707 100%); pointer-events: none; }
-.epic-player-art img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.08); }
-.epic-player-placeholder { position: absolute; inset: 0; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.1); border-radius: 50% 50% 28% 28%; background: radial-gradient(circle at 50% 35%, rgba(255,255,255,.15), transparent 32%), linear-gradient(145deg, #252529, #09090a 62%, #39090b); }
-.epic-player-placeholder span { color: rgba(255,255,255,.92); font-family: "Bebas Neue", Impact, sans-serif; font-size: 112px; line-height: 1; text-shadow: 0 10px 30px rgba(0,0,0,.6); }
-.epic-player-placeholder small { position: absolute; right: 18px; bottom: 14px; color: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 34px; letter-spacing: .08em; }
-.epic-crest { position: absolute; z-index: 5; top: 135px; left: 23px; width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .75)); }
-.epic-player-identity {
-  position: absolute;
-  z-index: 6;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 48px 20px 20px;
-  background: linear-gradient(transparent, rgba(5, 5, 5, .94) 38%);
-}
-.epic-kicker { color: var(--portal-gold); font-size: 9px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase; }
-.epic-name { margin: 7px 0 0; color: #fff; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(39px, 5cqw, 60px); font-weight: 400; line-height: .88; letter-spacing: .02em; text-transform: uppercase; overflow-wrap: anywhere; }
-.epic-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 17px; }
-.epic-chip { padding: 5px 8px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px; color: #dadade; background: rgba(255, 255, 255, .07); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.player-overview-grid { position: relative; z-index: 2; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(245px, .75fr); align-items: center; gap: clamp(24px, 5vw, 70px); min-height: 330px; padding: 20px clamp(22px, 5vw, 58px) 36px; }
+.player-identity-block { min-width: 0; }
+.player-crest { width: 60px; height: 60px; margin-bottom: 20px; object-fit: contain; filter: drop-shadow(0 12px 18px rgba(0, 0, 0, .65)); }
+.epic-kicker { color: var(--portal-gold); font-size: 10px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; }
+.epic-name { max-width: 680px; margin: 10px 0 0; color: #fff; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(52px, 7cqw, 92px); font-weight: 400; font-style: italic; line-height: .82; letter-spacing: .01em; text-transform: uppercase; overflow-wrap: anywhere; text-shadow: 0 10px 34px rgba(0,0,0,.6); }
+.epic-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 22px; }
+.epic-chip { padding: 6px 10px; border: 1px solid rgba(255, 255, 255, .15); border-radius: 999px; color: #e6e6e8; background: rgba(255, 255, 255, .07); backdrop-filter: blur(8px); font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+
+.streak-stage { position: relative; display: flex; min-width: 0; flex-direction: column; align-items: center; padding: 14px 8px 0; text-align: center; }
+.streak-overline { color: #9b9ba2; font-size: 8px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; }
+.streak-star-shell { position: relative; width: clamp(158px, 23vw, 210px); aspect-ratio: 1.05; margin: 2px auto -2px; filter: drop-shadow(0 16px 30px rgba(255, 65, 32, .28)); }
+.streak-star { width: 100%; height: 100%; overflow: visible; }
+.streak-star path { fill: url(#streak-gradient); stroke: rgba(255,255,255,.75); stroke-width: 2; transform-origin: center; }
+.streak-stage.is-active .streak-star path { animation: streak-heartbeat 2.4s ease-in-out infinite; }
+.streak-star-shell::before { content: ""; position: absolute; inset: 24%; border: 1px solid rgba(255,255,255,.5); border-radius: 50%; box-shadow: 0 0 0 10px rgba(255,255,255,.06), 0 0 46px rgba(255,174,0,.52); }
+.streak-value { position: absolute; inset: 0; display: grid; place-content: center; padding-top: 3px; color: #160607; text-align: center; }
+.streak-value strong { display: block; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(58px, 9vw, 78px); font-weight: 400; line-height: .72; text-shadow: 0 1px rgba(255,255,255,.34); }
+.streak-value span { display: block; margin-top: 8px; font-size: 8px; font-weight: 1000; letter-spacing: .18em; }
+.streak-title { color: #fff; font-family: "Bebas Neue", Impact, sans-serif; font-size: 24px; font-weight: 400; letter-spacing: .05em; text-transform: uppercase; }
+.streak-stage p { max-width: 260px; margin: 4px auto 0; color: #a7a7ad; font-size: 10px; line-height: 1.45; }
+.streak-spark { position: absolute; z-index: 3; color: #ffe082; font-size: 16px; text-shadow: 0 0 14px #ff9800; }
+.streak-spark--one { top: 24%; left: -2%; transform: rotate(-14deg); }
+.streak-spark--two { right: 0; bottom: 27%; color: #ff6b6f; font-size: 11px; transform: rotate(19deg); }
+@keyframes streak-heartbeat { 0%, 72%, 100% { transform: scale(1); } 80% { transform: scale(1.045); } 88% { transform: scale(.985); } 94% { transform: scale(1.025); } }
 
 /* Panel blanco de estadísticas */
 .epic-data-panel { min-width: 0; padding: 34px clamp(24px, 4cqw, 48px) 28px; background: #fff; }
@@ -219,39 +220,73 @@ body {
 .epic-report-head span { color: #77777d; font-size: 9px; font-weight: 900; letter-spacing: .18em; }
 .epic-report-head h3 { margin: 2px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(42px, 6cqw, 68px); font-weight: 400; font-style: italic; line-height: .9; }
 .epic-report-head > strong { color: #d7d7d7; font-family: "Bebas Neue", Impact, sans-serif; font-size: 40px; font-weight: 400; line-height: 1; }
-.epic-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 8px; }
-.epic-stat { min-width: 0; padding: 22px 18px 20px 0; border-bottom: 1px solid var(--portal-line-light); }
-.epic-stat:nth-child(odd) { border-right: 1px solid var(--portal-line-light); }
-.epic-stat:nth-child(even) { padding-left: 22px; }
-.epic-stat > div { display: flex; align-items: baseline; gap: 9px; }
-.epic-stat strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(46px, 7cqw, 72px); font-weight: 400; line-height: .8; }
-.epic-stat b { color: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 21px; font-weight: 400; letter-spacing: .04em; }
-.epic-stat > span { display: block; margin-top: 9px; color: #77777d; font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
-.epic-form-strip { display: grid; grid-template-columns: 45px minmax(0, 1fr) auto; align-items: center; gap: 14px; margin-top: 22px; padding: 15px 17px; color: #fff; border-radius: 14px; background: var(--portal-black); }
-.epic-form-icon { display: grid; width: 42px; height: 42px; place-items: center; border-radius: 50%; background: var(--portal-red); font-size: 23px; font-weight: 900; }
-.epic-form-strip strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: 21px; font-weight: 400; letter-spacing: .05em; text-transform: uppercase; }
-.epic-form-strip p { margin: 2px 0 0; color: #a8a8ae; font-size: 10px; line-height: 1.4; }
-.epic-last-session { min-width: 86px; padding-left: 14px; text-align: right; border-left: 1px solid rgba(255, 255, 255, .13); }
-.epic-last-session span { display: block; color: #77777e; font-size: 7px; font-weight: 900; letter-spacing: .1em; }
-.epic-last-session strong { color: var(--portal-gold); font-size: 22px; }
-.epic-physical { padding-top: 22px; }
 .epic-section-title { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; color: #69696f; font-size: 9px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
 .epic-section-title::before { content: ""; width: 20px; height: 3px; background: var(--portal-red); }
-.epic-physical-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-.epic-physical-item { padding: 12px 14px; border: 1px solid var(--portal-line-light); border-radius: 12px; background: #f5f5f3; }
-.epic-physical-item strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: 27px; font-weight: 400; }
-.epic-physical-item > span { display: block; color: #77777d; font-size: 8px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-.epic-delta { display: inline !important; margin-left: 6px; color: #168441 !important; }
-.epic-empty { padding: 13px 14px; border: 1px dashed var(--portal-line-light); border-radius: 12px; color: #77777d; background: #f7f7f5; font-size: 11px; text-align: center; }
-.epic-history { margin-top: 13px; border-top: 1px solid var(--portal-line-light); }
-.epic-history summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 0; cursor: pointer; color: #55555b; font-size: 9px; font-weight: 900; letter-spacing: .12em; list-style: none; text-transform: uppercase; }
-.epic-history summary::-webkit-details-marker { display: none; }
-.epic-history summary::after { content: "+"; color: var(--portal-red); font-size: 19px; }
-.epic-history[open] summary::after { content: "−"; }
-.epic-table-wrap { overflow-x: auto; padding-bottom: 10px; }
-.epic-table { width: 100%; min-width: 320px; border-collapse: collapse; font-size: 11px; }
-.epic-table th { padding: 8px; color: #77777d; text-align: left; text-transform: uppercase; letter-spacing: .08em; }
-.epic-table td { padding: 9px 8px; border-top: 1px solid var(--portal-line-light); color: #303035; }
+
+/* Rendimiento primero */
+.performance-zone { padding-bottom: 28px; border-bottom: 1px solid var(--portal-line-light); }
+.performance-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 18px; border-bottom: 5px solid var(--portal-black); }
+.performance-heading span { color: var(--portal-red); font-size: 9px; font-weight: 1000; letter-spacing: .19em; text-transform: uppercase; }
+.performance-heading h3 { margin: 4px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(44px, 7cqw, 72px); font-weight: 400; font-style: italic; line-height: .82; }
+.performance-heading b { flex: 0 0 auto; padding: 8px 11px; color: #fff; border-radius: 9px; background: var(--portal-black); font-size: 8px; letter-spacing: .12em; }
+.performance-metrics { display: grid; grid-template-columns: 1.15fr 1.15fr .7fr; gap: 10px; margin-top: 16px; }
+.performance-metric { position: relative; min-width: 0; overflow: hidden; padding: 17px; border: 1px solid #e1e1df; border-radius: 16px; background: #f5f5f2; }
+.performance-metric::after { content: ""; position: absolute; right: -18px; bottom: -28px; width: 72px; height: 72px; border: 12px solid rgba(5,5,5,.035); border-radius: 50%; }
+.performance-metric > span { display: block; color: #737378; font-size: 8px; font-weight: 1000; letter-spacing: .14em; text-transform: uppercase; }
+.performance-metric strong { display: block; margin-top: 12px; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(38px, 6cqw, 58px); font-weight: 400; line-height: .8; }
+.performance-metric em { display: block; margin-top: 10px; color: #168441; font-size: 9px; font-style: normal; font-weight: 900; }
+.performance-metric--height { border-top: 4px solid var(--portal-red); }
+.performance-metric--weight { border-top: 4px solid var(--portal-gold); }
+.performance-metric--score { color: #fff; border-color: #17171a; border-top: 4px solid #7c3aed; background: #0b0b0d; }
+.performance-metric--score > span { color: #8f8f98; }
+.performance-metric--score em { color: #c4b5fd; }
+
+.metric-charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.metric-spark { min-width: 0; padding: 15px; color: #fff; border-radius: 16px; background: #0b0b0d; }
+.metric-spark-head, .metric-spark-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.metric-spark-head span { color: #9b9ba2; font-size: 8px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
+.metric-spark-head strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: 26px; font-weight: 400; }
+.metric-spark svg { display: block; width: 100%; height: 92px; margin-top: 5px; overflow: visible; }
+.metric-grid-line { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 1; }
+.metric-line { fill: none; stroke: var(--portal-red); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 7px rgba(229,25,27,.55)); }
+.metric-dot { fill: #0b0b0d; stroke: var(--portal-red); stroke-width: 3; }
+.metric-dot.is-current { fill: #fff; }
+.metric-spark--peso .metric-line { stroke: var(--portal-gold); filter: drop-shadow(0 0 7px rgba(245,166,35,.5)); }
+.metric-spark--peso .metric-dot { stroke: var(--portal-gold); }
+.metric-spark-foot { color: #74747d; font-size: 7px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+
+.metric-history { margin-top: 18px; }
+.metric-history-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; margin-bottom: 10px; }
+.metric-history-head span { color: #7a7a80; font-size: 8px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+.metric-history-head h4 { margin: 2px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: 27px; font-weight: 400; text-transform: uppercase; }
+.metric-history-head > strong { display: grid; width: 35px; height: 35px; place-items: center; color: #fff; border-radius: 50%; background: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 20px; font-weight: 400; }
+.metric-history-list { display: grid; gap: 7px; }
+.metric-history-row { display: grid; grid-template-columns: minmax(105px, .8fr) minmax(0, 1.2fr); align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid #e5e5e3; border-radius: 13px; background: #fafaf8; }
+.metric-history-row.is-latest { border-color: rgba(229,25,27,.35); background: #fff5f5; }
+.metric-history-row > div > span { display: block; color: var(--portal-red); font-size: 7px; font-weight: 1000; letter-spacing: .12em; }
+.metric-history-row > div > strong { display: block; margin-top: 3px; font-size: 11px; }
+.metric-history-row dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.metric-history-row dl div { min-width: 0; }
+.metric-history-row dt { color: #85858a; font-size: 7px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.metric-history-row dd { margin: 2px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: 21px; }
+.performance-empty { display: flex; align-items: center; gap: 13px; margin-top: 14px; padding: 18px; color: #5f5f65; border: 1px dashed #d1d1ce; border-radius: 15px; background: #f7f7f4; }
+.performance-empty > span { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; color: #fff; border-radius: 50%; background: var(--portal-red); font-size: 24px; }
+.performance-empty strong { display: block; color: #17171a; font-size: 12px; }
+.performance-empty p { margin: 3px 0 0; font-size: 10px; line-height: 1.45; }
+
+.attendance-zone { padding-top: 26px; }
+.attendance-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.attendance-grid article { min-width: 0; padding: 14px; border-radius: 14px; background: #f3f3f0; }
+.attendance-grid strong { display: block; overflow-wrap: anywhere; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(30px, 5cqw, 46px); font-weight: 400; line-height: .9; }
+.attendance-grid span { display: block; margin-top: 8px; color: #77777d; font-size: 7px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+.momentum-strip { display: flex; align-items: center; gap: 13px; margin-top: 10px; padding: 14px; color: #fff; border-radius: 14px; background: linear-gradient(110deg, #0b0b0d, #26080b); }
+.momentum-mark { display: grid; flex: 0 0 40px; width: 40px; height: 40px; place-items: center; border-radius: 12px; background: var(--portal-red); font-size: 22px; }
+.momentum-strip strong { font-family: "Bebas Neue", Impact, sans-serif; font-size: 20px; font-weight: 400; letter-spacing: .05em; text-transform: uppercase; }
+.momentum-strip p { margin: 2px 0 0; color: #a6a6ae; font-size: 9px; line-height: 1.4; }
+.player-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--portal-line-light); }
+.player-facts div { min-width: 0; }
+.player-facts span { display: block; color: #85858a; font-size: 7px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.player-facts strong { display: block; margin-top: 4px; overflow-wrap: anywhere; font-size: 11px; }
 .epic-actions { padding-top: 15px; }
 .epic-share { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 50px; padding: 0 20px; color: #fff; border-radius: 12px; background: var(--portal-red); font-family: "Bebas Neue", Impact, sans-serif; font-size: 20px; letter-spacing: .08em; text-decoration: none; transition: transform .2s ease, background .2s ease, box-shadow .2s ease; }
 .epic-share b { font-size: 22px; }
@@ -278,11 +313,6 @@ body {
 .rk-name { min-width: 0; overflow: hidden; color: #ddd; font-size: 12px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
 .rk-score { color: var(--portal-gold); font-family: "Bebas Neue", Impact, sans-serif; font-size: 19px; }
 .rk-empty { padding: 22px 12px; color: #77777d; font-size: 12px; text-align: center; }
-
-@media (max-width: 900px) {
-  .epic-form-strip { grid-template-columns: 40px minmax(0, 1fr); }
-  .epic-last-session { grid-column: 2; padding: 8px 0 0; text-align: left; border-top: 1px solid rgba(255, 255, 255, .13); border-left: 0; }
-}
 
 @media (max-width: 767px) {
   .portal-body:not(.portal-player-view) { height: 100svh; min-height: 560px; overflow: hidden; background: var(--portal-red); }
@@ -315,19 +345,36 @@ body {
   .portal-player-view .portal-topbar { margin-bottom: 16px; }
   .portal-player-view #p3 > .grid { grid-template-columns: 1fr; }
   .epic-card { border-radius: 22px; }
-  .epic-player-panel { min-height: 300px; }
-  .epic-player-identity { padding: 45px 18px 18px; }
-  .epic-name { font-size: clamp(40px, 13cqw, 58px); }
+  .epic-player-topline { padding: 17px 18px 0; }
+  .player-overview-grid { grid-template-columns: minmax(0, 1fr) 142px; gap: 10px; min-height: 292px; padding: 14px 18px 23px; }
+  .player-crest { width: 43px; height: 43px; margin-bottom: 11px; }
+  .epic-kicker { font-size: 7px; letter-spacing: .15em; }
+  .epic-name { margin-top: 7px; font-size: clamp(38px, 11.6vw, 51px); line-height: .84; }
+  .epic-meta { gap: 5px; margin-top: 13px; }
+  .epic-chip { padding: 4px 7px; font-size: 6px; }
+  .streak-stage { padding: 7px 0 0; }
+  .streak-overline { font-size: 6px; letter-spacing: .12em; }
+  .streak-star-shell { width: 140px; margin-top: 0; }
+  .streak-value strong { font-size: 54px; }
+  .streak-value span { margin-top: 6px; font-size: 6px; }
+  .streak-title { font-size: 18px; }
+  .streak-stage p { max-width: 145px; font-size: 8px; }
   .epic-data-panel { padding: 24px 19px 20px; }
-  .epic-report-head h3 { font-size: clamp(43px, 15cqw, 58px); }
-  .epic-report-head > strong { font-size: 32px; }
-  .epic-stat { padding: 18px 10px 17px 0; }
-  .epic-stat:nth-child(even) { padding-left: 15px; }
-  .epic-stat strong { font-size: clamp(44px, 15cqw, 62px); }
-  .epic-stat b { font-size: 18px; }
-  .epic-form-strip { grid-template-columns: 39px minmax(0, 1fr); padding: 13px; }
-  .epic-form-icon { width: 38px; height: 38px; }
-  .epic-physical-grid { grid-template-columns: 1fr 1fr; }
+  .performance-heading { align-items: flex-start; }
+  .performance-heading h3 { font-size: clamp(40px, 12vw, 52px); }
+  .performance-heading b { margin-top: 2px; padding: 7px 8px; font-size: 6px; }
+  .performance-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .performance-metric { padding: 14px; }
+  .performance-metric--score { grid-column: 1 / -1; }
+  .performance-metric strong { font-size: clamp(34px, 10vw, 44px); }
+  .metric-charts { grid-template-columns: 1fr; }
+  .metric-spark svg { height: 82px; }
+  .metric-history-row { grid-template-columns: minmax(92px, .72fr) minmax(0, 1.28fr); gap: 9px; padding: 11px; }
+  .metric-history-row dd { font-size: 19px; }
+  .attendance-grid article { padding: 12px 10px; }
+  .attendance-grid strong { font-size: clamp(26px, 8vw, 35px); }
+  .player-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .player-facts div:last-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 767px) and (max-height: 680px) {
@@ -346,23 +393,29 @@ body {
 @media (max-width: 420px) {
   .portal-topbar-season { display: none; }
   .epic-player-topline { padding-inline: 18px; font-size: 8px; }
-  .epic-player-panel { min-height: 286px; }
-  .epic-player-art { left: 82px; bottom: 82px; }
-  .epic-player-placeholder span { font-size: 92px; }
-  .epic-physical-grid { grid-template-columns: 1fr; }
+  .player-overview-grid { grid-template-columns: minmax(0, 1fr) 128px; min-height: 276px; padding-inline: 16px; }
+  .epic-name { font-size: clamp(35px, 11vw, 46px); }
+  .streak-star-shell { width: 126px; }
+  .streak-value strong { font-size: 49px; }
+  .streak-title { font-size: 16px; }
+  .streak-stage p { font-size: 7px; }
+  .performance-heading b { max-width: 78px; text-align: center; }
 }
 
-@media (min-width: 901px) {
-  .epic-card { display: grid; grid-template-columns: minmax(310px, .82fr) minmax(0, 1.5fr); }
-  .epic-player-panel { min-height: 620px; }
-  .epic-rating { top: 75px; left: 27px; }
-  .epic-rating strong { font-size: 76px; }
-  .epic-player-art { inset: 70px 12px 142px 76px; }
-  .epic-player-placeholder span { font-size: 170px; }
-  .epic-crest { top: 166px; left: 29px; width: 50px; height: 50px; }
-  .epic-player-identity { padding: 56px 28px 28px; }
+@media (max-width: 350px) {
+  .player-overview-grid { grid-template-columns: 1fr; gap: 14px; padding-top: 17px; text-align: center; }
+  .player-crest { margin-inline: auto; }
+  .epic-meta { justify-content: center; }
+  .streak-stage { border-top: 1px solid rgba(255,255,255,.1); }
+  .streak-stage p { max-width: 220px; }
+  .performance-metrics { grid-template-columns: 1fr; }
+  .performance-metric--score { grid-column: auto; }
+  .attendance-grid { grid-template-columns: 1fr 1fr; }
+  .attendance-grid article:last-child { grid-column: 1 / -1; }
+  .metric-history-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .epic-share { transition: none; }
+  .streak-stage.is-active .streak-star path { animation: none; }
 }

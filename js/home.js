@@ -87,7 +87,7 @@ async function buscar() {
         
         let query = window.supabaseClient
             .from('students')
-            .select('id, full_name, valid_until, horario, sede, batido_credits')
+            .select('id, full_name, valid_until, horario, sede, batido_credits, grupo, categoria, turno')
             .eq('is_active', true);
             
         if (student_id_resolved) {
@@ -174,6 +174,7 @@ async function buscar() {
         let talla_actual = null;
         let peso_actual = null;
         let delta_talla = null;
+        let delta_peso = null;
         
         if (bioData && bioData.length > 0) {
             const ultimo = bioData[0];
@@ -187,20 +188,27 @@ async function buscar() {
                     const diffCm = Math.round(diff * 100);
                     delta_talla = diff >= 0 ? `+${diffCm}cm` : `${diffCm}cm`;
                 }
+                if (ultimo.peso != null && anterior.peso != null) {
+                    const diff = parseFloat(ultimo.peso) - parseFloat(anterior.peso);
+                    const rounded = Math.round(diff * 10) / 10;
+                    delta_peso = `${rounded > 0 ? '+' : ''}${rounded}kg`;
+                }
             }
             
             historial = bioData.map(r => ({
                 fecha: r.fecha,
-                talla: r.talla != null ? `${r.talla}m` : "—",
-                peso: r.peso != null ? `${r.peso}kg` : "—"
+                talla: r.talla != null ? Number.parseFloat(r.talla) : null,
+                peso: r.peso != null ? Number.parseFloat(r.peso) : null
             }));
         }
         
         const data = {
             full_name: student.full_name,
-            category: 'Jugador JR Stars',
+            category: student.categoria ? `Categoría ${student.categoria}` : 'Jugador JR Stars',
             sede: student.sede,
             horario: student.horario,
+            grupo: student.grupo,
+            turno: student.turno,
             img_url: null,
             batido_credits: student.batido_credits,
             debe,
@@ -212,6 +220,7 @@ async function buscar() {
             talla_actual,
             peso_actual,
             delta_talla,
+            delta_peso,
             historial_biometrico: historial
         };
         
@@ -347,6 +356,37 @@ function escapePortalHtml(value) {
     })[char]);
 }
 
+function buildMetricSparkline(history, key, unit, label) {
+    const points = [...history].reverse().filter(item => Number.isFinite(item[key]));
+    if (!points.length) return '';
+
+    const width = 300;
+    const height = 92;
+    const inset = 10;
+    const values = points.map(item => item[key]);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const coordinates = points.map((item, index) => {
+        const x = points.length === 1 ? width / 2 : inset + (index * (width - inset * 2) / (points.length - 1));
+        const y = height - inset - ((item[key] - min) / range) * (height - inset * 2);
+        return { x: x.toFixed(1), y: y.toFixed(1) };
+    });
+    const line = coordinates.map(point => `${point.x},${point.y}`).join(' ');
+    const last = points[points.length - 1];
+
+    return `
+      <article class="metric-spark metric-spark--${key}">
+        <div class="metric-spark-head"><span>${escapePortalHtml(label)}</span><strong>${escapePortalHtml(last[key])}${unit}</strong></div>
+        <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Evolución de ${escapePortalHtml(label.toLowerCase())}">
+          <path class="metric-grid-line" d="M10 22H290M10 46H290M10 70H290"></path>
+          <polyline class="metric-line" points="${line}"></polyline>
+          ${coordinates.map((point, index) => `<circle class="metric-dot${index === coordinates.length - 1 ? ' is-current' : ''}" cx="${point.x}" cy="${point.y}" r="${index === coordinates.length - 1 ? 5 : 3}"></circle>`).join('')}
+        </svg>
+        <div class="metric-spark-foot"><span>${escapePortalHtml(points[0].fecha || 'Inicio')}</span><span>${escapePortalHtml(last.fecha || 'Actual')}</span></div>
+      </article>`;
+}
+
 function renderCard(d) {
     const wrap = $('card-wrap');
     if (!wrap) return;
@@ -354,22 +394,20 @@ function renderCard(d) {
     const fullName = String(d.full_name || 'Jugador JR Stars').trim();
     const name = escapePortalHtml(fullName);
     const firstName = escapePortalHtml(fullName.split(/\s+/)[0] || 'Jugador');
-    const initial = escapePortalHtml(fullName.charAt(0).toUpperCase() || 'J');
     const season = new Date().getFullYear();
     const totalSessions = Number(d.total_sesiones) || 0;
     const monthSessions = Number(d.sesiones_mes) || 0;
     const streak = Number(d.racha) || 0;
     const physicalRecords = Number(d.registros_fisicos) || 0;
     const credits = Math.max(0, Number(d.batido_credits) || 0);
+    const historyData = Array.isArray(d.historial_biometrico) ? d.historial_biometrico : [];
     const creditBalance = $('kiosk-credit-balance');
     const energyLabel = $('kiosk-energy-label');
     const energyBar = $('kiosk-energy-bar');
     if (creditBalance) creditBalance.textContent = `${credits} ${credits === 1 ? 'CRÉDITO' : 'CRÉDITOS'}`;
     if (energyLabel) energyLabel.textContent = credits >= 15 ? 'ALTA' : credits >= 5 ? 'MEDIA' : 'BAJA';
     if (energyBar) energyBar.style.width = `${Math.min(100, (credits / 20) * 100)}%`;
-    const playerVisual = d.img_url
-        ? `<img src="${escapePortalHtml(d.img_url)}" alt="Foto de ${name}">`
-        : `<div class="epic-player-placeholder" aria-label="Jugador ${name}"><span>${initial}</span><small>JR</small></div>`;
+
     const meta = [d.category, d.sede && `Sede ${d.sede}`, d.grupo && `Grupo ${d.grupo}`, d.turno, d.horario]
         .filter(Boolean)
         .map(item => `<span class="epic-chip">${escapePortalHtml(item)}</span>`)
@@ -377,24 +415,34 @@ function renderCard(d) {
     const status = d.debe
         ? '<span class="epic-status is-locked">Acceso restringido</span>'
         : '<span class="epic-status">Jugador activo</span>';
+    const streakTitle = streak >= 8 ? 'Racha legendaria' : streak >= 4 ? 'En modo estrella' : streak > 0 ? 'Racha encendida' : 'Tu próxima racha';
+    const streakCopy = streak > 0
+        ? `${streak} ${streak === 1 ? 'sesión consecutiva' : 'sesiones consecutivas'} construyendo disciplina.`
+        : 'El próximo entrenamiento enciende tu estrella.';
     const playerPanel = `
-      <section class="epic-player-panel">
-        <div class="epic-player-topline">
-          <span>JR STARS · PLAYER CARD</span>
-          ${status}
-        </div>
-        <div class="epic-rating" aria-label="${streak} sesiones de racha">
-          <strong>${streak}</strong>
-          <span>RAC</span>
-        </div>
-        <div class="epic-player-art">
-          ${playerVisual}
-        </div>
-        <img class="epic-crest" src="../img/escudo.png" alt="Escudo JR Stars" width="400" height="400">
-        <div class="epic-player-identity">
-          <span class="epic-kicker">Ficha oficial · Temporada ${season}</span>
-          <h2 class="epic-name">${name}</h2>
-          <div class="epic-meta">${meta}</div>
+      <section class="epic-player-panel player-overview">
+        <div class="epic-player-topline"><span>JR STARS · TEMPORADA ${season}</span>${status}</div>
+        <div class="player-overview-grid">
+          <div class="player-identity-block">
+            <img class="player-crest" src="../img/escudo.png" alt="Escudo JR Stars" width="96" height="96">
+            <span class="epic-kicker">Perfil de alto rendimiento</span>
+            <h2 class="epic-name">${name}</h2>
+            <div class="epic-meta">${meta}</div>
+          </div>
+          <div class="streak-stage${streak > 0 ? ' is-active' : ''}">
+            <span class="streak-overline">Disciplina en juego</span>
+            <div class="streak-star-shell" aria-label="${streak} sesiones de racha">
+              <span class="streak-spark streak-spark--one" aria-hidden="true">★</span>
+              <span class="streak-spark streak-spark--two" aria-hidden="true">★</span>
+              <svg class="streak-star" viewBox="0 0 200 190" aria-hidden="true">
+                <defs><linearGradient id="streak-gradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff176"></stop><stop offset=".42" stop-color="#ffb300"></stop><stop offset="1" stop-color="#ff1744"></stop></linearGradient></defs>
+                <path d="M100 8 123 69 188 72 137 113 154 178 100 141 46 178 63 113 12 72 77 69Z"></path>
+              </svg>
+              <div class="streak-value"><strong>${streak}</strong><span>${streak === 1 ? 'SESIÓN' : 'SESIONES'}</span></div>
+            </div>
+            <strong class="streak-title">${streakTitle}</strong>
+            <p>${streakCopy}</p>
+          </div>
         </div>
       </section>`;
 
@@ -403,12 +451,12 @@ function renderCard(d) {
           <article class="epic-card is-locked">
             ${playerPanel}
             <section class="epic-data-panel epic-locked-panel">
-              <div class="epic-report-head"><div><span>REPORTE DE TEMPORADA</span><h3>ESTADÍSTICAS</h3></div><strong>${season}</strong></div>
+              <div class="epic-report-head"><div><span>REPORTE DE TEMPORADA</span><h3>PROGRESO</h3></div><strong>${season}</strong></div>
               <div class="epic-lock">
                 <div class="epic-lock-mark" aria-hidden="true">LOCKED</div>
-                <div class="epic-lock-icon" aria-hidden="true">🔒</div>
-                <h3>ESTADÍSTICAS BLOQUEADAS</h3>
-                <p>El progreso de <strong>${firstName}</strong> está listo, pero la mensualidad figura pendiente. Regularízala para volver a ver asistencia y evolución física.</p>
+                <div class="epic-lock-icon" aria-hidden="true">×</div>
+                <h3>PROGRESO BLOQUEADO</h3>
+                <p>La evolución de <strong>${firstName}</strong> está lista, pero la mensualidad figura pendiente. Regularízala para recuperar sus métricas e historial.</p>
                 <button class="epic-pay" onclick="document.getElementById('modal-yape').classList.remove('hidden')">PAGAR S/80 · YAPE / PLIN</button>
               </div>
             </section>
@@ -420,47 +468,60 @@ function renderCard(d) {
         `¡${d.full_name} ya suma ${totalSessions} sesiones esta temporada en JR Stars! 🔥🏆\n` +
         `Revisa el Portal del Jugador → ${window.location.origin}/portal/`
     );
-    const histRows = (d.historial_biometrico || []).map(h => `
-      <tr><td>${escapePortalHtml(h.fecha)}</td><td>${escapePortalHtml(h.talla)}</td><td>${escapePortalHtml(h.peso)}</td></tr>`).join('');
-    const physical = (d.talla_actual || d.peso_actual) ? `
-      <div class="epic-physical-grid">
-        <div class="epic-physical-item"><strong>${escapePortalHtml(d.talla_actual || '—')}<span class="epic-delta">${escapePortalHtml(d.delta_talla || '')}</span></strong><span>Estatura actual</span></div>
-        <div class="epic-physical-item"><strong>${escapePortalHtml(d.peso_actual || '—')}</strong><span>Peso actual</span></div>
-      </div>` : '<div class="epic-empty">Sin mediciones físicas registradas todavía.</div>';
-    const history = histRows ? `
-      <details class="epic-history">
-        <summary>Ver evolución física (${d.registros_fisicos || 0})</summary>
-        <div class="epic-table-wrap"><table class="epic-table">
-          <thead><tr><th>Fecha</th><th>Estatura</th><th>Peso</th></tr></thead>
-          <tbody>${histRows}</tbody>
-        </table></div>
-      </details>` : '';
-    const streakLabel = streak > 0 ? 'Racha activa' : 'Próxima meta';
-    const streakCopy = streak > 0
-        ? 'Sesiones consecutivas de disciplina. Cada entrenamiento suma a su historia.'
-        : 'Su próxima asistencia iniciará una nueva racha de disciplina.';
+    const hasPhysicalData = Boolean(d.talla_actual || d.peso_actual);
+    const metricHistory = historyData.length ? `
+      <section class="metric-history">
+        <div class="metric-history-head"><div><span>Registro por registro</span><h4>Historial de métricas</h4></div><strong>${physicalRecords}</strong></div>
+        <div class="metric-history-list">
+          ${historyData.map((item, index) => `
+            <article class="metric-history-row${index === 0 ? ' is-latest' : ''}">
+              <div><span>${index === 0 ? 'ÚLTIMO CONTROL' : 'CONTROL'}</span><strong>${escapePortalHtml(item.fecha || 'Sin fecha')}</strong></div>
+              <dl><div><dt>Estatura</dt><dd>${Number.isFinite(item.talla) ? `${item.talla}m` : '—'}</dd></div><div><dt>Peso</dt><dd>${Number.isFinite(item.peso) ? `${item.peso}kg` : '—'}</dd></div></dl>
+            </article>`).join('')}
+        </div>
+      </section>` : `
+      <div class="performance-empty">
+        <span aria-hidden="true">＋</span><div><strong>Primera medición pendiente</strong><p>Cuando el entrenador registre talla y peso, aquí aparecerá toda su evolución.</p></div>
+      </div>`;
+    const charts = historyData.length ? `
+      <div class="metric-charts">
+        ${buildMetricSparkline(historyData, 'talla', 'm', 'Estatura')}
+        ${buildMetricSparkline(historyData, 'peso', 'kg', 'Peso')}
+      </div>` : '';
 
     wrap.innerHTML = `
       <article class="epic-card">
         ${playerPanel}
         <section class="epic-data-panel">
-          <div class="epic-report-head">
-            <div><span>REPORTE DE TEMPORADA</span><h3>ESTADÍSTICAS</h3></div>
-            <strong>${season}</strong>
-          </div>
-          <div class="epic-stats" aria-label="Estadísticas de asistencia">
-            <div class="epic-stat"><div><strong>${totalSessions}</strong><b>SES</b></div><span>Sesiones del ciclo</span></div>
-            <div class="epic-stat"><div><strong>${monthSessions}</strong><b>MES</b></div><span>Sesiones este mes</span></div>
-            <div class="epic-stat"><div><strong>${streak}</strong><b>RAC</b></div><span>Racha actual</span></div>
-            <div class="epic-stat"><div><strong>${physicalRecords}</strong><b>CTR</b></div><span>Controles físicos</span></div>
-          </div>
-          <div class="epic-form-strip">
-            <span class="epic-form-icon" aria-hidden="true">↗</span>
-            <div><strong>${streakLabel}</strong><p>${streakCopy}</p></div>
-            <div class="epic-last-session"><span>ÚLTIMO ENTRENO</span><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong></div>
-          </div>
-          <div class="epic-physical"><div class="epic-section-title">Evolución física</div>${physical}</div>
-          ${history}
+          <section class="performance-zone">
+            <div class="performance-heading">
+              <div><span>Rendimiento primero</span><h3>EVOLUCIÓN FÍSICA</h3></div>
+              <b>${physicalRecords} ${physicalRecords === 1 ? 'CONTROL' : 'CONTROLES'}</b>
+            </div>
+            <div class="performance-metrics">
+              <article class="performance-metric performance-metric--height"><span>Estatura actual</span><strong>${escapePortalHtml(d.talla_actual || '—')}</strong><em>${escapePortalHtml(d.delta_talla || 'Sin tendencia')}</em></article>
+              <article class="performance-metric performance-metric--weight"><span>Peso actual</span><strong>${escapePortalHtml(d.peso_actual || '—')}</strong><em>${escapePortalHtml(d.delta_peso || 'Sin tendencia')}</em></article>
+              <article class="performance-metric performance-metric--score"><span>Controles</span><strong>${physicalRecords}</strong><em>${hasPhysicalData ? 'Progreso medible' : 'Por comenzar'}</em></article>
+            </div>
+            ${charts}
+            ${metricHistory}
+          </section>
+
+          <section class="attendance-zone">
+            <div class="epic-section-title">Disciplina y asistencia</div>
+            <div class="attendance-grid">
+              <article><strong>${totalSessions}</strong><span>Sesiones del ciclo</span></article>
+              <article><strong>${monthSessions}</strong><span>Este mes</span></article>
+              <article><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong><span>Último entreno</span></article>
+            </div>
+            <div class="momentum-strip"><span class="momentum-mark" aria-hidden="true">↗</span><div><strong>${streakTitle}</strong><p>${streakCopy}</p></div></div>
+          </section>
+
+          <section class="player-facts">
+            <div><span>Sede</span><strong>${escapePortalHtml(d.sede || 'Por asignar')}</strong></div>
+            <div><span>Horario</span><strong>${escapePortalHtml(d.horario || 'Por asignar')}</strong></div>
+            <div><span>Estado</span><strong>Al día</strong></div>
+          </section>
           <div class="epic-actions"><a href="https://wa.me/?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="epic-share"><span>COMPARTIR PROGRESO</span><b>↗</b></a></div>
         </section>
       </article>`;
