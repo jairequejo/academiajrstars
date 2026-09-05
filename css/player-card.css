@@ -106,37 +106,39 @@
   letter-spacing: .07em; text-transform: uppercase;
 }
 
-/* RACHA WIDGET */
+/* RACHA WIDGET — tarjeta vertical en desktop */
 .pc-streak {
   flex-shrink: 0;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
   text-align: center;
   background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 18px; padding: 16px 14px;
-  min-width: 96px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px; padding: 18px 16px;
+  min-width: 104px;
 }
 .pc-streak-label {
-  font-size: 8px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase;
-  color: rgba(255,255,255,.4);
+  font-size: 8px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase;
+  color: rgba(255,255,255,.38);
 }
 .pc-streak-flame {
-  font-size: clamp(2.2rem, 5vw, 3.2rem); line-height: 1;
-  filter: drop-shadow(0 4px 12px rgba(229,25,27,.7));
+  font-size: clamp(2.4rem, 5vw, 3.4rem); line-height: 1;
+  filter: drop-shadow(0 4px 14px rgba(229,25,27,.8));
+  margin: 2px 0;
 }
 .pc-streak-number {
   font-family: "Bebas Neue", Impact, sans-serif;
-  font-size: clamp(52px, 8vw, 76px); font-weight: 400; line-height: .82; color: #fff;
+  font-size: clamp(56px, 8vw, 78px); font-weight: 400; line-height: .8; color: #fff;
 }
 .pc-streak-unit {
-  font-size: 9px; font-weight: 900; letter-spacing: .18em; color: var(--portal-red);
+  font-size: 9px; font-weight: 900; letter-spacing: .2em; color: var(--portal-red);
+  margin-top: 2px;
 }
 .pc-streak-title {
   font-family: "Bebas Neue", Impact, sans-serif;
-  font-size: 14px; letter-spacing: .05em; color: #fff; margin-top: 6px;
+  font-size: 14px; letter-spacing: .05em; color: #fff; margin-top: 8px;
 }
 .pc-streak-copy {
-  font-size: 8px; color: rgba(255,255,255,.42); line-height: 1.4; max-width: 108px;
+  font-size: 8px; color: rgba(255,255,255,.40); line-height: 1.45; max-width: 110px;
 }
 
 /* ── CUERPO BLANCO ── */
@@ -274,24 +276,88 @@
 
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {
+  /* Hero: foto + nombre arriba, racha abajo full-width */
+  .pc-hero { padding: 18px 16px 0; }
   .pc-hero-body {
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
+    gap: 14px 12px;
   }
+
+  /* RACHA: banda horizontal prominente */
   .pc-streak {
     grid-column: 1 / -1;
-    flex-direction: row; justify-content: center; align-items: center;
-    gap: 16px; padding: 12px 16px; border-radius: 14px; min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    padding: 14px 18px;
+    border-radius: 0;
+    border-left: 0; border-right: 0; border-bottom: 0;
+    border-top: 1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.25);
+    min-width: 0;
+    margin: 14px -16px 0;
+    width: calc(100% + 32px);
   }
-  .pc-streak-copy { display: none; }
-  .pc-streak-title { font-size: 13px; }
+
+  /* Grupo izquierdo: llama + número */
+  .pc-streak-flame {
+    font-size: 2.6rem;
+    margin: 0 10px 0 0;
+    filter: drop-shadow(0 0 12px rgba(229,25,27,.9));
+  }
+  .pc-streak-number {
+    font-size: clamp(60px, 16vw, 80px);
+    line-height: 1;
+    margin-right: 8px;
+  }
+
+  /* Grupo centro: unidad */
+  .pc-streak-unit {
+    font-size: 10px;
+    letter-spacing: .16em;
+    align-self: flex-end;
+    padding-bottom: 6px;
+    margin-right: auto;
+  }
+
+  /* Grupo derecho: label + titulo + copy */
+  .pc-streak-info {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    flex: 1;
+  }
+  .pc-streak-label {
+    font-size: 8px;
+    letter-spacing: .14em;
+    text-align: right;
+  }
+  .pc-streak-title {
+    font-size: 18px;
+    margin-top: 2px;
+    text-align: right;
+  }
+  .pc-streak-copy {
+    display: block;
+    font-size: 9px;
+    text-align: right;
+    max-width: 140px;
+    color: rgba(255,255,255,.45);
+    margin: 0;
+  }
+
   .pc-charts { grid-template-columns: 1fr; }
   .pc-history-dl { grid-template-columns: repeat(2, 1fr); }
 }
+
 @media (max-width: 400px) {
-  .pc-avatar { width: 68px; height: 68px; }
-  .pc-name { font-size: clamp(34px, 11vw, 48px); }
-  .pc-metrics-grid { grid-template-columns: 1fr; }
+  .pc-avatar { width: 66px; height: 66px; }
+  .pc-name { font-size: clamp(32px, 11vw, 46px); }
+  .pc-metrics-grid { grid-template-columns: 1fr 1fr; }
   .pc-att-grid { grid-template-columns: 1fr 1fr; }
   .pc-att-grid > :last-child { grid-column: 1 / -1; }
   .pc-history-row { grid-template-columns: 1fr; }

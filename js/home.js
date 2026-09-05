@@ -485,12 +485,14 @@ function renderCard(d) {
             <div class="pc-meta">${[d.category, d.sede && `Sede ${d.sede}`, d.grupo && `Grupo ${d.grupo}`, d.turno, d.horario].filter(Boolean).map(i => `<span class="pc-chip">${escapePortalHtml(i)}</span>`).join('')}</div>
           </div>
           <div class="pc-streak">
-            <span class="pc-streak-label">Disciplina</span>
             <div class="pc-streak-flame" aria-hidden="true">🔥</div>
             <div class="pc-streak-number">${streak}</div>
             <div class="pc-streak-unit">${streak === 1 ? 'SESIÓN' : 'SESIONES'}</div>
-            <div class="pc-streak-title">${streakTitle}</div>
-            <p class="pc-streak-copy">${streakCopy}</p>
+            <div class="pc-streak-info">
+              <span class="pc-streak-label">Disciplina</span>
+              <div class="pc-streak-title">${streakTitle}</div>
+              <p class="pc-streak-copy">${streakCopy}</p>
+            </div>
           </div>
         </div>
       </div>`;
