@@ -64,7 +64,7 @@ function goTo(page, ev) {
   if (page === 'ranking') cargarRanking();
   if (page === 'calendario') loadCalendario();
   if (page === 'entrenadores') loadEntrenadores();
-  if (page === 'cobranzas') loadCobranzas();
+  if (page === 'cobranzas') setTimeout(loadCobranzas, 50);
   
   if (page === 'scanner') {
       setTimeout(initAdminScanner, 200);

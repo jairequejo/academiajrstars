@@ -176,7 +176,7 @@ async function notificarWhatsApp(studentId) {
     if (error) return showToast('No se pudo registrar la notificación', 'error');
 
     const tarifaStr = student.tarifa_mensual ? parseFloat(student.tarifa_mensual).toFixed(2) : '0.00';
-    const text = `Hola ${student.parent_name || 'apoderado'}.\nLe escribimos de la Academia *JR Stars*. Le recordamos que la mensualidad del jugador *${student.full_name}* por el monto de *S/ ${tarifaStr}* vence el *${formatCobranzasDate(student.valid_until)}*.\n\nPuede regularizar el pago presencialmente o mediante Yape al 955515693. Envíe la captura por este medio. Gracias por su compromiso.`;
+    const text = `Hola ${student.parent_name || 'apoderado'}. Te saludamos de la academia JR Stars. Te recordamos que la mensualidad de ${student.full_name} (S/ ${student.tarifa_mensual || '80'}) vence este ${formatCobranzasDate(student.valid_until)}. Porfa regulariza mediante Yape al 955515693 o en efectivo en la cancha. Mándanos la captura por aquí.`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
     showToast('Recordatorio registrado. Abriendo WhatsApp.');
     loadCobranzas();
