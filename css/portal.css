@@ -379,7 +379,7 @@ body {
   .portal-player-view .portal-topbar .text-white, 
   .portal-player-view .portal-topbar .text-gray-400,
   .portal-player-view .portal-topbar .text-brand { color: #ffffff !important; }
-  .portal-player-view .portal-topbar .bg-white\\/5 { background: rgba(0,0,0,0.15) !important; color: #ffffff !important; }
+  .portal-player-view .portal-topbar .bg-white\\/5 { background: #050505 !important; color: #ffffff !important; }
   .portal-player-view #p3 > .grid { grid-template-columns: 1fr; padding: 0 16px; }
   .epic-card { border-radius: 0; border: 0; box-shadow: none; background: #fff; }
   .epic-player-topline { padding: 17px 18px 0; }
