@@ -594,10 +594,10 @@ function renderCard(d) {
 
     const charts = historyData.length ? `
       <div class="pc-charts">
-        ${buildMetricSparkline(historyData, 'talla', 'm', 'Estatura')}
-        ${buildMetricSparkline(historyData, 'peso', 'kg', 'Peso')}
-        ${buildMetricSparkline(historyData, 'salto_cm', 'cm', 'Salto CMJ')}
-        ${buildMetricSparkline(historyData, 'sprint_10m_seg', 's', 'Sprint 10m')}
+        ${buildMetricSparkline(historyData, 'talla', 'm', '📏 Estatura')}
+        ${buildMetricSparkline(historyData, 'peso', 'kg', '⚖️ Peso')}
+        ${buildMetricSparkline(historyData, 'salto_cm', 'cm', '🦵 Salto CMJ')}
+        ${buildMetricSparkline(historyData, 'sprint_10m_seg', 's', '⚡ Sprint 10m')}
       </div>` : '';
 
     const PREVIEW = 3;
@@ -644,28 +644,7 @@ function renderCard(d) {
             <span class="pc-section-badge">${physicalRecords} ${physicalRecords === 1 ? 'CONTROL' : 'CONTROLES'}</span>
           </div>
 
-          <div class="pc-metrics-grid">
-            <div class="pc-metric">
-              <span class="pc-metric-label">📏 Estatura actual</span>
-              <span class="pc-metric-value">${escapePortalHtml(d.talla_actual || '—')}</span>
-              <span class="pc-metric-delta" style="${d.delta_talla ? 'color:#16a34a;' : 'color:#aaa;'}">${escapePortalHtml(d.delta_talla || 'Sin tendencia')}</span>
-            </div>
-            <div class="pc-metric pc-metric--gold">
-              <span class="pc-metric-label">⚖️ Peso actual</span>
-              <span class="pc-metric-value">${escapePortalHtml(d.peso_actual || '—')}</span>
-              <span class="pc-metric-delta" style="${d.delta_peso ? 'color:#d97706;' : 'color:#aaa;'}">${escapePortalHtml(d.delta_peso || 'Sin tendencia')}</span>
-            </div>
-            <div class="pc-metric pc-metric--green">
-              <span class="pc-metric-label">🦵 Salto Vertical</span>
-              <span class="pc-metric-value" style="${saltoCmLatest === '—' ? 'color:#bbb;font-size:32px;' : ''}">${saltoCmLatest}</span>
-              <span class="pc-metric-delta" style="${saltoCmLatest === '—' ? 'color:#bbb;font-size:9px;background:#f3f3f0;padding:3px 7px;border-radius:6px;' : 'color:#16a34a;'}">${saltoCmLatest === '—' ? 'Pendiente de medir' : 'Potencia CMJ'}</span>
-            </div>
-            <div class="pc-metric pc-metric--purple">
-              <span class="pc-metric-label">⚡ Sprint 10m</span>
-              <span class="pc-metric-value" style="${sprintLatest === '—' ? 'color:#bbb;font-size:32px;' : ''}">${sprintLatest}</span>
-              <span class="pc-metric-delta" style="${sprintLatest === '—' ? 'color:#bbb;font-size:9px;background:rgba(255,255,255,.08);padding:3px 7px;border-radius:6px;' : ''}">${sprintLatest === '—' ? 'Pendiente de medir' : 'Aceleración'}</span>
-            </div>
-          </div>
+
 
           ${charts}
           ${metricHistory}
