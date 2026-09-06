@@ -265,34 +265,49 @@ function mostrarPaneles(vista) {
     }
 }
 
-function toggleHistorial() {
-    const list = document.getElementById('pc-history-list');
-    const btn  = document.getElementById('pc-history-toggle');
-    if (!list || !btn) return;
-    const expanded = btn.getAttribute('aria-expanded') === 'true';
-    list.querySelectorAll('.pc-history-hidden, .pc-history-row').forEach((row, i) => {
-        if (i >= 3) {
-            if (expanded) {
-                row.classList.add('pc-history-hidden');
-            } else {
-                row.classList.remove('pc-history-hidden');
-            }
-        }
-    });
-    btn.setAttribute('aria-expanded', String(!expanded));
-    const countEl = btn.querySelector('.pc-history-toggle-count');
-    const iconEl  = btn.querySelector('.pc-history-toggle-icon');
-    const textEl  = btn.querySelector('span:first-child');
-    if (!expanded) {
-        if (textEl) textEl.textContent  = 'VER MENOS';
-        if (countEl) countEl.textContent = '';
-        if (iconEl)  iconEl.textContent  = '▲';
-    } else {
-        const total = list.querySelectorAll('.pc-history-row').length;
-        if (textEl) textEl.textContent  = 'VER TODAS LAS MEDICIONES';
-        if (countEl) countEl.textContent = `${total - 3} más`;
-        if (iconEl)  iconEl.textContent  = '▼';
+function openMetricModal(key, unit, label) {
+    if (!window._currentHistoryData) return;
+    
+    const history = window._currentHistoryData.filter(item => Number.isFinite(item[key]));
+    if (!history.length) return;
+    
+    let modal = document.getElementById('metric-history-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'metric-history-modal';
+        modal.className = 'portal-scanner-modal';
+        modal.innerHTML = `
+          <div class="metric-modal-content" onclick="event.stopPropagation()">
+            <div class="metric-modal-head">
+               <h3 id="mhm-title"></h3>
+               <button onclick="closeMetricModal()" class="metric-modal-close" aria-label="Cerrar">×</button>
+            </div>
+            <div id="mhm-list" class="pc-history-list"></div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        modal.onclick = closeMetricModal;
     }
+    
+    document.getElementById('mhm-title').textContent = label;
+    
+    const listHtml = history.map((item, index) => `
+        <div class="pc-history-row${index === 0 ? ' is-latest' : ''}">
+          <div>
+            <span>${index === 0 ? 'ÚLTIMO CONTROL' : 'CONTROL'}</span>
+            <strong>${escapePortalHtml(item.fecha || 'Sin fecha')}</strong>
+          </div>
+          <div class="mhm-val">${item[key]}${unit}</div>
+        </div>
+    `).join('');
+    
+    document.getElementById('mhm-list').innerHTML = listHtml;
+    modal.classList.remove('hidden');
+}
+
+function closeMetricModal() {
+    const modal = document.getElementById('metric-history-modal');
+    if (modal) modal.classList.add('hidden');
 }
 
 function volver() {
@@ -470,7 +485,7 @@ function buildMetricSparkline(history, key, unit, label) {
     const c = colors[key] || colors.talla;
 
     return `
-      <article class="ms-card ms-card--${key}">
+      <article class="ms-card ms-card--${key}" onclick="openMetricModal('${key}', '${unit}', '${label}')" style="cursor:pointer;" role="button" aria-label="Ver historial de ${label}">
         <div class="ms-head">
           <div class="ms-head-left">
             <span class="ms-label">${escapePortalHtml(label)}</span>
@@ -591,6 +606,9 @@ function renderCard(d) {
         `Revisa el Portal del Jugador → ${window.location.origin}/portal/`
     );
     const hasPhysicalData = Boolean(d.talla_actual || d.peso_actual);
+    
+    // Guardar para el modal
+    window._currentHistoryData = historyData;
 
     const charts = historyData.length ? `
       <div class="pc-charts">
@@ -598,34 +616,6 @@ function renderCard(d) {
         ${buildMetricSparkline(historyData, 'peso', 'kg', '⚖️ Peso')}
         ${buildMetricSparkline(historyData, 'salto_cm', 'cm', '🦵 Salto CMJ')}
         ${buildMetricSparkline(historyData, 'sprint_10m_seg', 's', '⚡ Sprint 10m')}
-      </div>` : '';
-
-    const PREVIEW = 3;
-    const metricHistory = historyData.length ? `
-      <div>
-        <div class="pc-history-head">
-          <div><span>Registro por registro</span><h4>Historial de métricas</h4></div>
-          <strong>${physicalRecords}</strong>
-        </div>
-        <div class="pc-history-list" id="pc-history-list">
-          ${historyData.map((item, index) => `
-            <div class="pc-history-row${index === 0 ? ' is-latest' : ''}${index >= PREVIEW ? ' pc-history-hidden' : ''}">
-              <div>
-                <span>${index === 0 ? 'ÚLTIMO CONTROL' : 'CONTROL'}</span>
-                <strong>${escapePortalHtml(item.fecha || 'Sin fecha')}</strong>
-              </div>
-              <dl class="pc-history-dl">
-                <div><dt>Estatura</dt><dd>${Number.isFinite(item.talla) ? `${item.talla}m` : '—'}</dd></div>
-                <div><dt>Peso</dt><dd>${Number.isFinite(item.peso) ? `${item.peso}kg` : '—'}</dd></div>
-                <div><dt>Salto</dt><dd>${Number.isFinite(item.salto_cm) ? `${item.salto_cm}cm` : '—'}</dd></div>
-                <div><dt>Sprint</dt><dd>${Number.isFinite(item.sprint_10m_seg) ? `${item.sprint_10m_seg}s` : '—'}</dd></div>
-              </dl>
-            </div>`).join('')}
-        </div>
-        ${historyData.length > PREVIEW ? `
-        <button class="pc-history-toggle" id="pc-history-toggle" onclick="toggleHistorial()" aria-expanded="false">
-          <span>VER TODAS LAS MEDICIONES</span><span class="pc-history-toggle-count">${historyData.length - PREVIEW} más</span><span class="pc-history-toggle-icon">▼</span>
-        </button>` : ''}
       </div>` : `
       <div class="performance-empty">
         <span aria-hidden="true">＋</span>
@@ -644,10 +634,7 @@ function renderCard(d) {
             <span class="pc-section-badge">${physicalRecords} ${physicalRecords === 1 ? 'CONTROL' : 'CONTROLES'}</span>
           </div>
 
-
-
           ${charts}
-          ${metricHistory}
 
           <div class="pc-divider"></div>
 

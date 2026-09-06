@@ -216,6 +216,11 @@
   border: 1px solid #e8e8e6;
   color: #0a0a0a;
   overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
+}
+.ms-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,.06);
 }
 .ms-head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
@@ -259,60 +264,44 @@
 }
 
 
-/* Historial */
-.pc-history-head {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 10px;
+/* Modal Historial de Métrica */
+.metric-modal-content {
+  width: 100%; max-width: 400px;
+  background: #fff; border-radius: 20px; padding: 24px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.2);
+  animation: modal-up 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
-.pc-history-head span { font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: #7a7a80; }
-.pc-history-head h4 { margin: 3px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: 26px; font-weight: 400; }
-.pc-history-head > strong {
-  display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%;
-  background: var(--portal-red); color: #fff;
-  font-family: "Bebas Neue", Impact, sans-serif; font-size: 18px; font-weight: 400;
+@keyframes modal-up {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.pc-history-list { display: grid; gap: 7px; }
-.pc-history-hidden { display: none !important; }
-
-/* Toggle button */
-.pc-history-toggle {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  width: 100%; margin-top: 10px; padding: 12px 16px;
-  border: 1px solid #e5e5e5; border-radius: 12px;
-  background: #f7f7f5; color: #0a0a0a;
-  font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
-  cursor: pointer; transition: background .15s ease, border-color .15s ease;
+.metric-modal-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
 }
-.pc-history-toggle:hover { background: #f0f0ed; border-color: var(--portal-red); }
-.pc-history-toggle-count {
-  flex-shrink: 0;
-  padding: 3px 8px; border-radius: 999px;
-  background: var(--portal-red); color: #fff;
-  font-size: 9px; font-weight: 900; letter-spacing: .06em;
+.metric-modal-head h3 {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 28px; font-weight: 400; margin: 0; color: #0a0a0a;
 }
-.pc-history-toggle-icon {
-  flex-shrink: 0; font-size: 10px; color: #888;
-  transition: transform .2s ease;
+.metric-modal-close {
+  display: grid; place-items: center; width: 32px; height: 32px;
+  border-radius: 50%; background: #f0f0ed; color: #555;
+  font-size: 20px; border: none; cursor: pointer;
 }
-.pc-history-toggle[aria-expanded="true"] .pc-history-toggle-icon { transform: rotate(180deg); }
-
+.pc-history-list { display: grid; gap: 8px; max-height: 50vh; overflow-y: auto; padding-right: 4px; }
 .pc-history-row {
-  display: grid; grid-template-columns: minmax(100px, .8fr) 1fr;
-  align-items: center; gap: 12px;
-  padding: 12px 14px; border: 1px solid #e8e8e6; border-radius: 12px; background: #fafaf8;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border: 1px solid #e8e8e6; border-radius: 12px; background: #fafaf8;
 }
 .pc-history-row.is-latest { border-color: rgba(229,25,27,.3); background: #fff5f5; }
 .pc-history-row > div > span {
-  display: block; font-size: 7px; font-weight: 900; letter-spacing: .12em;
+  display: block; font-size: 8px; font-weight: 900; letter-spacing: .12em;
   text-transform: uppercase; color: var(--portal-red);
 }
-.pc-history-row > div > strong { display: block; margin-top: 2px; font-size: 12px; color: #0a0a0a; }
-.pc-history-dl {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0;
+.pc-history-row > div > strong { display: block; margin-top: 2px; font-size: 13px; color: #0a0a0a; font-weight: 600; }
+.mhm-val {
+  font-family: "Bebas Neue", Impact, sans-serif; font-size: 26px; color: #0a0a0a;
 }
-.pc-history-dl dt {
-  font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #888;
-}
-.pc-history-dl dd { margin: 2px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: 20px; color: #0a0a0a; }
 
 /* Share */
 .pc-share {
