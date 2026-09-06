@@ -727,17 +727,20 @@ async function compartirProgreso() {
     btnIcon.textContent = '⏳';
     
     try {
-        const card = document.querySelector('.epic-card');
-        if (!card) throw new Error('Tarjeta no encontrada');
+        const wrap = document.getElementById('card-wrap');
+        if (!wrap) throw new Error('Tarjeta no encontrada');
         
         // Ocultar botón durante la captura
         const btnCompartir = document.getElementById('btn-compartir');
         if (btnCompartir) btnCompartir.style.visibility = 'hidden';
         
-        const canvas = await html2canvas(card, {
+        const canvas = await html2canvas(wrap, {
             scale: 2,
             useCORS: true,
-            backgroundColor: '#050505'
+            backgroundColor: '#050505',
+            onclone: (clonedDoc) => {
+                clonedDoc.getElementById('card-wrap').classList.add('export-mode');
+            }
         });
         
         if (btnCompartir) btnCompartir.style.visibility = 'visible';
