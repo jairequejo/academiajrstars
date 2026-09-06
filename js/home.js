@@ -205,7 +205,9 @@ async function buscar() {
             historial = bioData.map(r => ({
                 fecha: r.fecha,
                 talla: r.talla != null ? Number.parseFloat(r.talla) : null,
-                peso: r.peso != null ? Number.parseFloat(r.peso) : null
+                peso: r.peso != null ? Number.parseFloat(r.peso) : null,
+                salto_cm: r.salto_cm != null ? Number.parseFloat(r.salto_cm) : null,
+                sprint_10m_seg: r.sprint_10m_seg != null ? Number.parseFloat(r.sprint_10m_seg) : null
             }));
         }
         
