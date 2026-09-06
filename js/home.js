@@ -552,10 +552,15 @@ function renderCard(d) {
     const saltoCmLatest = Number.isFinite(lastBio.salto_cm) ? `${lastBio.salto_cm}cm` : '—';
     const sprintLatest = Number.isFinite(lastBio.sprint_10m_seg) ? `${lastBio.sprint_10m_seg}s` : '—';
 
+    const metaChips = [d.category, d.sede && `Sede ${d.sede}`, d.grupo && `Grupo ${d.grupo}`, d.turno, d.horario]
+      .filter(Boolean)
+      .map(i => `<span class="pc-chip">${escapePortalHtml(i)}</span>`)
+      .join('');
+
     const playerPanel = `
       <div class="pc-hero">
         <div class="pc-topline">
-          <span>JR STARS · TEMPORADA ${season}</span>
+          <div class="pc-meta">${metaChips}</div>
           ${d.debe
             ? '<span class="pc-status-locked">Acceso restringido</span>'
             : '<span class="pc-status-active">Jugador activo</span>'}
@@ -568,7 +573,6 @@ function renderCard(d) {
           <div class="pc-identity">
             <span class="pc-kicker">Perfil de alto rendimiento</span>
             <h2 class="pc-name">${name}</h2>
-            <div class="pc-meta">${[d.category, d.sede && `Sede ${d.sede}`, d.grupo && `Grupo ${d.grupo}`, d.turno, d.horario].filter(Boolean).map(i => `<span class="pc-chip">${escapePortalHtml(i)}</span>`).join('')}</div>
           </div>
           <div class="pc-streak">
             <div class="pc-streak-value">
@@ -663,12 +667,9 @@ async function loadRanking() {
     const el = $('ranking');
     if (!el) return;
     try {
-        const now = new Date();
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         const { data: atts, error: errAtt } = await window.supabaseClient
             .from('attendance')
-            .select('student_id')
-            .gte('created_at', firstDay);
+            .select('student_id');
             
         if (errAtt || !atts || !atts.length) {
             el.innerHTML = '<div class="rk-empty">Datos disponibles próximamente.</div>';
