@@ -374,7 +374,7 @@ body {
   .portal-scanner-modal { padding-inline: 12px; }
   .portal-scanner-shell { padding: 14px; border-radius: 22px; }
   .portal-scanner-stage { padding: 10px; }
-  .portal-player-view .portal-main { padding: 0 0 48px !important; background: #fff !important; }
+  .portal-player-view .portal-main { padding: 0 0 48px !important; background: #050505 !important; }
   .portal-player-view .portal-topbar { margin-bottom: 0; padding: 16px 16px 12px; background: #fff; border-bottom: 1px solid #eee; }
   .portal-player-view .portal-topbar .text-white { color: #0a0a0a !important; }
   .portal-player-view .portal-topbar .text-gray-400 { color: #555 !important; }
