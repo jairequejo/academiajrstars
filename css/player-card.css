@@ -437,32 +437,65 @@
   .pc-history-dl { grid-template-columns: repeat(2, 1fr); }
 }
 
-/* ── EXPORT MODE (Redes Sociales) ── */
+/* ── EXPORT MODE (Premium Infographic - No Alargado) ── */
 #card-wrap.export-mode {
-  padding: 40px 24px;
+  padding: 40px;
   background: #050505;
-  width: 480px !important;
+  width: 900px !important;
   max-width: none !important;
+  box-sizing: border-box;
 }
 #card-wrap.export-mode .epic-card {
   border-radius: 24px !important;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.8);
 }
+#card-wrap.export-mode .pc-hero {
+  background: linear-gradient(135deg, #e5191b 0%, #aa0b0e 100%) !important;
+  padding: 40px !important;
+  margin: 0 !important;
+  border-radius: 24px 24px 0 0 !important;
+}
+#card-wrap.export-mode .pc-hero-body {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  text-align: left !important;
+  gap: 30px !important;
+  margin-top: 20px !important;
+}
+#card-wrap.export-mode .pc-avatar {
+  width: 140px !important; height: 140px !important; margin: 0 !important;
+}
+#card-wrap.export-mode .pc-name {
+  text-align: left !important; font-size: 52px !important;
+}
+#card-wrap.export-mode .pc-meta {
+  justify-content: flex-start !important; margin-top: 12px !important;
+}
+#card-wrap.export-mode .pc-streak {
+  width: auto !important;
+  margin: 0 0 0 auto !important;
+  flex-direction: column !important;
+  padding: 20px 30px !important;
+}
+#card-wrap.export-mode .performance-metrics {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+#card-wrap.export-mode .pc-att-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+}
 #card-wrap.export-mode .pc-body {
-  position: relative;
-  z-index: 0;
+  position: relative; z-index: 0; padding: 40px !important;
 }
 #card-wrap.export-mode .pc-body > * {
-  position: relative;
-  z-index: 2;
+  position: relative; z-index: 2;
 }
 #card-wrap.export-mode .pc-body::before {
   content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: url('../img/escudo.png') center 40%/65% no-repeat;
-  opacity: 0.04;
-  pointer-events: none;
-  z-index: 1;
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: url('../img/escudo.png') center 40%/50% no-repeat;
+  opacity: 0.05; pointer-events: none; z-index: 1;
 }
