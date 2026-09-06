@@ -651,9 +651,9 @@ function renderCard(d) {
             <div><strong>${streakTitle}</strong><p>${streakCopy}</p></div>
           </div>
 
-          <a href="https://wa.me/?text=${waMsg}" target="_blank" rel="noopener noreferrer" class="pc-share">
-            <span>COMPARTIR PROGRESO</span><b>↗</b>
-          </a>
+          <button onclick="compartirProgreso()" class="pc-share" id="btn-compartir">
+            <span id="share-text">COMPARTIR PROGRESO</span><b id="share-icon">↗</b>
+          </button>
         </div>
       </article>`;
 }
@@ -711,5 +711,72 @@ async function loadRanking() {
           </div>`).join('');
     } catch {
         el.innerHTML = '<div class="rk-empty" style="color:var(--red2)">No disponible.</div>';
+    }
+}
+
+async function compartirProgreso() {
+    const btnText = document.getElementById('share-text');
+    const btnIcon = document.getElementById('share-icon');
+    if (!btnText) return;
+    
+    // Feedback visual
+    const originalText = btnText.textContent;
+    const originalIcon = btnIcon.textContent;
+    btnText.textContent = 'GENERANDO IMAGEN...';
+    btnIcon.textContent = '⏳';
+    
+    try {
+        const card = document.querySelector('.epic-card');
+        if (!card) throw new Error('Tarjeta no encontrada');
+        
+        // Ocultar botón durante la captura
+        const btnCompartir = document.getElementById('btn-compartir');
+        if (btnCompartir) btnCompartir.style.visibility = 'hidden';
+        
+        const canvas = await html2canvas(card, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#050505'
+        });
+        
+        if (btnCompartir) btnCompartir.style.visibility = 'visible';
+        
+        canvas.toBlob(async (blob) => {
+            if (!blob) throw new Error('No se pudo generar la imagen');
+            const file = new File([blob], 'jrstars_progreso.png', { type: 'image/png' });
+            
+            // Si soporta Web Share API con archivos (Mobile nativo Android/iOS)
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: 'Mi progreso en JR Stars',
+                        text: '¡Mira mi evolución y racha de disciplina en la academia JR Stars! 🔥⚽',
+                        files: [file]
+                    });
+                } catch (err) {
+                    console.log('Compartir cancelado o fallido:', err);
+                }
+            } else {
+                // Fallback para PC / Browsers sin soporte de Share: Descargar la imagen
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'jrstars_progreso.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                alert('La imagen ha sido descargada. Puedes compartirla manualmente en WhatsApp o Facebook.');
+            }
+        }, 'image/png');
+        
+    } catch (e) {
+        console.error(e);
+        alert('Hubo un error al generar la imagen. Intenta de nuevo.');
+        const btnCompartir = document.getElementById('btn-compartir');
+        if (btnCompartir) btnCompartir.style.visibility = 'visible';
+    } finally {
+        btnText.textContent = originalText;
+        btnIcon.textContent = originalIcon;
     }
 }
