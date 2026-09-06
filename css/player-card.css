@@ -10,10 +10,7 @@
   isolation: isolate;
   overflow: hidden;
   padding: clamp(18px, 4vw, 38px);
-  background:
-    radial-gradient(circle at 80% 10%, rgba(229,25,27,.30) 0%, transparent 42%),
-    radial-gradient(circle at 5% 92%, rgba(229,25,27,.20) 0%, transparent 38%),
-    linear-gradient(155deg, #13131a 0%, #070709 55%, #1a0508 100%);
+  background: linear-gradient(135deg, #e5191b 0%, #aa0b0e 100%);
   color: #fff;
 }
 .pc-hero::before {
@@ -21,9 +18,9 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  opacity: .35;
+  opacity: .15;
   background:
-    radial-gradient(circle, rgba(255,255,255,.22) 0 1px, transparent 1.5px)
+    radial-gradient(circle, rgba(255,255,255,.3) 0 1px, transparent 1.5px)
     0 0 / 26px 26px;
   pointer-events: none;
 }
@@ -33,7 +30,7 @@
   right: -70px; bottom: -90px;
   z-index: 0;
   width: 260px; height: 260px;
-  border: 32px solid rgba(229,25,27,.09);
+  border: 32px solid rgba(0,0,0,.08);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -317,11 +314,12 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 640px) {
   /* Hero: foto + nombre arriba, racha abajo full-width */
-  .pc-hero { padding: 18px 16px 0; }
+  .pc-hero { padding: 20px 20px 24px; }
   .pc-hero-body {
     grid-template-columns: auto 1fr;
     grid-template-rows: auto auto;
-    gap: 14px 12px;
+    gap: 16px 14px;
+    align-items: center;
   }
 
   /* RACHA: banda horizontal prominente */
@@ -332,13 +330,12 @@
     justify-content: space-between;
     gap: 0;
     padding: 14px 18px;
-    border-radius: 0;
-    border-left: 0; border-right: 0; border-bottom: 0;
-    border-top: 1px solid rgba(255,255,255,.12);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.12);
     background: rgba(0,0,0,.25);
     min-width: 0;
-    margin: 14px -16px 0;
-    width: calc(100% + 32px);
+    margin: 10px 0 0;
+    width: 100%;
   }
 
   .pc-streak-value {
