@@ -109,12 +109,15 @@
 /* RACHA WIDGET — tarjeta vertical en desktop */
 .pc-streak {
   flex-shrink: 0;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
   text-align: center;
   background: rgba(255,255,255,.07);
   border: 1px solid rgba(255,255,255,.14);
   border-radius: 18px; padding: 18px 16px;
   min-width: 104px;
+}
+.pc-streak-value {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
 .pc-streak-label {
   font-size: 8px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase;
@@ -123,7 +126,6 @@
 .pc-streak-flame {
   font-size: clamp(2.4rem, 5vw, 3.4rem); line-height: 1;
   filter: drop-shadow(0 4px 14px rgba(229,25,27,.8));
-  margin: 2px 0;
 }
 .pc-streak-number {
   font-family: "Bebas Neue", Impact, sans-serif;
@@ -131,14 +133,13 @@
 }
 .pc-streak-unit {
   font-size: 9px; font-weight: 900; letter-spacing: .2em; color: var(--portal-red);
-  margin-top: 2px;
 }
 .pc-streak-title {
   font-family: "Bebas Neue", Impact, sans-serif;
   font-size: 14px; letter-spacing: .05em; color: #fff; margin-top: 8px;
 }
 .pc-streak-copy {
-  font-size: 8px; color: rgba(255,255,255,.40); line-height: 1.45; max-width: 110px;
+  display: none;
 }
 
 /* ── CUERPO BLANCO ── */
@@ -340,25 +341,27 @@
     width: calc(100% + 32px);
   }
 
-  /* Grupo izquierdo: llama + número */
+  .pc-streak-value {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    margin-right: auto;
+  }
   .pc-streak-flame {
     font-size: 2.6rem;
     margin: 0 10px 0 0;
     filter: drop-shadow(0 0 12px rgba(229,25,27,.9));
+    align-self: center;
   }
   .pc-streak-number {
     font-size: clamp(60px, 16vw, 80px);
     line-height: 1;
     margin-right: 8px;
   }
-
-  /* Grupo centro: unidad */
   .pc-streak-unit {
     font-size: 10px;
     letter-spacing: .16em;
-    align-self: flex-end;
     padding-bottom: 6px;
-    margin-right: auto;
   }
 
   /* Grupo derecho: label + titulo + copy */
