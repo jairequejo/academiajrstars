@@ -96,16 +96,25 @@
   <main class="portal-main w-full lg:w-1/2 min-h-screen flex flex-col px-4 py-6 sm:p-12 relative overflow-y-auto bg-[#050505]">
 
     <!-- Mobile Topbar -->
-    <div class="portal-topbar lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-      <a href="../" class="flex items-center gap-3" aria-label="Volver al inicio de JR Stars">
+    <div class="portal-topbar lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/10 relative">
+      <a href="../" class="topbar-default flex items-center gap-3" aria-label="Volver al inicio de JR Stars">
         <img src="../img/escudo.png" alt="Escudo JR Stars" class="h-10 w-10">
         <div class="flex flex-col leading-none">
-          <span class="font-display text-2xl tracking-wide italic">JR STARS</span>
+          <span class="font-display text-2xl tracking-wide italic text-white">JR STARS</span>
           <span class="text-[0.55rem] font-bold tracking-[0.2em] text-brand uppercase mt-0.5">Portal Jugador</span>
         </div>
       </a>
-      <span class="portal-topbar-season">TEMPORADA 26</span>
+      <span class="portal-topbar-season topbar-default">TEMPORADA 26</span>
+
+      <button onclick="volver()" class="topbar-player hidden items-center gap-2 text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        VOLVER AL BUSCADOR
+      </button>
     </div>
+    <style>
+      .portal-player-view .topbar-default { display: none !important; }
+      .portal-player-view .topbar-player { display: flex !important; }
+    </style>
 
     <div class="portal-shell flex-grow flex flex-col w-full max-w-xl mx-auto">
 
@@ -172,7 +181,7 @@
 
       <!-- FICHA JUGADOR -->
       <section id="p2" class="hidden w-full transition-opacity duration-300">
-        <button onclick="volver()" class="mb-6 flex items-center gap-2 text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">
+        <button onclick="volver()" class="hidden lg:flex mb-6 items-center gap-2 text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           VOLVER AL BUSCADOR
         </button>
