@@ -753,8 +753,8 @@ async function compartirProgreso() {
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
                     await navigator.share({
-                        title: 'Mi progreso en JR Stars',
-                        text: '¡Mira mi evolución y racha de disciplina en la academia JR Stars! 🔥⚽',
+                        title: 'Perfil de Alto Rendimiento - JR Stars',
+                        text: '¡Orgulloso del progreso de mi campeón! ⚽🔥 En la Academia JR Stars no improvisan: medimos su disciplina, físico y racha de entrenamientos con tecnología. ¡Miren estos números! 💪🏆',
                         files: [file]
                     });
                 } catch (err) {
