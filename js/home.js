@@ -650,9 +650,22 @@ function renderCard(d) {
             <div class="pc-att-card"><strong>${monthSessions}</strong><span>Este mes</span></div>
             <div class="pc-att-card"><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong><span>Último entreno</span></div>
           </div>
+          
           <div class="pc-momentum">
             <div class="pc-momentum-icon" aria-hidden="true">↗</div>
             <div><strong>${streakTitle}</strong><p>${streakCopy}</p></div>
+          </div>
+          
+          <!-- FOOTER PUBLICITARIO (Solo visible al compartir) -->
+          <div class="pc-export-footer">
+            <img src="../img/escudo.png" alt="JR Stars Logo">
+            <div class="pc-export-contact">
+              <strong>ACADEMIA JR STARS</strong>
+              <span>🌐 academiajrstars.com</span>
+              <span>📱 WhatsApp: 955 515 693</span>
+              <span>📷 @academiajrstars</span>
+            </div>
+            <div class="pc-export-cta">¡ÚNETE A<br>LA ÉLITE!</div>
           </div>
 
           <button onclick="compartirProgreso()" class="pc-share" id="btn-compartir">
