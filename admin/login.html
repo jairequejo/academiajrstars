@@ -46,13 +46,13 @@
     }
     .bg-ambient-layer2 {
       position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80vw; height: 80vw;
+      top: -20%; left: 50%;
+      transform: translateX(-50%);
+      width: 400px; height: 400px;
       background-color: #e5191b; /* var(--brand) */
       border-radius: 50%;
-      filter: blur(150px);
-      opacity: 0.1;
+      filter: blur(100px);
+      opacity: 0.15;
     }
   </style>
 
@@ -78,10 +78,10 @@
     <div class="bg-ambient-layer2"></div>
   </div>
 
-  <div class="bento-card w-full max-w-md p-8 sm:p-10 relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+  <div class="bento-card w-full max-w-md p-5 sm:p-10 relative z-10 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
 
     <!-- BRAND -->
-    <div class="flex flex-col items-center text-center mb-10">
+    <div class="flex flex-col items-center text-center mb-8">
       <img src="../img/escudo.png" alt="Escudo JR Stars" class="w-24 h-24 drop-shadow-[0_0_20px_rgba(229,25,27,0.3)] mb-4" onerror="this.onerror=null;this.style.display='none'">
       <div class="font-display text-5xl italic tracking-wider leading-none">JR <span class="text-brand">STARS</span></div>
       <div class="inline-block bg-white/5 border border-white/10 text-gray-400 font-bold text-[0.65rem] uppercase tracking-widest px-3 py-1 rounded-full mt-4">
@@ -97,13 +97,13 @@
     <!-- FORM -->
     <div class="space-y-5">
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2" for="email">Correo electrónico</label>
-        <input class="w-full bg-black border border-white/20 rounded-xl text-white font-body px-4 py-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-gray-700 transition-all" type="email" id="email" placeholder="admin@jrstars.com" autocomplete="email">
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" for="email">Correo electrónico</label>
+        <input class="w-full bg-[#111] border border-white/20 rounded-xl text-white font-body px-4 py-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-gray-600 transition-all" type="email" id="email" placeholder="admin@jrstars.com" autocomplete="email">
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2" for="password">Contraseña</label>
-        <input class="w-full bg-black border border-white/20 rounded-xl text-white font-body px-4 py-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-gray-700 transition-all" type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2" for="password">Contraseña</label>
+        <input class="w-full bg-[#111] border border-white/20 rounded-xl text-white font-body px-4 py-3 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand placeholder:text-gray-600 transition-all" type="password" id="password" placeholder="••••••••" autocomplete="current-password">
       </div>
 
       <button id="btn-login" onclick="login()" class="slant-btn w-full bg-brand text-white mt-8 py-4 border border-transparent">

@@ -97,7 +97,7 @@
 
     <!-- Mobile Topbar -->
     <div class="portal-topbar lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/10 relative">
-      <a href="../" class="topbar-default flex items-center gap-3" aria-label="Volver al inicio de JR Stars">
+      <a href="../" class="flex items-center gap-3" aria-label="Volver al inicio de JR Stars">
         <img src="../img/escudo.png" alt="Escudo JR Stars" class="h-10 w-10">
         <div class="flex flex-col leading-none">
           <span class="font-display text-2xl tracking-wide italic text-white">JR STARS</span>
@@ -106,9 +106,8 @@
       </a>
       <span class="portal-topbar-season topbar-default">TEMPORADA 26</span>
 
-      <button onclick="volver()" class="topbar-player hidden items-center gap-2 text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        VOLVER AL BUSCADOR
+      <button onclick="volver()" class="topbar-player hidden items-center justify-center w-9 h-9 rounded-full bg-white/5 text-gray-400 hover:text-white hover:bg-brand transition-colors" aria-label="Cerrar Ficha">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
     </div>
     <style>
