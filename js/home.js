@@ -560,7 +560,7 @@ function renderCard(d) {
     const playerPanel = `
       <div class="pc-hero">
         <div class="pc-topline">
-          <div class="pc-meta">${metaChips}</div>
+          <span class="pc-kicker">Perfil de alto rendimiento</span>
           ${d.debe
             ? '<span class="pc-status-locked">Acceso restringido</span>'
             : '<span class="pc-status-active">Jugador activo</span>'}
@@ -571,8 +571,8 @@ function renderCard(d) {
             alt="Foto de ${name}"
             onerror="this.src='../img/escudo.png'; this.style.objectFit='contain'; this.style.padding='8px';">
           <div class="pc-identity">
-            <span class="pc-kicker">Perfil de alto rendimiento</span>
             <h2 class="pc-name">${name}</h2>
+            <div class="pc-meta">${metaChips}</div>
           </div>
           <div class="pc-streak">
             <div class="pc-streak-value">
