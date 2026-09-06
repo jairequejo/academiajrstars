@@ -265,9 +265,9 @@ body {
 .performance-metrics { display: grid; grid-template-columns: 1.15fr 1.15fr .7fr; gap: 10px; margin-top: 16px; }
 .performance-metric { position: relative; min-width: 0; overflow: hidden; padding: 17px; border: 1px solid #e1e1df; border-radius: 16px; background: #f5f5f2; }
 .performance-metric::after { content: ""; position: absolute; right: -18px; bottom: -28px; width: 72px; height: 72px; border: 12px solid rgba(5,5,5,.035); border-radius: 50%; }
-.performance-metric > span { display: block; color: #737378; font-size: 8px; font-weight: 1000; letter-spacing: .14em; text-transform: uppercase; }
+.performance-metric > span { display: block; color: #737378; font-size: 10px; font-weight: 1000; letter-spacing: .14em; text-transform: uppercase; }
 .performance-metric strong { display: block; margin-top: 12px; font-family: "Bebas Neue", Impact, sans-serif; font-size: clamp(38px, 6cqw, 58px); font-weight: 400; line-height: .8; }
-.performance-metric em { display: block; margin-top: 10px; color: #168441; font-size: 9px; font-style: normal; font-weight: 900; }
+.performance-metric em { display: block; margin-top: 10px; color: #168441; font-size: 13px; font-style: normal; font-weight: 900; letter-spacing: 0.5px; }
 .performance-metric--height { border-top: 4px solid var(--portal-red); }
 .performance-metric--weight { border-top: 4px solid var(--portal-gold); }
 .performance-metric--score { color: #fff; border-color: #17171a; border-top: 4px solid #7c3aed; background: #0b0b0d; }
@@ -300,7 +300,7 @@ body {
 .metric-history-row > div > strong { display: block; margin-top: 3px; font-size: 11px; }
 .metric-history-row dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; }
 .metric-history-row dl div { min-width: 0; }
-.metric-history-row dt { color: #85858a; font-size: 7px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+.metric-history-row dt { color: #85858a; font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
 .metric-history-row dd { margin: 2px 0 0; font-family: "Bebas Neue", Impact, sans-serif; font-size: 21px; }
 .performance-empty { display: flex; align-items: center; gap: 13px; margin-top: 14px; padding: 18px; color: #5f5f65; border: 1px dashed #d1d1ce; border-radius: 15px; background: #f7f7f4; }
 .performance-empty > span { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; color: #fff; border-radius: 50%; background: var(--portal-red); font-size: 24px; }
@@ -374,10 +374,10 @@ body {
   .portal-scanner-modal { padding-inline: 12px; }
   .portal-scanner-shell { padding: 14px; border-radius: 22px; }
   .portal-scanner-stage { padding: 10px; }
-  .portal-player-view .portal-main { padding: 16px 12px 48px !important; }
-  .portal-player-view .portal-topbar { margin-bottom: 16px; }
-  .portal-player-view #p3 > .grid { grid-template-columns: 1fr; }
-  .epic-card { border-radius: 22px; }
+  .portal-player-view .portal-main { padding: 0 0 48px !important; }
+  .portal-player-view .portal-topbar { margin-bottom: 0; padding: 16px 16px 12px; background: #050505; }
+  .portal-player-view #p3 > .grid { grid-template-columns: 1fr; padding: 0 16px; }
+  .epic-card { border-radius: 0; border-left: 0; border-right: 0; border-top: 0; box-shadow: none; }
   .epic-player-topline { padding: 17px 18px 0; }
   .player-overview-grid { grid-template-columns: minmax(0, 1fr) 142px; gap: 10px; min-height: 292px; padding: 14px 18px 23px; }
   .player-crest { width: 43px; height: 43px; margin-bottom: 11px; }
