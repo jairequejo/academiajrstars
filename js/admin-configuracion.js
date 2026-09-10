@@ -183,20 +183,24 @@ function adminPwaIsInstalled() {
 
 function updateAdminPwaInstallUi() {
     const button = document.getElementById('config-pwa-install');
+    const updateButton = document.getElementById('config-pwa-update');
     const status = document.getElementById('config-pwa-status');
     const help = document.getElementById('config-pwa-help');
-    if (!button || !status || !help) return;
+    if (!button || !updateButton || !status || !help) return;
 
     help.hidden = true;
+    updateButton.disabled = !('serviceWorker' in navigator);
     if (adminPwaIsInstalled()) {
-        status.textContent = 'JR Admin ya está instalado en este dispositivo.';
+        status.textContent = 'JR Admin está instalado. Puedes comprobar aquí si hay una versión nueva.';
         button.textContent = 'Aplicación instalada';
         button.disabled = true;
+        updateButton.textContent = 'Buscar actualización';
         return;
     }
 
     button.disabled = false;
     button.textContent = deferredAdminInstallPrompt ? 'Instalar aplicación' : 'Ver cómo instalar';
+    updateButton.textContent = 'Actualizar aplicación';
     status.textContent = 'Instala el panel para abrirlo como una aplicación y acceder más rápido.';
 }
 
@@ -221,6 +225,71 @@ async function installAdminPwa() {
     help.hidden = false;
 }
 
+function waitForAdminWorker(worker) {
+    if (!worker || ['installed', 'activated', 'redundant'].includes(worker.state)) {
+        return Promise.resolve(worker?.state || 'missing');
+    }
+    return new Promise(resolve => {
+        worker.addEventListener('statechange', () => {
+            if (['installed', 'activated', 'redundant'].includes(worker.state)) resolve(worker.state);
+        });
+    });
+}
+
+async function updateAdminPwa() {
+    const button = document.getElementById('config-pwa-update');
+    const status = document.getElementById('config-pwa-status');
+    if (!button || !status || !('serviceWorker' in navigator)) {
+        showToast('Este navegador no permite actualizar la aplicación.', 'error');
+        return;
+    }
+
+    const originalLabel = button.textContent;
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    button.textContent = 'Buscando actualización…';
+    status.textContent = 'Comprobando la versión instalada de JR Admin…';
+
+    try {
+        const registration = await navigator.serviceWorker.getRegistration('./')
+            || await navigator.serviceWorker.register('./sw.js', { scope: './' });
+        let foundUpdate = false;
+        let installation = Promise.resolve();
+        const onUpdateFound = () => {
+            foundUpdate = true;
+            installation = waitForAdminWorker(registration.installing);
+        };
+
+        registration.addEventListener('updatefound', onUpdateFound, { once: true });
+        await registration.update();
+        if (registration.installing && !foundUpdate) onUpdateFound();
+        await installation;
+
+        if (registration.waiting) {
+            foundUpdate = true;
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        if (foundUpdate) {
+            status.textContent = 'Actualización lista. Reiniciando JR Admin…';
+            showToast('Aplicación actualizada.');
+            setTimeout(() => window.location.reload(), 500);
+            return;
+        }
+
+        status.textContent = 'JR Admin ya tiene la versión más reciente.';
+        showToast('La aplicación ya está actualizada.');
+    } catch (error) {
+        console.error('No se pudo actualizar JR Admin:', error);
+        status.textContent = 'No pudimos comprobar la actualización. Revisa tu conexión e inténtalo nuevamente.';
+        showToast('No se pudo actualizar la aplicación.', 'error');
+    } finally {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        button.textContent = originalLabel;
+    }
+}
+
 function initAdminConfiguration() {
     renderAdminBottomNav();
     renderAdminNavFields();
@@ -237,6 +306,7 @@ function initAdminConfiguration() {
     document.getElementById('config-message-save')?.addEventListener('click', saveCobranzaMessageTemplate);
     document.getElementById('config-message-reset')?.addEventListener('click', resetCobranzaMessageTemplate);
     document.getElementById('config-pwa-install')?.addEventListener('click', installAdminPwa);
+    document.getElementById('config-pwa-update')?.addEventListener('click', updateAdminPwa);
     updateAdminPwaInstallUi();
 }
 

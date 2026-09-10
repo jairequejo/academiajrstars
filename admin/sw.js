@@ -1,4 +1,4 @@
-const ADMIN_CACHE = 'jr-admin-shell-v2';
+const ADMIN_CACHE = 'jr-admin-shell-v3';
 const ADMIN_SHELL = [
   './',
   './index.html',
@@ -54,4 +54,8 @@ self.addEventListener('notificationclick', event => {
     }
     return self.clients.openWindow(target);
   })());
+});
+
+self.addEventListener('message', event => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });

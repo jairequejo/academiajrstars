@@ -1,7 +1,9 @@
 // Cobranzas, recordatorios y alertas del panel administrativo.
 const cobranzasById = new Map();
 const COBRANZAS_ALERTS_ENABLED_KEY = 'jr_admin_cobranzas_alerts_enabled';
-const COBRANZAS_LAST_ALERT_KEY = 'jr_admin_cobranzas_last_alert';
+const COBRANZAS_ALERTS_STATE_KEY = 'jr_admin_cobranzas_alerts_state_v2';
+const COBRANZAS_ALERTS_MORNING_HOUR = 6;
+const COBRANZAS_ALERTS_EVENING_HOUR = 18;
 let adminServiceWorkerRegistration = null;
 let cobranzasRows = [];
 let cobranzasReferenceNow = new Date();
@@ -19,9 +21,38 @@ function getCobranzasLimit() {
     return `${limit.getFullYear()}-${String(limit.getMonth() + 1).padStart(2, '0')}-${String(limit.getDate()).padStart(2, '0')}`;
 }
 
-function getLocalDateKey() {
-    const now = new Date();
+function getLocalDateKey(now = new Date()) {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+}
+
+function getCurrentCobranzaNotification(student) {
+    const notifications = student?.historial_notificaciones || [];
+    if (!notifications.length) return null;
+
+    let cycleStart = null;
+    if (student.valid_until) {
+        cycleStart = new Date(`${student.valid_until}T12:00:00`);
+        if (!Number.isNaN(cycleStart.getTime())) {
+            cycleStart.setDate(cycleStart.getDate() - 7);
+            cycleStart.setHours(0, 0, 0, 0);
+        } else {
+            cycleStart = null;
+        }
+    }
+
+    return notifications.reduce((latest, notification) => {
+        if (!notification?.fecha_envio) return latest;
+        const sentAt = new Date(notification.fecha_envio);
+        if (Number.isNaN(sentAt.getTime()) || (cycleStart && sentAt < cycleStart)) return latest;
+        if (!latest || sentAt > new Date(latest)) return notification.fecha_envio;
+        return latest;
+    }, null);
+}
+
+function getStudentCobranzaNotification(student) {
+    return Object.prototype.hasOwnProperty.call(student || {}, '_last_notified_at')
+        ? student._last_notified_at
+        : getCurrentCobranzaNotification(student);
 }
 
 function updateCobranzasAlertsUi() {
@@ -44,7 +75,7 @@ function updateCobranzasAlertsUi() {
         && localStorage.getItem(COBRANZAS_ALERTS_ENABLED_KEY) === 'true';
     if (enabled) {
         container.classList.add('is-enabled');
-        status.textContent = 'Recibirás un resumen al abrir o volver al panel cuando haya cobros por atender.';
+        status.textContent = 'Verás los nombres pendientes durante el día y, desde las 6 p. m., un recordatorio con lo que aún falte.';
         if (state) state.textContent = 'Activas';
         button.textContent = 'Desactivar';
         button.disabled = false;
@@ -62,7 +93,7 @@ function updateCobranzasAlertsUi() {
 
     status.textContent = Notification.permission === 'granted'
         ? 'Las alertas están pausadas en este dispositivo.'
-        : 'Actívalas para recibir un resumen de cobros vencidos o próximos a vencer.';
+        : 'Actívalas para recibir recordatorios visibles con los alumnos pendientes de aviso.';
     if (state) state.textContent = 'Desactivadas';
     button.textContent = 'Activar alertas';
     button.disabled = false;
@@ -109,38 +140,60 @@ async function toggleCobranzasAlerts() {
 }
 
 async function maybeNotifyCobranzas(rows = []) {
-    if (!('Notification' in window) || !rows.length || Notification.permission !== 'granted') return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
     if (localStorage.getItem(COBRANZAS_ALERTS_ENABLED_KEY) !== 'true') return;
 
-    const signature = rows.map(student => `${student.id}:${student.valid_until || ''}`).sort().join('|');
-    const current = { date: getLocalDateKey(), signature };
+    const now = new Date();
+    const hour = now.getHours();
+    if (hour < COBRANZAS_ALERTS_MORNING_HOUR) return;
+
+    const period = hour >= COBRANZAS_ALERTS_EVENING_HOUR ? 'evening' : 'morning';
+    const date = getLocalDateKey(now);
+    let state = { date, sent: {} };
     try {
-        const previous = JSON.parse(localStorage.getItem(COBRANZAS_LAST_ALERT_KEY) || 'null');
-        if (previous?.date === current.date && previous?.signature === signature) return;
+        const saved = JSON.parse(localStorage.getItem(COBRANZAS_ALERTS_STATE_KEY) || 'null');
+        if (saved?.date === date && saved.sent) state = saved;
     } catch {
-        localStorage.removeItem(COBRANZAS_LAST_ALERT_KEY);
+        localStorage.removeItem(COBRANZAS_ALERTS_STATE_KEY);
     }
+    if (state.sent[period]) return;
+
+    const pending = rows
+        .filter(student => !getStudentCobranzaNotification(student))
+        .sort((a, b) => getCobranzaDayDifference(a.valid_until, now) - getCobranzaDayDifference(b.valid_until, now));
+    if (!pending.length) return;
 
     const registration = adminServiceWorkerRegistration || await registerAdminPwa();
     if (!registration) return;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const expired = rows.filter(student => new Date(`${student.valid_until}T00:00:00`) < today).length;
-    const upcoming = rows.length - expired;
-    const parts = [];
-    if (expired) parts.push(`${expired} vencido${expired === 1 ? '' : 's'}`);
-    if (upcoming) parts.push(`${upcoming} por vencer`);
+    const count = pending.length;
+    const names = pending.slice(0, 2).map(student => {
+        const parts = String(student.full_name || 'Alumno').trim().split(/\s+/);
+        return parts.slice(0, 2).join(' ');
+    });
+    const nameSummary = count > 2
+        ? `${names.join(', ')} y ${count - 2} más`
+        : names.join(' y ');
+    const title = period === 'evening'
+        ? `⏰ Tienes ${count} ${count === 1 ? 'alumno' : 'alumnos'} por notificar`
+        : `💳 ${count} ${count === 1 ? 'pago pendiente' : 'pagos pendientes'} de aviso`;
+    const body = period === 'evening'
+        ? `Antes de cerrar, aún falta notificar ${count === 1 ? 'el pago' : 'los pagos'} de ${nameSummary}.`
+        : `Notifica ${count === 1 ? 'el pago' : 'los pagos'} de ${nameSummary}. Toca para abrir Cobranzas.`;
 
-    await registration.showNotification('JR Stars · Cobros por atender', {
-        body: `${parts.join(' y ')}. Toca para revisar Cobranzas.`,
+    await registration.showNotification(title, {
+        body,
         icon: './icons/red-white/pwa-admin-192.png',
         badge: './icons/red-white/favicon-32.png',
-        tag: 'jr-admin-cobranzas',
+        tag: `jr-admin-cobranzas-${period}`,
         renotify: true,
-        data: { url: './?section=cobranzas' }
+        requireInteraction: true,
+        vibrate: [220, 100, 220, 100, 320],
+        actions: [{ action: 'open-cobranzas', title: 'Ver cobranzas' }],
+        data: { url: './?section=cobranzas', period }
     });
-    localStorage.setItem(COBRANZAS_LAST_ALERT_KEY, JSON.stringify(current));
+    state.sent[period] = { at: now.toISOString(), count };
+    localStorage.setItem(COBRANZAS_ALERTS_STATE_KEY, JSON.stringify(state));
 }
 
 function setCobranzasNavState(pendingCount = cobranzasPendingCount) {
@@ -162,7 +215,7 @@ async function refreshCobranzasNavState() {
     if (!window.supabaseClient) return;
     const { data, error } = await window.supabaseClient
         .from('students')
-        .select('id, full_name, valid_until')
+        .select('id, full_name, valid_until, historial_notificaciones(fecha_envio)')
         .eq('is_active', true)
         .lte('valid_until', getCobranzasLimit());
 
@@ -225,12 +278,7 @@ function normalizeCobranzasSearch(value) {
 }
 
 function prepareCobranzaStudent(student) {
-    const notifications = student.historial_notificaciones || [];
-    student._last_notified_at = notifications.reduce((latest, notification) => {
-        if (!notification?.fecha_envio) return latest;
-        if (!latest || new Date(notification.fecha_envio) > new Date(latest)) return notification.fecha_envio;
-        return latest;
-    }, null);
+    student._last_notified_at = getCurrentCobranzaNotification(student);
     student._due = getCobranzaDueMeta(student.valid_until, cobranzasReferenceNow);
     return student;
 }
@@ -247,7 +295,7 @@ async function loadCobranzas() {
     try {
         const { data, error } = await window.supabaseClient
             .from('students')
-            .select('id, full_name, valid_until, parent_name, parent_phone, tarifa_mensual, historial_notificaciones(fecha_envio)')
+            .select('id, full_name, dni, valid_until, parent_name, parent_phone, tarifa_mensual, historial_notificaciones(fecha_envio)')
             .eq('is_active', true)
             .lte('valid_until', getCobranzasLimit())
             .order('valid_until', { ascending: true });
@@ -282,11 +330,11 @@ async function loadCobranzas() {
 
 function getFilteredCobranzas() {
     const query = normalizeCobranzasSearch(document.getElementById('cobranzas-search')?.value);
-    const dueFilter = document.getElementById('cobranzas-filter-due')?.value || 'all';
-    const notificationFilter = document.getElementById('cobranzas-filter-notified')?.value || 'all';
+    const dueFilter = getActiveCobranzaFilter('due');
+    const notificationFilter = getActiveCobranzaFilter('notified');
 
     return cobranzasRows.filter(student => {
-        const haystack = normalizeCobranzasSearch(`${student.full_name || ''} ${student.parent_name || ''} ${student.parent_phone || ''}`);
+        const haystack = normalizeCobranzasSearch(`${student.full_name || ''} ${student.dni || ''} ${student.parent_name || ''} ${student.parent_phone || ''}`);
         const matchesQuery = !query || haystack.includes(query);
         const matchesDue = dueFilter === 'all'
             || (dueFilter === 'expired' && student._due.days < 0)
@@ -301,10 +349,14 @@ function getFilteredCobranzas() {
     });
 }
 
+function getActiveCobranzaFilter(group) {
+    return document.querySelector(`[data-cobranzas-filter="${group}"].is-active`)?.dataset.value || 'all';
+}
+
 function updateCobranzasFilterSummary(visibleCount) {
     const query = document.getElementById('cobranzas-search')?.value.trim() || '';
-    const due = document.getElementById('cobranzas-filter-due')?.value || 'all';
-    const notified = document.getElementById('cobranzas-filter-notified')?.value || 'all';
+    const due = getActiveCobranzaFilter('due');
+    const notified = getActiveCobranzaFilter('notified');
     const activeCount = Number(Boolean(query)) + Number(due !== 'all') + Number(notified !== 'all');
     const count = document.getElementById('cobranzas-filter-count');
     const results = document.getElementById('cobranzas-filter-results');
@@ -422,17 +474,17 @@ async function sendCobranzaWhatsApp(studentId, resend = false) {
     const phone = normalizePeruPhone(student?.parent_phone);
     if (!student || !phone) return showToast('Registra un teléfono válido para el apoderado', 'error');
 
-    const whatsappWindow = window.open('', '_blank');
-    if (!whatsappWindow) {
-        showToast('Permite ventanas emergentes para abrir WhatsApp.', 'error');
-        return;
-    }
-    whatsappWindow.document.write('<!doctype html><title>Abriendo WhatsApp</title><p style="font:16px sans-serif;padding:24px">Preparando el recordatorio…</p>');
-
     const due = student._due || getCobranzaDueMeta(student.valid_until);
     const message = typeof buildCobranzaMessage === 'function'
         ? buildCobranzaMessage(student, due.phrase)
         : `Hola ${student.parent_name || 'apoderado'}. Te recordamos que la mensualidad de ${student.full_name} ${due.phrase}.`;
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    // La navegación debe ocurrir durante el toque. Si esperamos la base de datos,
+    // varios navegadores móviles interpretan la nueva pestaña como un popup.
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    showToast('Abriendo WhatsApp…');
+
     const { error } = await window.supabaseClient
         .from('historial_notificaciones')
         .insert({
@@ -442,16 +494,13 @@ async function sendCobranzaWhatsApp(studentId, resend = false) {
         });
 
     if (error) {
-        whatsappWindow.close();
-        showToast('No se pudo registrar la notificación', 'error');
+        showToast('WhatsApp se abrió, pero no pudimos guardar el historial.', 'error');
         return;
     }
 
-    whatsappWindow.opener = null;
-    whatsappWindow.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     student._last_notified_at = new Date().toISOString();
     renderFilteredCobranzas();
-    showToast(resend ? 'Nuevo recordatorio registrado. Abriendo WhatsApp.' : 'Recordatorio registrado. Abriendo WhatsApp.');
+    showToast(resend ? 'Nuevo recordatorio registrado.' : 'Recordatorio registrado.');
 }
 
 async function inhabilitarMoroso(studentId) {
@@ -478,11 +527,22 @@ function toggleCobranzasFilters() {
 
 function resetCobranzasFilters() {
     const search = document.getElementById('cobranzas-search');
-    const due = document.getElementById('cobranzas-filter-due');
-    const notified = document.getElementById('cobranzas-filter-notified');
     if (search) search.value = '';
-    if (due) due.value = 'all';
-    if (notified) notified.value = 'all';
+    document.querySelectorAll('[data-cobranzas-filter]').forEach(button => {
+        const isActive = button.dataset.value === 'all';
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    });
+    renderFilteredCobranzas();
+}
+
+function selectCobranzaFilter(button) {
+    const group = button.dataset.cobranzasFilter;
+    document.querySelectorAll(`[data-cobranzas-filter="${group}"]`).forEach(option => {
+        const isActive = option === button;
+        option.classList.toggle('is-active', isActive);
+        option.setAttribute('aria-pressed', String(isActive));
+    });
     renderFilteredCobranzas();
 }
 
@@ -491,8 +551,10 @@ document.getElementById('cobranzas-alerts-button')?.addEventListener('click', to
 document.getElementById('cobranzas-filter-button')?.addEventListener('click', toggleCobranzasFilters);
 document.getElementById('cobranzas-filter-reset')?.addEventListener('click', resetCobranzasFilters);
 document.getElementById('cobranzas-search')?.addEventListener('input', renderFilteredCobranzas);
-document.getElementById('cobranzas-filter-due')?.addEventListener('change', renderFilteredCobranzas);
-document.getElementById('cobranzas-filter-notified')?.addEventListener('change', renderFilteredCobranzas);
+document.getElementById('cobranzas-filters')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-cobranzas-filter]');
+    if (button) selectCobranzaFilter(button);
+});
 document.getElementById('cobranzas-list')?.addEventListener('click', event => {
     const button = event.target.closest('[data-cobranza-action]');
     if (!button || button.disabled) return;

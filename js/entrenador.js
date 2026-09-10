@@ -15,6 +15,14 @@ function escapeCoachHtml(value) {
     })[char]);
 }
 
+function normalizeCoachSearch(value) {
+    return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('es-PE')
+        .trim();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const coachName = (sessionStorage.getItem('jr_nombre') || localStorage.getItem('jr_entrenador_nombre') || 'Profe').trim();
     const shortName = coachName.split(/\s+/)[0] || 'Profe';
@@ -531,7 +539,7 @@ async function loadAsistencia() {
 
         const [stRes, attRes] = await Promise.all([
             window.supabaseClient.from('students')
-                .select('id, full_name, horario, valid_until, sede')
+                .select('id, full_name, dni, horario, valid_until, sede')
                 .eq('is_active', true)
                 .order('full_name'),
             window.supabaseClient.from('attendance')
@@ -560,6 +568,7 @@ async function loadAsistencia() {
             return {
                 id: student.id,
                 full_name: student.full_name,
+                dni: student.dni || "",
                 horario: student.horario || "",
                 turno: inferTurno(student.horario),
                 sede: student.sede || "",
@@ -641,7 +650,7 @@ function renderAsistencia() {
     const qSede = document.getElementById('filtro-ent-sede')?.value || '';
     const qGrupo = document.getElementById('filtro-ent-grupo')?.value || '';
     const qTurno = document.getElementById('filtro-ent-turno')?.value || '';
-    const qNombre = (document.getElementById('filtro-ent-nombre')?.value || '').toLowerCase().trim();
+    const qNombre = normalizeCoachSearch(document.getElementById('filtro-ent-nombre')?.value);
 
     // 1. Filtrar los datos con todos los criterios
     let datos = asistenciaData.filter(a => {
@@ -654,7 +663,7 @@ function renderAsistencia() {
         if (qSede && (a.sede || '').toLowerCase() !== qSede.toLowerCase()) return false;
         if (qGrupo && (a.grupo || '').toLowerCase() !== qGrupo.toLowerCase()) return false;
         if (qTurno && (a.turno || '').toLowerCase() !== qTurno.toLowerCase()) return false;
-        if (qNombre && !(a.full_name || '').toLowerCase().includes(qNombre)) return false;
+        if (qNombre && !normalizeCoachSearch(`${a.full_name || ''} ${a.dni || ''}`).includes(qNombre)) return false;
 
         return true;
     });
@@ -668,7 +677,7 @@ function renderAsistencia() {
         if (qSede && (a.sede || '').toLowerCase() !== qSede.toLowerCase()) return false;
         if (qGrupo && (a.grupo || '').toLowerCase() !== qGrupo.toLowerCase()) return false;
         if (qTurno && (a.turno || '').toLowerCase() !== qTurno.toLowerCase()) return false;
-        if (qNombre && !(a.full_name || '').toLowerCase().includes(qNombre)) return false;
+        if (qNombre && !normalizeCoachSearch(`${a.full_name || ''} ${a.dni || ''}`).includes(qNombre)) return false;
         return true;
     });
 

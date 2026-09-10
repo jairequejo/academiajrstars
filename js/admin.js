@@ -27,6 +27,14 @@ function escapeAdminHtml(value) {
   }[char]));
 }
 
+function normalizeAdminSearch(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('es-PE')
+    .trim();
+}
+
 // ── SIDEBAR MOBILE ────────────────────────────────────
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -378,12 +386,12 @@ function aplicarFiltros() {
   const horario = document.getElementById('filtro-horario')?.value || '';
   const sede = document.getElementById('filtro-sede')?.value || '';
   const grupo = document.getElementById('filtro-grupo')?.value || '';
-  const busqueda = (document.getElementById('filtro-busqueda')?.value || '').toLowerCase().trim();
+  const busqueda = normalizeAdminSearch(document.getElementById('filtro-busqueda')?.value);
   const hoy = new Date();
 
   const filtrados = alumnosData.filter(a => {
     // Filtro búsqueda de texto
-    const searchable = `${a.full_name || ''} ${a.dni || ''}`.toLowerCase();
+    const searchable = normalizeAdminSearch(`${a.full_name || ''} ${a.dni || ''}`);
     if (busqueda && !searchable.includes(busqueda)) return false;
     // Filtro horario
     if (horario && (a.horario || '').toLowerCase() !== horario.toLowerCase()) return false;
@@ -824,11 +832,12 @@ function setChip(chip, ev) {
 }
 
 function aplicarFiltrosPagos() {
-  const q = (document.getElementById('batidos-nombre-search')?.value || '').toLowerCase().trim();
+  const q = normalizeAdminSearch(document.getElementById('batidos-nombre-search')?.value);
 
   let lista = todosPagosData.filter(a => {
-    // Búsqueda por nombre
-    if (q && !a.full_name.toLowerCase().includes(q)) return false;
+    // Búsqueda flexible por nombre o DNI.
+    const searchable = normalizeAdminSearch(`${a.full_name || ''} ${a.dni || ''}`);
+    if (q && !searchable.includes(q)) return false;
     // Filtro por chip
     if (chipActivo === 'lmv') return a.horario === 'LMV';
     if (chipActivo === 'mjs') return a.horario === 'MJS';
@@ -1199,7 +1208,7 @@ async function loadCalendario() {
     const last = `${calYear}-${mm}-${dd}T23:59:59`;
 
     const [studRes, rangeRes] = await Promise.all([
-      window.supabaseClient.from('students').select('id, full_name, horario, turno, sede').eq('is_active', true).order('full_name'),
+      window.supabaseClient.from('students').select('id, full_name, dni, horario, turno, sede').eq('is_active', true).order('full_name'),
       window.supabaseClient.from('attendance').select('id, student_id, created_at').gte('created_at', first).lte('created_at', last)
     ]);
 
@@ -1236,10 +1245,10 @@ async function loadCalendario() {
 function renderCalendario() {
   const turnoFilter = document.getElementById('cal-filter-turno')?.value || '';
   const sedeFilter = document.getElementById('cal-filter-sede')?.value || '';
-  const searchFilter = (document.getElementById('cal-search')?.value || '').toLowerCase();
+  const searchFilter = normalizeAdminSearch(document.getElementById('cal-search')?.value);
 
   const students = _calStudents.filter(s => {
-    const matchSearch = (s.full_name || '').toLowerCase().includes(searchFilter);
+    const matchSearch = normalizeAdminSearch(`${s.full_name || ''} ${s.dni || ''}`).includes(searchFilter);
     const matchTurno = !turnoFilter || (s.turno || '').toLowerCase() === turnoFilter.toLowerCase();
     const matchSede = !sedeFilter || (s.sede || '').toLowerCase() === sedeFilter.toLowerCase();
     return matchSearch && matchTurno && matchSede;
@@ -1374,11 +1383,10 @@ async function loadBioStudents(refresh = false) {
 function renderBioStudents(query = '') {
   const el = document.getElementById('bio-search-results');
   if (!el) return;
-  const normalized = query.trim().toLocaleLowerCase('es');
+  const normalized = normalizeAdminSearch(query);
   const hits = _bioStudents.filter(student => {
     if (!normalized) return true;
-    return String(student.full_name || '').toLocaleLowerCase('es').includes(normalized)
-      || String(student.dni || '').includes(normalized);
+    return normalizeAdminSearch(`${student.full_name || ''} ${student.dni || ''}`).includes(normalized);
   }).slice(0, 12);
 
   if (!hits.length) {
@@ -1418,7 +1426,7 @@ async function resetBioSearch() {
 
 
 async function buscarParaBio() {
-  const q = document.getElementById('bio-search').value.trim().toLowerCase();
+  const q = document.getElementById('bio-search').value.trim();
   const el = document.getElementById('bio-search-results');
   if (!el) return;
   try {
