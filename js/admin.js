@@ -66,7 +66,12 @@ function goTo(page, ev) {
   if (page === 'calendario') loadCalendario();
   if (page === 'entrenadores') loadEntrenadores();
   if (page === 'cobranzas') setTimeout(loadCobranzas, 50);
-  
+  if (page === 'configuracion') {
+    if (typeof renderAdminNavFields === 'function') renderAdminNavFields();
+    if (typeof updateAdminPwaInstallUi === 'function') updateAdminPwaInstallUi();
+    if (typeof updateCobranzasAlertsUi === 'function') updateCobranzasAlertsUi();
+  }
+
   if (page === 'scanner') {
       setTimeout(initAdminScanner, 200);
   } else {
@@ -125,7 +130,7 @@ async function loadStats() {
 
     const { count: totalAlumnos } = await window.supabaseClient.from('students').select('id', {count: 'exact', head: true}).eq('is_active', true);
     const { count: presentesHoy } = await window.supabaseClient.from('attendance').select('id', {count: 'exact', head: true}).gte('created_at', `${hoyStr}T00:00:00`).lte('created_at', `${hoyStr}T23:59:59`);
-    
+
     document.getElementById('s-total').textContent = totalAlumnos || 0;
     document.getElementById('s-presentes').textContent = presentesHoy || 0;
     document.getElementById('s-ausentes').textContent = Math.max(0, (totalAlumnos || 0) - (presentesHoy || 0));
@@ -174,7 +179,7 @@ function initAdminScanner() {
             console.warn('[Admin Scanner] No camera available or permissions denied. Scanner will be dormant.');
             readerEl.innerHTML = `<div style="padding:1rem;color:var(--gray)">No camera detected. Used for QR only if connected.</div>`;
         });
-        
+
     initNFC();
 }
 
@@ -785,7 +790,7 @@ async function loadCreditos() {
   try {
     const { data, error } = await window.supabaseClient.from('students').select('*').order('full_name');
     if (error) throw error;
-    
+
     const hoy = new Date();
     todosPagosData = (data || []).map(a => {
       let dias_restantes = null;
@@ -1005,7 +1010,7 @@ async function loadHistorialPagos(student_id) {
   try {
     const { data, error } = await window.supabaseClient.from('mensualidades').select('id, monto, metodo_pago, fecha_vencimiento, created_at').eq('student_id', student_id).order('created_at', { ascending: false }).limit(24);
     if (error) throw error;
-    
+
     if (!data || !data.length) {
       wrap.innerHTML = `
         <h3>Historial de pagos</h3>
@@ -1124,7 +1129,7 @@ async function recargar(id) {
 
   const nuevo = (alumno.batido_credits || 0) + cantidad;
   const { error } = await window.supabaseClient.from('students').update({batido_credits: nuevo}).eq('id', id);
-  
+
   if (error) { showToast('Error al recargar', 'error'); return; }
 
   showToast(`${alumno.full_name}: ahora tiene ${nuevo} cr.`);
@@ -1552,7 +1557,7 @@ async function cargarRanking() {
   try {
     let q = window.supabaseClient.from('students').select('id, full_name, horario, sede, categoria').eq('is_active', true);
     if (sede) q = q.eq('sede', sede);
-    
+
     const { data: students_list, error: err1 } = await q;
     if (err1) throw err1;
 
@@ -1591,7 +1596,7 @@ async function cargarRanking() {
           String(student.categoria || '').trim().toUpperCase() === categoriaVal.trim().toUpperCase()
         ));
     }
-    
+
     if (filtered_students.length === 0) {
         wrap.innerHTML = '<p style="font-family:var(--font-cond);color:var(--gray)">No hay alumnos activos con estos filtros.</p>';
         return;
@@ -1754,7 +1759,7 @@ async function crearEntrenador() {
   if (!nombre) return showToast('Completa el nombre', 'error');
 
   const { data, error } = await window.supabaseClient.rpc('admin_create_entrenador', { p_nombre: nombre });
-  
+
   if (error || !data) return showToast('Error al crear', 'error');
 
   document.getElementById('ent-nombre').value = '';

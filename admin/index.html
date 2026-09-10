@@ -8,7 +8,7 @@
   <title>JR Stars — Admin Panel</title>
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20260904">
-  <link rel="stylesheet" href="../css/admin.css?v=20260905d">
+  <link rel="stylesheet" href="../css/admin.css?v=20260909a">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260904">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
   <meta name="theme-color" content="#E30D13">
@@ -65,8 +65,8 @@
       <div class="sidebar-item" id="nav-alumnos" onclick="goTo('alumnos', event)">
         <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#users"></use></svg></span> Alumnos
       </div>
-            <div class="sidebar-item" id="nav-cobranzas" onclick="goTo('cobranzas', event)">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Cobranzas
+      <div class="sidebar-item" id="nav-cobranzas" onclick="goTo('cobranzas', event)">
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#cash"></use></svg></span> Cobranzas
       </div>
       <div class="sidebar-item" id="nav-batidos" onclick="goTo('batidos', event)">
         <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg></span> Caja / Pagos
@@ -86,6 +86,11 @@
       <div class="sidebar-section">Equipo</div>
       <div class="sidebar-item" id="nav-entrenadores" onclick="goTo('entrenadores', event)">
         <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#activity"></use></svg></span> Entrenadores
+      </div>
+
+      <div class="sidebar-section">Sistema</div>
+      <div class="sidebar-item" id="nav-configuracion" onclick="goTo('configuracion', event)">
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg?v=20260909#settings"></use></svg></span> Configuración
       </div>
 
       <div class="sidebar-logout">
@@ -148,7 +153,7 @@
         </div>
       </div>
 
-      
+
       <!-- ── COBRANZAS ── -->
       <div class="page" id="page-cobranzas">
         <section class="cobranzas-shell" aria-labelledby="cobranzas-title">
@@ -176,17 +181,38 @@
             </article>
           </div>
 
-          <div class="cobranzas-note">
-            <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#clock"></use></svg>
-            <span>Para evitar mensajes repetidos, cada alumno puede notificarse una vez cada 24 horas.</span>
+          <div class="cobranzas-toolbar">
+            <div class="cobranzas-search">
+              <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#search"></use></svg>
+              <input id="cobranzas-search" type="search" placeholder="Buscar alumno o apoderado" autocomplete="off" aria-label="Buscar alumno o apoderado">
+            </div>
+            <button class="cobranzas-filter-button" id="cobranzas-filter-button" type="button" aria-expanded="false" aria-controls="cobranzas-filters">
+              <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260909#filter"></use></svg>
+              Filtros <span id="cobranzas-filter-count" hidden>0</span>
+            </button>
           </div>
 
-          <div class="cobranzas-alerts" id="cobranzas-alerts">
-            <div>
-              <strong>Alertas de vencimiento</strong>
-              <span id="cobranzas-alerts-status">Actívalas para recibir un aviso al entrar o volver a la PWA.</span>
-            </div>
-            <button class="cobranzas-alerts-button" id="cobranzas-alerts-button" type="button">Activar alertas</button>
+          <div class="cobranzas-filters" id="cobranzas-filters" hidden>
+            <label>
+              <span>Vencimiento</span>
+              <select id="cobranzas-filter-due">
+                <option value="all">Todos</option>
+                <option value="expired">Vencidos</option>
+                <option value="today">Vence hoy</option>
+                <option value="tomorrow">Vence mañana</option>
+                <option value="upcoming">Próximos</option>
+              </select>
+            </label>
+            <label>
+              <span>Recordatorio</span>
+              <select id="cobranzas-filter-notified">
+                <option value="all">Todos</option>
+                <option value="pending">Sin notificar</option>
+                <option value="notified">Ya notificados</option>
+              </select>
+            </label>
+            <button id="cobranzas-filter-reset" type="button">Limpiar filtros</button>
+            <p id="cobranzas-filter-results" role="status" aria-live="polite"></p>
           </div>
 
           <div class="cobranzas-list" id="cobranzas-list" aria-live="polite">
@@ -209,9 +235,6 @@
         <div class="filtros-bar">
           <div class="filtros-heading">
             <div class="form-card-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#clipboard"></use></svg> Directorio de Alumnos</div>
-            <button class="btn btn-gold" style="font-size:.8rem;padding:.4rem .9rem" onclick="imprimirPlanchaQRs()">
-              <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#printer"></use></svg> Generar Plancha QR
-            </button>
           </div>
           <div class="alumnos-filter-primary">
             <label class="form-label" for="filtro-busqueda">Buscar alumno</label>
@@ -497,30 +520,102 @@
         </div>
       </div>
 
+      <!-- ── CONFIGURACIÓN ── -->
+      <div class="page" id="page-configuracion">
+        <section class="config-shell" aria-labelledby="config-title">
+          <header class="config-hero">
+            <div>
+              <span class="config-eyebrow">Panel a tu medida</span>
+              <h1 id="config-title">Configuración</h1>
+              <p>Instala el panel, administra alertas y deja a mano las herramientas que usas todos los días.</p>
+            </div>
+            <span class="config-device-note">Los cambios se guardan en este dispositivo</span>
+          </header>
+
+          <div class="config-grid">
+            <article class="config-card config-card--pwa">
+              <div class="config-card-icon"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260909#download"></use></svg></div>
+              <div class="config-card-copy">
+                <span class="config-card-kicker">Aplicación</span>
+                <h2>Instalar JR Admin</h2>
+                <p id="config-pwa-status">Instala el panel para abrirlo como una aplicación y acceder más rápido.</p>
+              </div>
+              <button class="config-primary-button" id="config-pwa-install" type="button">Instalar aplicación</button>
+              <p class="config-help" id="config-pwa-help" hidden></p>
+            </article>
+
+            <article class="config-card config-card--alerts">
+              <div class="config-card-icon"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260909#bell"></use></svg></div>
+              <div class="config-card-copy">
+                <span class="config-card-kicker">Avisos del dispositivo</span>
+                <h2>Alertas de cobranzas</h2>
+                <p id="cobranzas-alerts-status">Recibe un resumen cuando existan mensualidades vencidas o próximas a vencer.</p>
+              </div>
+              <div class="cobranzas-alerts" id="cobranzas-alerts">
+                <span class="config-switch-state" id="cobranzas-alerts-state">Desactivadas</span>
+                <button class="cobranzas-alerts-button" id="cobranzas-alerts-button" type="button">Activar alertas</button>
+              </div>
+            </article>
+
+            <article class="config-card config-card--qr">
+              <div class="config-card-icon"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#qr"></use></svg></div>
+              <div class="config-card-copy">
+                <span class="config-card-kicker">Credenciales</span>
+                <h2>Plancha de códigos QR</h2>
+                <p>Genera los QR de todos los alumnos activos y guárdalos como PDF o imprímelos.</p>
+              </div>
+              <button class="config-secondary-button" type="button" onclick="imprimirPlanchaQRs()">
+                <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#printer"></use></svg>
+                Descargar o imprimir QR
+              </button>
+            </article>
+
+            <article class="config-card config-card--nav">
+              <div class="config-card-heading">
+                <div class="config-card-icon"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260909#mobile"></use></svg></div>
+                <div class="config-card-copy">
+                  <span class="config-card-kicker">Accesos rápidos</span>
+                  <h2>Menú inferior del celular</h2>
+                  <p>Elige las cinco secciones que aparecerán abajo y ordénalas por posición.</p>
+                </div>
+              </div>
+              <div class="config-nav-fields" id="config-nav-fields"></div>
+              <div class="config-card-actions">
+                <button class="config-link-button" id="config-nav-reset" type="button">Restaurar</button>
+                <button class="config-primary-button" id="config-nav-save" type="button">Guardar menú</button>
+              </div>
+            </article>
+
+            <article class="config-card config-card--message">
+              <div class="config-card-heading">
+                <div class="config-card-icon"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260909#message"></use></svg></div>
+                <div class="config-card-copy">
+                  <span class="config-card-kicker">WhatsApp</span>
+                  <h2>Mensaje de cobranza</h2>
+                  <p>Personaliza el recordatorio. Puedes usar {apoderado}, {alumno}, {monto} y {vencimiento}.</p>
+                </div>
+              </div>
+              <label class="config-message-field" for="config-message-template">
+                <span>Plantilla del mensaje</span>
+                <textarea id="config-message-template" rows="8"></textarea>
+              </label>
+              <div class="config-message-preview">
+                <span>Vista previa</span>
+                <p id="config-message-preview"></p>
+              </div>
+              <div class="config-card-actions">
+                <button class="config-link-button" id="config-message-reset" type="button">Usar mensaje original</button>
+                <button class="config-primary-button" id="config-message-save" type="button">Guardar mensaje</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+
     </main>
   </div>
 
-  <nav class="bottom-nav" id="bottom-nav">
-    <button class="bottom-nav-item active" id="bnav-stats" onclick="goTo('stats', event)">
-      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#chart"></use></svg></span><span class="bnav-label">Stats</span>
-    </button>
-    <button class="bottom-nav-item" id="bnav-alumnos" onclick="goTo('alumnos', event)">
-      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#users"></use></svg></span><span class="bnav-label">Alumnos</span>
-    </button>
-    <button class="bottom-nav-item" id="bnav-cobranzas" onclick="goTo('cobranzas', event)" aria-label="Cobranzas">
-      <span class="bnav-cobranzas-icon" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </span>
-      <span class="bnav-label">Cobros</span>
-    </button>
-    <button class="bottom-nav-item" id="bnav-batidos" onclick="goTo('batidos', event)">
-      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg></span><span class="bnav-label">Caja</span>
-    </button>
-    <button class="bottom-nav-item" id="bnav-calendario"
-      onclick="goTo('calendario', event)">
-      <span><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#calendar"></use></svg></span><span class="bnav-label">Asistencia</span>
-    </button>
-  </nav>
+  <nav class="bottom-nav" id="bottom-nav" aria-label="Accesos rápidos del panel"></nav>
 
   <!-- ── MODAL EDITAR ALUMNO ── -->
   <div id="modal-editar-alumno" class="modal-overlay hidden" onclick="cerrarModalEdicionOutside(event)">
@@ -834,10 +929,11 @@
 
   <script src="../js/admin-icons.js?v=20260904"></script>
   <script src="../js/admin-sedes.js?v=20260904"></script>
-  <script src="../js/admin.js?v=20260905d"></script>
+  <script src="../js/admin.js?v=20260909a"></script>
   <script src="../js/alumno-ficha.js?v=20260904"></script>
   <script src="../js/inscripcion.js?v=20260904"></script>
-  <script src="../js/admin-cobranzas.js?v=20260905b"></script>
+  <script src="../js/admin-configuracion.js?v=20260909a"></script>
+  <script src="../js/admin-cobranzas.js?v=20260909a"></script>
 </body>
 
 </html>
