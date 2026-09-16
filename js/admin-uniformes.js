@@ -190,6 +190,20 @@ function renderUniformMetrics() {
     document.getElementById('uniform-metric-unpaid').textContent = uniformOrders.filter(order => !order.is_paid).length;
 }
 
+function setUniformMobileView(view, { scroll = false } = {}) {
+    const page = document.getElementById('page-uniformes');
+    if (!page || !['form', 'list'].includes(view)) return;
+    page.dataset.mobileView = view;
+    document.querySelectorAll('[data-uniform-mobile-view]').forEach(button => {
+        const selected = button.dataset.uniformMobileView === view;
+        button.classList.toggle('is-active', selected);
+        button.setAttribute('aria-pressed', String(selected));
+    });
+    if (scroll && window.matchMedia('(max-width: 700px)').matches) {
+        document.querySelector('.uniform-mobile-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
 function getFilteredUniformOrders() {
     const normalized = normalizeAdminSearch(uniformFilters.query);
     return uniformOrders.filter(order => {
@@ -318,6 +332,7 @@ function startUniformEdit(orderId) {
     document.getElementById('uniform-notes').value = order.notes || '';
     updateUniformPaidUi();
     selectUniformStudent(order.student_id, true);
+    setUniformMobileView('form', { scroll: true });
     setUniformFormError();
     document.getElementById('uniform-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -383,6 +398,7 @@ async function saveUniformOrder(event) {
         showToast(editingId ? 'Pedido de uniforme actualizado.' : 'Pedido de uniforme registrado.');
         resetUniformForm();
         await loadUniformes();
+        setUniformMobileView('list', { scroll: true });
     } catch (error) {
         console.error('Error guardando uniforme:', error);
         setUniformFormError(uniformErrorMessage(error));
@@ -456,7 +472,10 @@ function initUniformesUi() {
     document.querySelectorAll('[data-uniform-color]').forEach(button => button.addEventListener('click', () => selectUniformColor(button.dataset.uniformColor)));
     document.getElementById('uniform-is-paid').addEventListener('change', updateUniformPaidUi);
     document.getElementById('uniform-cancel-edit').addEventListener('click', () => resetUniformForm());
-    document.getElementById('uniform-new-button').addEventListener('click', () => resetUniformForm({ focus: true }));
+    document.getElementById('uniform-new-button').addEventListener('click', () => {
+        setUniformMobileView('form', { scroll: true });
+        resetUniformForm({ focus: true });
+    });
     document.getElementById('uniform-refresh').addEventListener('click', loadUniformes);
     document.getElementById('uniform-order-search').addEventListener('input', event => {
         uniformFilters.query = event.target.value;
@@ -464,6 +483,12 @@ function initUniformesUi() {
     });
     document.querySelectorAll('[data-uniform-status-filter]').forEach(button => button.addEventListener('click', () => setUniformFilter('status', button.dataset.uniformStatusFilter)));
     document.querySelectorAll('[data-uniform-payment-filter]').forEach(button => button.addEventListener('click', () => setUniformFilter('payment', button.dataset.uniformPaymentFilter)));
+    document.querySelectorAll('[data-uniform-mobile-view]').forEach(button => button.addEventListener('click', () => {
+        setUniformMobileView(button.dataset.uniformMobileView);
+        if (button.dataset.uniformMobileView === 'form' && !uniformEditingOrder) {
+            window.setTimeout(() => document.getElementById('uniform-student-search')?.focus(), 80);
+        }
+    }));
 
     orderList.addEventListener('click', event => {
         const retry = event.target.closest('#uniform-error-retry');
@@ -497,6 +522,7 @@ function initUniformesUi() {
     });
 
     resetUniformForm();
+    setUniformMobileView('list');
 }
 
 window.loadUniformes = loadUniformes;

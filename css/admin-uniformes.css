@@ -18,6 +18,8 @@
 }
 .uniform-new-button { flex: 0 0 auto; color: #151515; border: 1px solid #ffc107; background: #ffc107; box-shadow: 0 10px 25px rgba(255,193,7,.2); }
 .uniform-new-button .admin-icon { width: 19px; height: 19px; }
+.uniform-save-button .admin-icon,
+.uniform-cancel-button .admin-icon { flex: 0 0 18px; width: 18px; height: 18px; }
 
 .uniform-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .7rem; margin: .8rem 0 1rem; }
 .uniform-metrics article { display: flex; align-items: center; justify-content: space-between; gap: .65rem; min-width: 0; padding: .8rem 1rem; background: #fff; border: 1px solid #e1e5eb; border-top: 4px solid #111; border-radius: 14px; }
@@ -26,6 +28,7 @@
 .uniform-metrics article.is-unpaid { border-top-color: #da1212; }
 .uniform-metrics span { color: #657184; font-size: .69rem; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
 .uniform-metrics strong { flex: 0 0 auto; color: #141418; font-family: var(--font-display); font-size: 2rem; font-weight: 500; line-height: 1; }
+.uniform-mobile-tabs { display: none; }
 
 .uniform-layout { display: grid; grid-template-columns: minmax(390px, .85fr) minmax(470px, 1.15fr); align-items: start; gap: 1rem; }
 .uniform-form-card,
@@ -209,42 +212,189 @@
 }
 
 @media (max-width: 700px) {
-  .uniform-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; min-height: 0; padding: 1rem; border-radius: 17px; }
-  .uniform-hero h1 { font-size: 2.3rem; }
-  .uniform-hero p { display: none; }
-  .uniform-new-button { width: 46px; min-width: 46px; min-height: 46px; padding: 0; font-size: 0; }
-  .uniform-new-button .admin-icon { width: 21px; height: 21px; }
-  .uniform-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .45rem; }
-  .uniform-metrics article { padding: .7rem .75rem; }
-  .uniform-metrics span { font-size: .61rem; }
-  .uniform-metrics strong { font-size: 1.7rem; }
-  .uniform-form-card, .uniform-orders-panel { padding: .9rem; border-radius: 16px; }
-  .uniform-fields-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .uniform-price-field { grid-column: 1 / -1; }
-  .uniform-field input, .uniform-field textarea, .uniform-list-search input, .uniform-search-box input { font-size: 16px; }
-  .uniform-type-option { min-height: 100px; }
-  .uniform-color-grid { grid-template-columns: minmax(0, 1fr); }
-  .uniform-color-option { min-height: 62px; }
+  .uniform-shell { margin-inline: 0; }
+  .uniform-hero {
+    display: flex; align-items: stretch; flex-direction: column; gap: .9rem;
+    min-height: 0; padding: 1.1rem; border-radius: 20px;
+    background: radial-gradient(circle at 94% 5%, rgba(255,193,7,.2), transparent 30%), linear-gradient(135deg, #09090b, #250709);
+  }
+  .uniform-eyebrow { margin-bottom: .35rem; font-size: .65rem; letter-spacing: .14em; }
+  .uniform-hero h1 { font-size: clamp(2.35rem, 13vw, 3.15rem); line-height: .9; }
+  .uniform-hero p { display: block; margin-top: .55rem; color: #d5d5da; font-size: .78rem; line-height: 1.45; }
+  .uniform-new-button {
+    width: 100%; min-height: 50px; padding: .8rem 1rem; gap: .55rem;
+    border: 0; border-radius: 999px; font-size: .86rem;
+  }
+  .uniform-new-button .admin-icon { width: 20px; height: 20px; }
+
+  .uniform-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; margin: .7rem 0; }
+  .uniform-metrics article {
+    min-height: 82px; align-items: flex-start; flex-direction: column-reverse; gap: .35rem;
+    padding: .75rem .8rem; border-radius: 16px; border-top-width: 4px;
+  }
+  .uniform-metrics span { font-size: .78rem; line-height: 1.3; letter-spacing: .02em; }
+  .uniform-metrics strong { font-size: 2rem; }
+
+  .uniform-mobile-tabs {
+    position: sticky; top: 66px; z-index: 20; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px; margin: 0 0 .75rem; padding: 4px; border: 1px solid #dfe3e8; border-radius: 999px;
+    background: rgba(255,255,255,.96); box-shadow: 0 8px 24px rgba(15,23,42,.08); backdrop-filter: blur(10px);
+  }
+  .uniform-mobile-tabs button {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    min-width: 0; min-height: 46px; padding: .65rem .45rem; color: #596579;
+    border: 0; border-radius: 999px; background: transparent; font: 850 .78rem/1 var(--font-body); cursor: pointer;
+  }
+  .uniform-mobile-tabs button.is-active { color: #fff; background: #111318; box-shadow: 0 6px 16px rgba(17,19,24,.2); }
+  .uniform-mobile-tabs .admin-icon { width: 18px; height: 18px; }
+  #page-uniformes[data-mobile-view="list"] .uniform-form-card,
+  #page-uniformes[data-mobile-view="form"] .uniform-orders-panel { display: none; }
+
+  .uniform-layout { display: block; }
+  .uniform-form-card,
+  .uniform-orders-panel { padding: 1rem; border-radius: 20px; box-shadow: 0 10px 28px rgba(15,23,42,.07); }
+  .uniform-card-heading { margin-bottom: 1rem; padding-bottom: .9rem; }
+  .uniform-card-heading h2,
+  .uniform-section-title h3,
+  .uniform-orders-heading h2 { font-size: 1.05rem; }
+  .uniform-card-heading p,
+  .uniform-section-title p { font-size: .84rem; }
+  .uniform-step-number { flex-basis: 34px; width: 34px; height: 34px; border-radius: 50%; background: #da1212; font-size: .82rem; }
+  .uniform-section-title { margin: 1.35rem 0 .8rem; }
+
+  .uniform-field > span,
+  .uniform-filter-block > span { font-size: .82rem; letter-spacing: .04em; }
+  .uniform-field input,
+  .uniform-field textarea,
+  .uniform-list-search input,
+  .uniform-search-box input { font-size: 16px; }
+  .uniform-field input { min-height: 54px; padding: .8rem .9rem; border-radius: 14px; }
+  .uniform-field textarea { min-height: 92px; border-radius: 14px; }
+  .uniform-field small { font-size: .82rem; }
+  .uniform-search-box { min-height: 56px; border-radius: 16px; }
+  .uniform-search-box input { min-height: 54px; }
+
+  .uniform-student-option { min-height: 62px; padding: .7rem; border-radius: 16px; }
+  .uniform-student-option strong { font-size: .88rem; }
+  .uniform-student-option small { font-size: .8rem; }
   .uniform-student-option b { display: none; }
+  .uniform-selected-student { grid-template-columns: auto minmax(0, 1fr); padding: .8rem; border-radius: 16px; }
+  .uniform-selected-student strong { font-size: .9rem; }
+  .uniform-selected-student small { font-size: .78rem; line-height: 1.35; }
+  .uniform-selected-student button { grid-column: 1 / -1; width: 100%; min-height: 44px; border-radius: 999px; font-size: .75rem; }
+
+  .uniform-type-grid,
+  .uniform-fields-row,
+  .uniform-color-grid { grid-template-columns: minmax(0, 1fr); }
+  .uniform-type-grid { gap: .55rem; }
+  .uniform-type-option {
+    grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-content: center;
+    min-height: 72px; gap: .2rem .75rem; padding: .8rem .9rem; border-radius: 17px;
+  }
+  .uniform-type-option::before {
+    content: ""; position: absolute; top: 50%; right: .9rem; width: 18px; height: 18px;
+    border: 2px solid #cbd1d9; border-radius: 50%; transform: translateY(-50%); background: #fff;
+  }
+  .uniform-type-option.is-selected::before { border: 6px solid #da1212; }
+  .uniform-type-option strong { grid-column: 1; font-size: .92rem; }
+  .uniform-type-option span { grid-column: 1; font-size: .8rem; }
+  .uniform-type-option b { grid-column: 2; grid-row: 1 / 3; align-self: center; margin: 0 32px 0 0; font-size: .92rem; }
+  .uniform-type-option .admin-icon { display: none; }
+  .uniform-fields-row { gap: .85rem; margin-top: 1rem; }
+  .uniform-price-field { grid-column: auto; }
+  .uniform-price-field > div { min-height: 54px; border-radius: 14px; }
+
+  .uniform-color-grid { gap: .55rem; }
+  .uniform-color-option { min-height: 72px; padding: .7rem .8rem; border-radius: 17px; }
+  .uniform-color-option strong { font-size: .88rem; }
+  .uniform-color-option small { font-size: .78rem; }
+  .uniform-paid-toggle { min-height: 76px; padding: .8rem; border-radius: 17px; }
+  .uniform-paid-toggle strong { font-size: .9rem; }
+  .uniform-paid-toggle small { font-size: .78rem; line-height: 1.35; }
+
+  .uniform-form-actions {
+    position: sticky; bottom: calc(78px + env(safe-area-inset-bottom)); z-index: 12;
+    grid-template-columns: minmax(0, 1fr); margin: 1rem -.25rem -.25rem; padding: .75rem .25rem .25rem;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 20%); border-top: 0;
+  }
+  .uniform-form-actions button { width: 100%; min-height: 52px; border-radius: 999px; font-size: .9rem; }
+  .uniform-cancel-button[hidden] + .uniform-save-button { grid-column: auto; }
+
+  .uniform-orders-heading h2 { margin-top: .25rem; font-size: 1.2rem; }
+  .uniform-orders-heading > div > span { font-size: .68rem; }
+  .uniform-orders-heading > button { flex-basis: 46px; width: 46px; height: 46px; border-radius: 50%; }
+  .uniform-list-search { min-height: 54px; margin-top: .9rem; border-radius: 16px; }
+  .uniform-list-search input { min-height: 52px; }
+  .uniform-filter-block { margin-top: .85rem; }
+  .uniform-filter-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-top: .5rem; padding: 0; overflow: visible; }
+  .uniform-filter-row button { width: 100%; min-height: 46px; padding: .65rem .55rem; font-size: .9rem; white-space: normal; }
+  .uniform-results-count { margin: .75rem 0; font-size: .82rem; }
+
+  .uniform-orders-list { gap: .85rem; }
+  .uniform-order-card { padding: 1rem; border-left-width: 1px; border-top: 5px solid #111318; border-radius: 20px; }
   .uniform-order-head { align-items: stretch; flex-direction: column; }
-  .uniform-order-status { align-self: flex-start; }
-  .uniform-order-actions { grid-template-columns: minmax(0, 1fr); }
-  .uniform-order-actions button { min-height: 48px; font-size: .72rem; }
-  .uniform-order-workflow button { min-height: 46px; }
+  .uniform-order-person h3 { font-size: 1rem; }
+  .uniform-order-person p { margin-top: .28rem; font-size: .8rem; }
+  .uniform-order-status { align-self: flex-start; padding: .45rem .7rem; font-size: .76rem; }
+  .uniform-order-details { gap: .5rem; }
+  .uniform-order-details > div { padding: .7rem; border-radius: 13px; }
+  .uniform-order-details span { font-size: .76rem; }
+  .uniform-order-details strong { font-size: .88rem; }
+  .uniform-order-details small { font-size: .78rem; }
+  .uniform-order-note { padding: .7rem; border-radius: 10px; font-size: .82rem; }
+  .uniform-order-workflow { margin-top: .85rem; padding-top: .8rem; }
+  .uniform-order-workflow > span { font-size: .76rem; }
+  .uniform-order-workflow button { min-height: 50px; padding: .55rem .3rem; border-radius: 13px; font-size: .78rem; }
+  .uniform-order-actions { grid-template-columns: minmax(0, 1fr); gap: .55rem; margin-top: .8rem; }
+  .uniform-order-actions button { min-height: 52px; border-radius: 999px; font-size: .84rem; }
+  .uniform-state { border-radius: 18px; }
+  .uniform-state strong { font-size: .95rem; }
+  .uniform-state p { font-size: .78rem; }
 }
 
-@media (max-width: 390px) {
-  .uniform-type-grid,
-  .uniform-fields-row { grid-template-columns: minmax(0, 1fr); }
-  .uniform-price-field { grid-column: auto; }
-  .uniform-form-actions { grid-template-columns: minmax(0, 1fr); }
-  .uniform-form-actions button { width: 100%; }
-  .uniform-cancel-button[hidden] + .uniform-save-button { grid-column: auto; }
-  .uniform-selected-student { grid-template-columns: auto minmax(0, 1fr); }
-  .uniform-selected-student button { grid-column: 1 / -1; width: 100%; }
+@media (max-width: 370px) {
+  .uniform-hero { padding: 1rem; }
+  .uniform-mobile-tabs button { font-size: .78rem; }
+  .uniform-mobile-tabs .admin-icon { width: 16px; height: 16px; }
+  .uniform-metrics article { padding: .7rem; }
   .uniform-order-details { grid-template-columns: minmax(0, 1fr); }
   .uniform-order-workflow > div { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* El tema general elimina todos los radios con !important; Uniformes recupera
+   la geometría redondeada que usa el resto del panel moderno. */
+#page-uniformes .uniform-hero,
+#page-uniformes .uniform-form-card,
+#page-uniformes .uniform-orders-panel,
+#page-uniformes .uniform-order-card { border-radius: 20px !important; }
+#page-uniformes .uniform-metrics article,
+#page-uniformes .uniform-student-option,
+#page-uniformes .uniform-selected-student,
+#page-uniformes .uniform-type-option,
+#page-uniformes .uniform-color-option,
+#page-uniformes .uniform-paid-toggle,
+#page-uniformes .uniform-state { border-radius: 16px !important; }
+#page-uniformes .uniform-search-box,
+#page-uniformes .uniform-list-search,
+#page-uniformes .uniform-field input,
+#page-uniformes .uniform-field textarea,
+#page-uniformes .uniform-price-field > div,
+#page-uniformes .uniform-order-details > div,
+#page-uniformes .uniform-order-workflow button { border-radius: 14px !important; }
+#page-uniformes .uniform-step-number,
+#page-uniformes .uniform-student-avatar,
+#page-uniformes .uniform-order-avatar,
+#page-uniformes .uniform-selected-check,
+#page-uniformes .uniform-color-swatch,
+#page-uniformes .uniform-orders-heading > button { border-radius: 50% !important; }
+#page-uniformes .uniform-new-button,
+#page-uniformes .uniform-mobile-tabs,
+#page-uniformes .uniform-mobile-tabs button,
+#page-uniformes .uniform-selected-student button,
+#page-uniformes .uniform-filter-row button,
+#page-uniformes .uniform-order-status,
+#page-uniformes .uniform-form-actions button,
+#page-uniformes .uniform-order-actions button { border-radius: 999px !important; }
 
 @media (prefers-reduced-motion: reduce) {
   .uniform-state.is-loading i { animation-duration: 1.5s; }

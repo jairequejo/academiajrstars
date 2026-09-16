@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20260904">
   <link rel="stylesheet" href="../css/admin.css?v=20260915_uniformes">
-  <link rel="stylesheet" href="../css/admin-uniformes.css?v=20260915a">
+  <link rel="stylesheet" href="../css/admin-uniformes.css?v=20260916_mobile">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260904">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
   <meta name="theme-color" content="#E30D13">
@@ -366,6 +366,17 @@
             <article class="is-unpaid"><span>Sin pagar</span><strong id="uniform-metric-unpaid">0</strong></article>
           </div>
 
+          <nav class="uniform-mobile-tabs" aria-label="Vistas de uniformes">
+            <button class="is-active" type="button" data-uniform-mobile-view="list" aria-pressed="true">
+              <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260915#shirt"></use></svg>
+              Ver pedidos
+            </button>
+            <button type="button" data-uniform-mobile-view="form" aria-pressed="false">
+              <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#plus"></use></svg>
+              Registrar
+            </button>
+          </nav>
+
           <div class="uniform-layout">
             <form class="uniform-form-card" id="uniform-form" novalidate>
               <input id="uniform-order-id" type="hidden">
@@ -439,7 +450,7 @@
               </div>
               <div class="uniform-list-search">
                 <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#search"></use></svg>
-                <input id="uniform-order-search" type="search" placeholder="Buscar por alumno, DNI o dorsal" autocomplete="off">
+                <input id="uniform-order-search" type="search" placeholder="Alumno, DNI o dorsal" autocomplete="off">
               </div>
               <div class="uniform-filter-block">
                 <span>Estado</span>
@@ -1065,7 +1076,7 @@
   <script src="../js/inscripcion.js?v=20260904"></script>
   <script src="../js/admin-configuracion.js?v=20260915_uniformes"></script>
   <script src="../js/admin-cobranzas.js?v=20260909c"></script>
-  <script src="../js/admin-uniformes.js?v=20260915a"></script>
+  <script src="../js/admin-uniformes.js?v=20260916_mobile"></script>
 </body>
 
 </html>

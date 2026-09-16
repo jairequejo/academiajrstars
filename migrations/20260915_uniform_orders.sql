@@ -1,9 +1,43 @@
 -- Pedidos de uniformes de los alumnos.
--- Ejecutar en Supabase SQL Editor después de 20260905_security_hardening.sql.
--- Es una migración aditiva: no modifica alumnos, pagos ni asistencias.
+-- Ejecutar una sola vez en Supabase SQL Editor.
+-- Es autónoma y aditiva: no modifica alumnos, pagos ni asistencias.
 begin;
 
 create extension if not exists pgcrypto with schema extensions;
+
+-- Los alumnos y entrenadores no usan Supabase Auth en este proyecto.
+-- Los usuarios Auth existentes corresponden al panel administrativo.
+create schema if not exists private;
+
+create table if not exists private.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+insert into private.admin_users (user_id)
+select id
+from auth.users
+on conflict (user_id) do nothing;
+
+create or replace function private.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from private.admin_users au
+    where au.user_id = auth.uid()
+  );
+$$;
+
+revoke all on schema private from public, anon, authenticated;
+revoke all on table private.admin_users from public, anon, authenticated;
+revoke all on function private.is_admin() from public, anon, authenticated;
+grant usage on schema private to authenticated;
+grant execute on function private.is_admin() to authenticated;
 
 create table if not exists public.uniform_orders (
   id uuid primary key default extensions.gen_random_uuid(),
