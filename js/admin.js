@@ -74,6 +74,7 @@ function goTo(page, ev) {
   if (page === 'calendario') loadCalendario();
   if (page === 'entrenadores') loadEntrenadores();
   if (page === 'cobranzas') setTimeout(loadCobranzas, 50);
+  if (page === 'uniformes' && typeof loadUniformes === 'function') setTimeout(loadUniformes, 50);
   if (page === 'configuracion') {
     if (typeof renderAdminNavFields === 'function') renderAdminNavFields();
     if (typeof updateAdminPwaInstallUi === 'function') updateAdminPwaInstallUi();

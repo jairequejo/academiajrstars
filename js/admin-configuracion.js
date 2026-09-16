@@ -13,6 +13,7 @@ const ADMIN_NAV_CATALOG = {
     rendimiento: { label: 'Rendimiento', shortLabel: 'Rendimiento', icon: 'ruler' },
     ranking: { label: 'Ranking', shortLabel: 'Ranking', icon: 'medal' },
     entrenadores: { label: 'Entrenadores', shortLabel: 'Equipo', icon: 'activity' },
+    uniformes: { label: 'Uniformes', shortLabel: 'Uniformes', icon: 'shirt' },
     configuracion: { label: 'Configuración', shortLabel: 'Ajustes', icon: 'settings' }
 };
 
@@ -58,7 +59,7 @@ function getAdminBottomNavSelection() {
 }
 
 function bottomNavIcon(icon) {
-    return `<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260909#${icon}"></use></svg>`;
+    return `<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260915#${icon}"></use></svg>`;
 }
 
 function renderAdminBottomNav() {

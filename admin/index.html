@@ -8,7 +8,8 @@
   <title>JR Stars — Admin Panel</title>
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20260904">
-  <link rel="stylesheet" href="../css/admin.css?v=20260909c">
+  <link rel="stylesheet" href="../css/admin.css?v=20260915_uniformes">
+  <link rel="stylesheet" href="../css/admin-uniformes.css?v=20260915a">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260904">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
   <meta name="theme-color" content="#E30D13">
@@ -69,6 +70,9 @@
       </div>
       <div class="sidebar-item" id="nav-batidos" onclick="goTo('batidos', event)">
         <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#wallet"></use></svg></span> Caja / Pagos
+      </div>
+      <div class="sidebar-item" id="nav-uniformes" onclick="goTo('uniformes', event)">
+        <span class="sidebar-icon"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg?v=20260915#shirt"></use></svg></span> Uniformes
       </div>
 
       <div class="sidebar-section">Métricas</div>
@@ -338,6 +342,129 @@
             <p>Escribe el nombre del alumno para buscarlo</p>
           </div>
         </div>
+      </div>
+
+      <!-- ── UNIFORMES ── -->
+      <div class="page" id="page-uniformes">
+        <section class="uniform-shell" aria-labelledby="uniform-title">
+          <header class="uniform-hero">
+            <div>
+              <span class="uniform-eyebrow">Pedidos de la academia</span>
+              <h1 id="uniform-title">Uniformes</h1>
+              <p>Registra cada pedido, controla la confección y confirma la entrega y el pago.</p>
+            </div>
+            <button class="uniform-new-button" id="uniform-new-button" type="button">
+              <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#plus"></use></svg>
+              Nuevo pedido
+            </button>
+          </header>
+
+          <div class="uniform-metrics" aria-label="Resumen de pedidos de uniformes">
+            <article><span>Por iniciar</span><strong id="uniform-metric-pending">0</strong></article>
+            <article class="is-making"><span>En confección</span><strong id="uniform-metric-making">0</strong></article>
+            <article class="is-delivered"><span>Entregados</span><strong id="uniform-metric-delivered">0</strong></article>
+            <article class="is-unpaid"><span>Sin pagar</span><strong id="uniform-metric-unpaid">0</strong></article>
+          </div>
+
+          <div class="uniform-layout">
+            <form class="uniform-form-card" id="uniform-form" novalidate>
+              <input id="uniform-order-id" type="hidden">
+              <input id="uniform-student-id" type="hidden">
+
+              <div class="uniform-card-heading">
+                <span class="uniform-step-number">1</span>
+                <div><h2 id="uniform-form-title">Nuevo pedido</h2><p>Primero busca y selecciona al alumno.</p></div>
+              </div>
+
+              <label class="uniform-field uniform-field--wide" for="uniform-student-search">
+                <span>Alumno matriculado</span>
+                <div class="uniform-search-box">
+                  <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#search"></use></svg>
+                  <input id="uniform-student-search" type="search" placeholder="Nombre, apellido o DNI" autocomplete="off" aria-controls="uniform-student-results">
+                </div>
+              </label>
+              <div class="uniform-student-results" id="uniform-student-results" aria-live="polite"></div>
+              <div class="uniform-selected-student" id="uniform-selected-student" hidden>
+                <span class="uniform-selected-check"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#check"></use></svg></span>
+                <div><strong id="uniform-selected-name"></strong><small id="uniform-selected-meta"></small></div>
+                <button type="button" id="uniform-change-student">Cambiar</button>
+              </div>
+
+              <div class="uniform-section-title"><span class="uniform-step-number">2</span><div><h3>¿Qué prendas necesita?</h3><p>El precio sugerido se puede modificar.</p></div></div>
+              <div class="uniform-type-grid" role="radiogroup" aria-label="Tipo de uniforme">
+                <button class="uniform-type-option is-selected" type="button" data-uniform-type="completo" data-price="60" role="radio" aria-checked="true"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260915#shirt"></use></svg><strong>Completo</strong><span>Polo + short + medias</span><b>S/ 60</b></button>
+                <button class="uniform-type-option" type="button" data-uniform-type="polo" data-price="40" role="radio" aria-checked="false"><strong>Polo</strong><span>Solo camiseta</span><b>S/ 40</b></button>
+                <button class="uniform-type-option" type="button" data-uniform-type="short" data-price="20" role="radio" aria-checked="false"><strong>Short</strong><span>Solo pantalón corto</span><b>S/ 20</b></button>
+                <button class="uniform-type-option" type="button" data-uniform-type="medias" data-price="10" role="radio" aria-checked="false"><strong>Medias</strong><span>Solo calcetines</span><b>S/ 10</b></button>
+              </div>
+              <input id="uniform-type" type="hidden" value="completo">
+
+              <div class="uniform-fields-row">
+                <label class="uniform-field" for="uniform-dorsal-name"><span>Nombre en el dorsal</span><input id="uniform-dorsal-name" type="text" maxlength="30" placeholder="Ej. YAIR"><small id="uniform-dorsal-name-help">Se imprimirá en el polo.</small></label>
+                <label class="uniform-field" for="uniform-dorsal-number"><span>Número del dorsal</span><input id="uniform-dorsal-number" type="number" min="0" max="99" inputmode="numeric" placeholder="10"><small id="uniform-dorsal-number-help">Número entre 0 y 99.</small></label>
+                <label class="uniform-field uniform-price-field" for="uniform-amount"><span>Precio acordado</span><div><b>S/</b><input id="uniform-amount" type="number" min="0" step="0.50" value="60.00" inputmode="decimal"></div><small>Puedes editar el precio.</small></label>
+              </div>
+
+              <div class="uniform-section-title"><span class="uniform-step-number">3</span><div><h3>Elige los colores</h3><p>Toca la combinación solicitada.</p></div></div>
+              <div class="uniform-color-grid" role="radiogroup" aria-label="Colores del uniforme">
+                <button class="uniform-color-option is-selected" type="button" data-uniform-color="salmon_granate" role="radio" aria-checked="true"><span class="uniform-color-swatch is-salmon"></span><strong>Salmón y granate</strong><small>Modelo salmón</small></button>
+                <button class="uniform-color-option" type="button" data-uniform-color="rojo_azul" role="radio" aria-checked="false"><span class="uniform-color-swatch is-red-blue"></span><strong>Rojo y azul</strong><small>Modelo clásico</small></button>
+              </div>
+              <input id="uniform-color" type="hidden" value="salmon_granate">
+
+              <div class="uniform-section-title"><span class="uniform-step-number">4</span><div><h3>Confirma el pago</h3><p>Puedes cambiarlo después desde el pedido.</p></div></div>
+              <label class="uniform-paid-toggle" for="uniform-is-paid">
+                <input id="uniform-is-paid" type="checkbox">
+                <span class="uniform-paid-icon"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#cash"></use></svg></span>
+                <span><strong id="uniform-paid-label">Pendiente de pago</strong><small id="uniform-paid-help">Todavía no se recibió el dinero.</small></span>
+                <b aria-hidden="true"></b>
+              </label>
+
+              <label class="uniform-field uniform-field--wide" for="uniform-notes"><span>Observación <em>(opcional)</em></span><textarea id="uniform-notes" rows="2" maxlength="300" placeholder="Ej. Entregar antes del campeonato"></textarea></label>
+
+              <div class="uniform-form-actions">
+                <button class="uniform-cancel-button" id="uniform-cancel-edit" type="button" hidden>Cancelar edición</button>
+                <button class="uniform-save-button" id="uniform-save-button" type="submit">
+                  <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#save"></use></svg>
+                  Guardar pedido
+                </button>
+              </div>
+              <p class="uniform-form-error" id="uniform-form-error" role="alert" hidden></p>
+            </form>
+
+            <section class="uniform-orders-panel" aria-labelledby="uniform-orders-title">
+              <div class="uniform-orders-heading">
+                <div><span>Seguimiento</span><h2 id="uniform-orders-title">Pedidos registrados</h2></div>
+                <button id="uniform-refresh" type="button" aria-label="Actualizar pedidos"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#refresh"></use></svg></button>
+              </div>
+              <div class="uniform-list-search">
+                <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#search"></use></svg>
+                <input id="uniform-order-search" type="search" placeholder="Buscar por alumno, DNI o dorsal" autocomplete="off">
+              </div>
+              <div class="uniform-filter-block">
+                <span>Estado</span>
+                <div class="uniform-filter-row" role="group" aria-label="Filtrar por estado">
+                  <button class="is-active" type="button" data-uniform-status-filter="all">Todos</button>
+                  <button type="button" data-uniform-status-filter="pendiente">Pendientes</button>
+                  <button type="button" data-uniform-status-filter="en_confeccion">En confección</button>
+                  <button type="button" data-uniform-status-filter="entregado">Entregados</button>
+                </div>
+              </div>
+              <div class="uniform-filter-block">
+                <span>Pago</span>
+                <div class="uniform-filter-row" role="group" aria-label="Filtrar por pago">
+                  <button class="is-active" type="button" data-uniform-payment-filter="all">Todos</button>
+                  <button type="button" data-uniform-payment-filter="unpaid">Sin pagar</button>
+                  <button type="button" data-uniform-payment-filter="paid">Pagados</button>
+                </div>
+              </div>
+              <p class="uniform-results-count" id="uniform-results-count" role="status"></p>
+              <div class="uniform-orders-list" id="uniform-orders-list" aria-live="polite">
+                <div class="uniform-state">Abre esta sección para cargar los pedidos.</div>
+              </div>
+            </section>
+          </div>
+        </section>
       </div>
 
 
@@ -931,13 +1058,14 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="../js/admin-icons.js?v=20260904"></script>
+  <script src="../js/admin-icons.js?v=20260915_uniformes"></script>
   <script src="../js/admin-sedes.js?v=20260904"></script>
-  <script src="../js/admin.js?v=20260909c"></script>
+  <script src="../js/admin.js?v=20260915_uniformes"></script>
   <script src="../js/alumno-ficha.js?v=20260904"></script>
   <script src="../js/inscripcion.js?v=20260904"></script>
-  <script src="../js/admin-configuracion.js?v=20260909c"></script>
+  <script src="../js/admin-configuracion.js?v=20260915_uniformes"></script>
   <script src="../js/admin-cobranzas.js?v=20260909c"></script>
+  <script src="../js/admin-uniformes.js?v=20260915a"></script>
 </body>
 
 </html>

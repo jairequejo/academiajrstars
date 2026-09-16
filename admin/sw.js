@@ -1,4 +1,4 @@
-const ADMIN_CACHE = 'jr-admin-shell-v3';
+const ADMIN_CACHE = 'jr-admin-shell-v4';
 const ADMIN_SHELL = [
   './',
   './index.html',

@@ -521,6 +521,7 @@ function renderCard(d) {
     if (!wrap) return;
 
     const fullName = String(d.full_name || 'Jugador JR Stars').trim();
+    window._currentPlayerShareName = fullName;
     const name = escapePortalHtml(fullName);
     const firstName = escapePortalHtml(fullName.split(/\s+/)[0] || 'Jugador');
     const season = new Date().getFullYear();
@@ -556,6 +557,13 @@ function renderCard(d) {
       .filter(Boolean)
       .map(i => `<span class="pc-chip">${escapePortalHtml(i)}</span>`)
       .join('');
+    const nameLengthClass = fullName.length > 30
+      ? ' is-xlong'
+      : fullName.length > 23
+        ? ' is-long'
+        : fullName.length > 15
+          ? ' is-medium'
+          : '';
 
     const playerPanel = `
       <div class="pc-hero">
@@ -571,7 +579,7 @@ function renderCard(d) {
             alt="Foto de ${name}"
             onerror="this.src='../img/escudo.png'; this.style.objectFit='contain'; this.style.padding='8px';">
           <div class="pc-identity">
-            <h2 class="pc-name">${name}</h2>
+            <h2 class="pc-name${nameLengthClass}">${name}</h2>
             <div class="pc-meta">${metaChips}</div>
           </div>
           <div class="pc-streak">
@@ -658,14 +666,18 @@ function renderCard(d) {
           
           <!-- FOOTER PUBLICITARIO (Solo visible al compartir) -->
           <div class="pc-export-footer">
-            <img src="../img/escudo.png" alt="JR Stars Logo">
-            <div class="pc-export-contact">
-              <strong>ACADEMIA JR STARS</strong>
-              <span>🌐 academiajrstars.com</span>
-              <span>📱 WhatsApp: 955 515 693</span>
-              <span>📷 @academiajrstars</span>
+            <div class="pc-export-brand">
+              <img src="../img/escudo.png" alt="Escudo de la Academia JR Stars">
+              <div>
+                <span>ACADEMIA DE FÚTBOL</span>
+                <strong>JR STARS</strong>
+                <small>Disciplina que se convierte en progreso.</small>
+              </div>
             </div>
-            <div class="pc-export-cta">¡ÚNETE A<br>LA ÉLITE!</div>
+            <div class="pc-export-contact">
+              <strong>academiajrstars.com</strong>
+              <span>955 515 693 · @academiajrstars</span>
+            </div>
           </div>
 
           <button onclick="compartirProgreso()" class="pc-share" id="btn-compartir">
@@ -728,72 +740,285 @@ async function loadRanking() {
     }
 }
 
+function getShareProgressOverlay() {
+    let overlay = document.getElementById('share-progress-overlay');
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    overlay.id = 'share-progress-overlay';
+    overlay.className = 'share-progress-overlay';
+    overlay.hidden = true;
+    overlay.innerHTML = `
+      <section class="share-progress-card" role="status" aria-live="polite">
+        <img src="../img/escudo.png" alt="" aria-hidden="true">
+        <div class="share-progress-copy">
+          <span>JR STARS · PROGRESO</span>
+          <strong id="share-progress-label">Preparando imagen…</strong>
+          <div class="share-progress-track" role="progressbar" aria-label="Generando imagen" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <i id="share-progress-bar"></i>
+          </div>
+          <small id="share-progress-percent">0%</small>
+          <div class="share-ready-actions" id="share-ready-actions" hidden>
+            <button type="button" id="share-now-button">COMPARTIR AHORA</button>
+            <button type="button" id="share-cancel-button">Cancelar</button>
+          </div>
+        </div>
+      </section>`;
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+function updateShareProgress(percent, label) {
+    const overlay = getShareProgressOverlay();
+    const value = Math.max(0, Math.min(100, Number(percent) || 0));
+    const bar = overlay.querySelector('#share-progress-bar');
+    const progress = overlay.querySelector('[role="progressbar"]');
+    const text = overlay.querySelector('#share-progress-label');
+    const counter = overlay.querySelector('#share-progress-percent');
+    if (bar) bar.style.width = `${value}%`;
+    if (progress) progress.setAttribute('aria-valuenow', String(value));
+    if (text && label) text.textContent = label;
+    if (counter) counter.textContent = `${Math.round(value)}%`;
+}
+
+function showShareProgress() {
+    const overlay = getShareProgressOverlay();
+    const actions = overlay.querySelector('#share-ready-actions');
+    if (actions) actions.hidden = true;
+    window.clearTimeout(window._shareProgressHideTimer);
+    overlay.hidden = false;
+    requestAnimationFrame(() => overlay.classList.add('is-visible'));
+}
+
+function hideShareProgress() {
+    const overlay = document.getElementById('share-progress-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('is-visible');
+    window.clearTimeout(window._shareProgressHideTimer);
+    window._shareProgressHideTimer = window.setTimeout(() => { overlay.hidden = true; }, 180);
+}
+
+function waitForShareImage(image) {
+    if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+    return new Promise(resolve => {
+        let settled = false;
+        const finish = () => {
+            if (settled) return;
+            settled = true;
+            image.removeEventListener('load', finish);
+            image.removeEventListener('error', finish);
+            resolve();
+        };
+        image.addEventListener('load', finish, { once: true });
+        image.addEventListener('error', finish, { once: true });
+        window.setTimeout(finish, 6000);
+    });
+}
+
+async function prepareShareAssets(wrap) {
+    updateShareProgress(18, 'Cargando tipografías…');
+    if (document.fonts && document.fonts.ready) {
+        await Promise.race([
+            document.fonts.ready,
+            new Promise(resolve => window.setTimeout(resolve, 5000))
+        ]);
+    }
+
+    updateShareProgress(38, 'Cargando foto y escudo…');
+    const images = Array.from(wrap.querySelectorAll('img'));
+    await Promise.all(images.map(waitForShareImage));
+
+    updateShareProgress(58, 'Acomodando métricas…');
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+
+function canvasToPngBlob(canvas) {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob(blob => {
+            if (blob) resolve(blob);
+            else reject(new Error('No se pudo generar el archivo PNG'));
+        }, 'image/png');
+    });
+}
+
+function getShareFileName() {
+    const player = String(window._currentPlayerShareName || 'jugador')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 48);
+    return `jr-stars-progreso-${player || 'jugador'}.png`;
+}
+
+function downloadShareImage(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function showShareResult(message, isError = false) {
+    let toast = document.getElementById('share-result-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'share-result-toast';
+        toast.className = 'share-result-toast';
+        toast.setAttribute('role', 'status');
+        toast.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toast);
+    }
+    toast.classList.toggle('is-error', isError);
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+    window.clearTimeout(window._shareResultTimer);
+    window._shareResultTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 5000);
+}
+
+function isMobileShareDevice() {
+    if (navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean') {
+        return navigator.userAgentData.mobile;
+    }
+    const userAgent = navigator.userAgent || '';
+    return /Android|iPhone|iPod|IEMobile|Opera Mini/i.test(userAgent)
+        || (/Macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1);
+}
+
+function canShareProgressFile(file) {
+    try {
+        return isMobileShareDevice()
+            && typeof navigator.share === 'function'
+            && typeof navigator.canShare === 'function'
+            && navigator.canShare({ files: [file] });
+    } catch {
+        return false;
+    }
+}
+
+function shareProgressFileFromUserTap(file) {
+    const overlay = getShareProgressOverlay();
+    const actions = overlay.querySelector('#share-ready-actions');
+    const shareButton = overlay.querySelector('#share-now-button');
+    const cancelButton = overlay.querySelector('#share-cancel-button');
+    if (!actions || !shareButton || !cancelButton) {
+        return Promise.resolve({ status: 'failed', error: new Error('Controles para compartir no disponibles') });
+    }
+
+    actions.hidden = false;
+    updateShareProgress(100, 'Imagen lista. Elige dónde publicarla.');
+
+    return new Promise(resolve => {
+        const finish = result => {
+            shareButton.removeEventListener('click', onShare);
+            cancelButton.removeEventListener('click', onCancel);
+            shareButton.disabled = false;
+            resolve(result);
+        };
+        const onCancel = () => finish({ status: 'cancelled' });
+        const onShare = async () => {
+            shareButton.disabled = true;
+            shareButton.textContent = 'ABRIENDO APLICACIONES…';
+            try {
+                await navigator.share({
+                    title: 'Progreso en Academia JR Stars',
+                    text: '⚽ Mira mi progreso en la Academia JR Stars. Disciplina, constancia y evolución en cada entrenamiento. 🔥🏆',
+                    files: [file]
+                });
+                finish({ status: 'shared' });
+            } catch (error) {
+                finish({ status: error && error.name === 'AbortError' ? 'cancelled' : 'failed', error });
+            } finally {
+                shareButton.textContent = 'COMPARTIR AHORA';
+            }
+        };
+
+        shareButton.addEventListener('click', onShare);
+        cancelButton.addEventListener('click', onCancel);
+        shareButton.focus({ preventScroll: true });
+    });
+}
+
 async function compartirProgreso() {
     const btnText = document.getElementById('share-text');
     const btnIcon = document.getElementById('share-icon');
-    if (!btnText) return;
-    
-    // Feedback visual
+    const button = document.getElementById('btn-compartir');
+    if (!btnText || window._sharingPlayerProgress) return;
+
     const originalText = btnText.textContent;
-    const originalIcon = btnIcon.textContent;
-    btnText.textContent = 'GENERANDO IMAGEN...';
-    btnIcon.textContent = '⏳';
-    
+    const originalIcon = btnIcon ? btnIcon.textContent : '';
+    window._sharingPlayerProgress = true;
+    btnText.textContent = 'PREPARANDO IMAGEN…';
+    if (btnIcon) btnIcon.textContent = '⏳';
+    if (button) {
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+    }
+    showShareProgress();
+    updateShareProgress(6, 'Preparando la ficha…');
+
     try {
         const wrap = document.getElementById('card-wrap');
         if (!wrap) throw new Error('Tarjeta no encontrada');
-        
-        // Ocultar botón durante la captura
-        const btnCompartir = document.getElementById('btn-compartir');
-        if (btnCompartir) btnCompartir.style.visibility = 'hidden';
-        
+        if (typeof html2canvas !== 'function') throw new Error('Generador de imágenes no disponible');
+
+        await prepareShareAssets(wrap);
+        updateShareProgress(68, 'Creando imagen para redes…');
+
         const canvas = await html2canvas(wrap, {
-            scale: 2,
+            scale: 1.2,
+            width: 900,
+            height: 900,
+            windowWidth: 1100,
+            windowHeight: 1100,
             useCORS: true,
+            allowTaint: false,
+            imageTimeout: 10000,
+            logging: false,
             backgroundColor: '#050505',
-            onclone: (clonedDoc) => {
-                clonedDoc.getElementById('card-wrap').classList.add('export-mode');
+            onclone: clonedDoc => {
+                const clonedWrap = clonedDoc.getElementById('card-wrap');
+                if (!clonedWrap) return;
+                clonedWrap.classList.add('export-mode');
+                const clonedButton = clonedWrap.querySelector('#btn-compartir');
+                if (clonedButton) clonedButton.remove();
             }
         });
-        
-        if (btnCompartir) btnCompartir.style.visibility = 'visible';
-        
-        canvas.toBlob(async (blob) => {
-            if (!blob) throw new Error('No se pudo generar la imagen');
-            const file = new File([blob], 'jrstars_progreso.png', { type: 'image/png' });
-            
-            // Si soporta Web Share API con archivos (Mobile nativo Android/iOS)
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        title: 'Perfil de Alto Rendimiento - JR Stars',
-                        text: '¡Orgulloso del progreso de mi campeón! ⚽🔥 En la Academia JR Stars no improvisan: medimos su disciplina, físico y racha de entrenamientos con tecnología. ¡Miren estos números! 💪🏆',
-                        files: [file]
-                    });
-                } catch (err) {
-                    console.log('Compartir cancelado o fallido:', err);
-                }
-            } else {
-                // Fallback para PC / Browsers sin soporte de Share: Descargar la imagen
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'jrstars_progreso.png';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                alert('La imagen ha sido descargada. Puedes compartirla manualmente en WhatsApp o Facebook.');
+
+        updateShareProgress(90, 'Empaquetando archivo PNG…');
+        const blob = await canvasToPngBlob(canvas);
+        const fileName = getShareFileName();
+        const file = new File([blob], fileName, { type: 'image/png' });
+        updateShareProgress(100, '¡Imagen lista para compartir!');
+        const canShareFile = canShareProgressFile(file);
+
+        if (canShareFile) {
+            const shareResult = await shareProgressFileFromUserTap(file);
+            if (shareResult.status === 'failed') {
+                console.warn('No se pudo abrir el menú para compartir; se descargará la imagen.', shareResult.error);
+                downloadShareImage(blob, fileName);
+                showShareResult('La imagen se descargó. Ya puedes publicarla en WhatsApp, Instagram o Facebook.');
             }
-        }, 'image/png');
-        
-    } catch (e) {
-        console.error(e);
-        alert('Hubo un error al generar la imagen. Intenta de nuevo.');
-        const btnCompartir = document.getElementById('btn-compartir');
-        if (btnCompartir) btnCompartir.style.visibility = 'visible';
+        } else {
+            updateShareProgress(100, 'Descargando imagen…');
+            downloadShareImage(blob, fileName);
+            showShareResult('La imagen se descargó. Ya puedes publicarla en WhatsApp, Instagram o Facebook.');
+        }
+    } catch (error) {
+        console.error('Error al compartir progreso:', error);
+        showShareResult('No pudimos crear la imagen. Revisa tu conexión e inténtalo nuevamente.', true);
     } finally {
+        hideShareProgress();
+        window._sharingPlayerProgress = false;
         btnText.textContent = originalText;
-        btnIcon.textContent = originalIcon;
+        if (btnIcon) btnIcon.textContent = originalIcon;
+        if (button) {
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+        }
     }
 }
