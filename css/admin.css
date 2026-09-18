@@ -120,6 +120,7 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
 .stat-box-num.red { color: var(--color-red); }
 .stat-box-label { margin-top: 0.75rem; font-size: 0.85rem; font-weight: 800; color: #333; }
 .input-jr, .select-jr { width: 100%; min-width: 0; font-family: var(--font-body); }
+.admin-notes-input { min-height: 88px; resize: vertical; line-height: 1.45; }
 .input-jr:focus, .select-jr:focus { border-color: #c96969 !important; outline: 2px solid #da12121a; outline-offset: 2px; }
 .btn:focus-visible, .filtro-chip:focus-visible, .month-btn:focus-visible { outline: 2px solid var(--color-red); outline-offset: 3px; }
 .form-group { min-width: 0; }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jr-entrenador-v8';
+const CACHE_NAME = 'jr-entrenador-v9';
 const assetUrl = path => new URL(path, self.location.href).href;
 const APP_SHELL = [
   './',
@@ -12,7 +12,7 @@ const APP_SHELL = [
   './icons/favicon-48.png',
   '../css/entrenador.css?v=20260905',
   '../css/login.css',
-  '../js/entrenador.js?v=20260905',
+  '../js/entrenador.js?v=20260916_alumnos',
   '../js/login.js?v=20260905',
   '../js/supabaseClient.js',
   '../js/sync-worker.js',

@@ -65,7 +65,7 @@ function renderUniformStudentResults(query = '') {
     const activeStudents = uniformStudents.filter(student => student.is_active !== false);
     const matches = activeStudents.filter(student => {
         if (!normalized) return true;
-        return normalizeAdminSearch(`${student.full_name || ''} ${student.dni || ''}`).includes(normalized);
+        return normalizeAdminSearch(`${student.full_name || ''} ${student.first_names || ''} ${student.last_names || ''} ${student.dni || ''} ${student.codigo_legacy || ''}`).includes(normalized);
     }).slice(0, 8);
 
     if (!activeStudents.length) {
@@ -73,14 +73,14 @@ function renderUniformStudentResults(query = '') {
         return;
     }
     if (!matches.length) {
-        results.innerHTML = '<p class="uniform-inline-state is-error">No encontramos ese nombre o DNI.</p>';
+        results.innerHTML = '<p class="uniform-inline-state is-error">No encontramos ese nombre, código o DNI.</p>';
         return;
     }
 
     results.innerHTML = matches.map(student => `
       <button class="uniform-student-option" type="button" data-uniform-student="${escapeAdminHtml(student.id)}">
         <span class="uniform-student-avatar">${escapeAdminHtml((student.full_name || '?').trim().charAt(0).toUpperCase())}</span>
-        <span><strong>${escapeAdminHtml(student.full_name || 'Alumno sin nombre')}</strong><small>DNI ${escapeAdminHtml(student.dni || 'no registrado')}${student.categoria ? ` · Cat. ${escapeAdminHtml(student.categoria)}` : ''}</small></span>
+        <span><strong>${escapeAdminHtml(student.full_name || 'Alumno sin nombre')}</strong><small>${escapeAdminHtml(student.dni ? `DNI ${student.dni}` : student.codigo_legacy ? `Código ${student.codigo_legacy}` : 'Sin DNI ni código')}${student.categoria ? ` · Cat. ${escapeAdminHtml(student.categoria)}` : ''}</small></span>
         <b>Elegir</b>
       </button>`).join('');
 }
@@ -95,7 +95,7 @@ function selectUniformStudent(studentId, keepDorsal = false) {
     document.getElementById('uniform-student-results').innerHTML = '';
     document.getElementById('uniform-selected-name').textContent = student.full_name || 'Alumno sin nombre';
     document.getElementById('uniform-selected-meta').textContent = [
-        student.dni ? `DNI ${student.dni}` : 'DNI no registrado',
+        student.dni ? `DNI ${student.dni}` : student.codigo_legacy ? `Código ${student.codigo_legacy}` : 'Sin DNI ni código',
         student.categoria ? `Categoría ${student.categoria}` : '',
         student.sede || ''
     ].filter(Boolean).join(' · ');
@@ -298,7 +298,7 @@ async function loadUniformes() {
 
     try {
         const [studentsResult, ordersResult] = await Promise.all([
-            window.supabaseClient.from('students').select('id, full_name, dni, categoria, sede, is_active').order('full_name'),
+            window.supabaseClient.from('students').select('id, full_name, first_names, last_names, dni, codigo_legacy, categoria, sede, is_active').order('full_name'),
             window.supabaseClient.from('uniform_orders').select('*').order('created_at', { ascending: false })
         ]);
         if (studentsResult.error) throw studentsResult.error;

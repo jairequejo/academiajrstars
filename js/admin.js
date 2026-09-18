@@ -392,7 +392,7 @@ function aplicarFiltros() {
 
   const filtrados = alumnosData.filter(a => {
     // Filtro búsqueda de texto
-    const searchable = normalizeAdminSearch(`${a.full_name || ''} ${a.dni || ''}`);
+    const searchable = normalizeAdminSearch(`${a.full_name || ''} ${a.first_names || ''} ${a.last_names || ''} ${a.dni || ''} ${a.codigo_legacy || ''}`);
     if (busqueda && !searchable.includes(busqueda)) return false;
     // Filtro horario
     if (horario && (a.horario || '').toLowerCase() !== horario.toLowerCase()) return false;
@@ -497,12 +497,12 @@ function renderAlumnos(data) {
         <div class="alumno-card-header">
           <div>
             <div class="alumno-card-name">${a.full_name}</div>
-            <div style="font-size:.72rem;color:var(--gray);font-family:var(--font-mono)">DNI: ${a.dni || '—'}</div>
+            <div style="font-size:.72rem;color:var(--gray);font-family:var(--font-mono)">${a.dni ? `DNI: ${a.dni}` : a.codigo_legacy ? `Código: ${a.codigo_legacy}` : 'Sin DNI ni código'}</div>
           </div>
           <span style="color:${estadoColor};font-weight:bold;font-size:.8rem;font-family:var(--font-cond)">${estadoTexto}</span>
         </div>
         <div class="alumno-card-row">
-          <span class="badge badge-gold">${a.horario || 'LMV'}</span>
+          <span class="badge badge-gold">${a.horario || 'Por asignar'}</span>
           <span style="font-family:var(--font-mono);font-size:.8rem;color:var(--gray)">Vence: ${vencimiento}</span>
         </div>
         <div class="alumno-card-actions alumno-actions">${accionesAlumno(a)}</div>
@@ -527,10 +527,10 @@ function renderAlumnos(data) {
       }
       return `
           <tr style="opacity:${a.is_active ? '1' : '0.5'}">
-            <td><strong>${a.full_name}</strong><br><span style="font-size:.75rem;color:var(--gray)">DNI: ${a.dni || '—'}</span></td>
+            <td><strong>${a.full_name}</strong><br><span style="font-size:.75rem;color:var(--gray)">${a.dni ? `DNI: ${a.dni}` : a.codigo_legacy ? `Código: ${a.codigo_legacy}` : 'Sin DNI ni código'}</span></td>
             <td><span style="color:${estadoColor};font-weight:bold;font-size:.85rem">${estadoTexto}</span></td>
             <td style="font-family:var(--font-mono);font-size:.85rem">${vencimiento}</td>
-            <td><span class="badge badge-gold">${a.horario || 'LMV'}</span></td>
+            <td><span class="badge badge-gold">${a.horario || 'Por asignar'}</span></td>
             <td><div class="alumno-actions">${accionesAlumno(a)}</div></td>
           </tr>`;
     }).join('')}
@@ -541,11 +541,15 @@ function renderAlumnos(data) {
 
 
 async function crearAlumno() {
-  const nombre = document.getElementById('a-nombre').value.trim();
+  const firstNames = document.getElementById('a-nombres').value.trim();
+  const lastNames = document.getElementById('a-apellidos').value.trim();
+  const nombre = [firstNames, lastNames].filter(Boolean).join(' ');
   const dni = document.getElementById('a-dni').value.trim();
   const fechaNac = document.getElementById('a-fecha-nacimiento')?.value || null;
   const apoderado = document.getElementById('a-apoderado').value.trim();
   const telefono = document.getElementById('a-telefono').value.trim();
+  const telefonoAlternativo = document.getElementById('a-telefono-alternativo').value.trim();
+  const observacion = document.getElementById('a-observacion').value.trim();
   const sede = document.getElementById('a-sede')?.value || null;
   const grupo = document.getElementById('a-grupo')?.value || null;
   const categoria = document.getElementById('a-categoria')?.value || null;
@@ -555,8 +559,8 @@ async function crearAlumno() {
   const horario = document.getElementById('a-horario').value;
   const turno = document.getElementById('a-turno')?.value || null;
 
-  if (!nombre) {
-    showToast('El nombre es obligatorio', 'error');
+  if (!firstNames) {
+    showToast('Los nombres son obligatorios', 'error');
     return false;
   }
 
@@ -565,10 +569,12 @@ async function crearAlumno() {
   const fecha_vencimiento_str = hoy.toISOString().split('T')[0];
 
   const insert_data = {
+      first_names: firstNames,
+      last_names: lastNames || null,
       full_name: nombre,
       dni: dni || null,
       fecha_nacimiento: fechaNac || null,
-      horario: horario,
+      horario: horario || null,
       sede: sede || null,
       turno: turno || null,
       grupo: grupo || null,
@@ -578,7 +584,10 @@ async function crearAlumno() {
       valid_until: fecha_vencimiento_str,
       parent_name: apoderado || null,
       parent_phone: telefono || null,
-      tarifa_mensual: pagoMes
+      parent_phone_secondary: telefonoAlternativo || null,
+      notes: observacion || null,
+      tarifa_mensual: pagoMes,
+      enrollment_amount: pagoMat || null
   };
 
   try {
@@ -610,16 +619,19 @@ async function crearAlumno() {
           if (pagoErr) throw pagoErr;
       }
 
-      document.getElementById('a-nombre').value = '';
+      document.getElementById('a-nombres').value = '';
+      document.getElementById('a-apellidos').value = '';
       document.getElementById('a-dni').value = '';
       document.getElementById('a-fecha-nacimiento').value = '';
       document.getElementById('a-apoderado').value = '';
+      document.getElementById('a-observacion').value = '';
   } catch (err) {
       console.error(err);
       showToast(`Error: ${err.message || 'Error de conexión'}`, 'error');
       return false;
   }
   document.getElementById('a-telefono').value = '';
+  document.getElementById('a-telefono-alternativo').value = '';
   document.getElementById('a-sede').value = '';
   document.getElementById('a-grupo').value = '';
   document.getElementById('a-categoria').value = '';
@@ -669,20 +681,24 @@ function abrirModalEdicion(student_id) {
 
   // Rellenar campos
   document.getElementById('edit-id').value = a.id;
-  document.getElementById('edit-full-name').value = a.full_name || '';
+  document.getElementById('edit-first-names').value = a.first_names || (!a.last_names ? a.full_name : '') || '';
+  document.getElementById('edit-last-names').value = a.last_names || '';
   document.getElementById('edit-dni').value = a.dni || '';
   document.getElementById('edit-fecha-nacimiento').value = a.fecha_nacimiento || '';
   document.getElementById('edit-parent-name').value = a.parent_name || '';
   document.getElementById('edit-parent-phone').value = a.parent_phone || '';
+  document.getElementById('edit-parent-phone-secondary').value = a.parent_phone_secondary || '';
+  document.getElementById('edit-notes').value = a.notes || '';
   window.adminSedes.setValue('edit-sede', a.sede || '');
   document.getElementById('edit-turno').value = a.turno || '';
-  document.getElementById('edit-horario').value = a.horario || 'LMV';
+  document.getElementById('edit-horario').value = a.horario || '';
   document.getElementById('edit-grupo').value = a.grupo || '';
   document.getElementById('edit-categoria').value = a.categoria || '';
   // tarifa_mensual: '' vacío → null (reset a default), número → valor (0 = becado)
   const tarifaRaw = a.tarifa_mensual;
   document.getElementById('edit-tarifa').value = tarifaRaw !== null && tarifaRaw !== undefined ? tarifaRaw : '';
   document.getElementById('edit-codigo-legacy').value = a.codigo_legacy || '';
+  document.getElementById('edit-enrollment-amount').value = a.enrollment_amount ?? '';
 
   window.adminAlumnoUI.actualizarEstado(a);
   document.getElementById('modal-editar-alumno').classList.remove('hidden');
@@ -713,47 +729,37 @@ async function guardarEdicionAlumno(event) {
     return el ? el.value.trim() : null;
   };
 
-  const payload = {};
-  const fullName = val('edit-full-name');
-  if (fullName) payload.full_name = fullName;
+  const firstNames = val('edit-first-names');
+  const lastNames = val('edit-last-names');
+  if (!firstNames) {
+    showToast('Los nombres son obligatorios', 'error');
+    document.getElementById('edit-first-names').focus();
+    return;
+  }
 
-  const dni = val('edit-dni');
-  if (dni) payload.dni = dni;
-
-  const fechaNac = val('edit-fecha-nacimiento');
-  if (fechaNac) payload.fecha_nacimiento = fechaNac;
-
-  const parentName = val('edit-parent-name');
-  if (parentName) payload.parent_name = parentName;
-
-  const parentPhone = val('edit-parent-phone');
-  if (parentPhone) payload.parent_phone = parentPhone;
-
-  const sede = val('edit-sede');
-  if (sede) payload.sede = sede;
-
-  const turno = document.getElementById('edit-turno').value;
-  if (turno) payload.turno = turno;
-
-  const horario = document.getElementById('edit-horario').value;
-  if (horario) payload.horario = horario;
-
-  const grupo = val('edit-grupo');
-  if (grupo) payload.grupo = grupo;
-
-  const categoria = val('edit-categoria');
-  if (categoria) payload.categoria = categoria;
+  const payload = {
+    first_names: firstNames,
+    last_names: lastNames || null,
+    full_name: [firstNames, lastNames].filter(Boolean).join(' '),
+    dni: val('edit-dni') || null,
+    fecha_nacimiento: val('edit-fecha-nacimiento') || null,
+    parent_name: val('edit-parent-name') || null,
+    parent_phone: val('edit-parent-phone') || null,
+    parent_phone_secondary: val('edit-parent-phone-secondary') || null,
+    notes: val('edit-notes') || null,
+    sede: val('edit-sede') || null,
+    turno: document.getElementById('edit-turno').value || null,
+    horario: document.getElementById('edit-horario').value || null,
+    grupo: val('edit-grupo') || null,
+    categoria: val('edit-categoria') || null
+  };
 
   const tarifaInput = document.getElementById('edit-tarifa').value;
   payload.tarifa_mensual = tarifaInput === '' ? null : parseFloat(tarifaInput);
 
-  const codigoLegacy = val('edit-codigo-legacy');
-  if (codigoLegacy) payload.codigo_legacy = codigoLegacy;
-
-  if (!Object.keys(payload).length) {
-    showToast('No hay cambios para guardar', 'error');
-    return;
-  }
+  payload.codigo_legacy = val('edit-codigo-legacy') || null;
+  const enrollmentInput = document.getElementById('edit-enrollment-amount').value;
+  payload.enrollment_amount = enrollmentInput === '' ? null : parseFloat(enrollmentInput);
 
   try {
     const { error } = await window.supabaseClient.from('students').update(payload).eq('id', id);
@@ -837,7 +843,7 @@ function aplicarFiltrosPagos() {
 
   let lista = todosPagosData.filter(a => {
     // Búsqueda flexible por nombre o DNI.
-    const searchable = normalizeAdminSearch(`${a.full_name || ''} ${a.dni || ''}`);
+    const searchable = normalizeAdminSearch(`${a.full_name || ''} ${a.first_names || ''} ${a.last_names || ''} ${a.dni || ''} ${a.codigo_legacy || ''}`);
     if (q && !searchable.includes(q)) return false;
     // Filtro por chip
     if (chipActivo === 'lmv') return a.horario === 'LMV';
@@ -1209,7 +1215,7 @@ async function loadCalendario() {
     const last = `${calYear}-${mm}-${dd}T23:59:59`;
 
     const [studRes, rangeRes] = await Promise.all([
-      window.supabaseClient.from('students').select('id, full_name, dni, horario, turno, sede').eq('is_active', true).order('full_name'),
+      window.supabaseClient.from('students').select('id, full_name, first_names, last_names, dni, codigo_legacy, horario, turno, sede').eq('is_active', true).order('full_name'),
       window.supabaseClient.from('attendance').select('id, student_id, created_at').gte('created_at', first).lte('created_at', last)
     ]);
 
@@ -1249,7 +1255,7 @@ function renderCalendario() {
   const searchFilter = normalizeAdminSearch(document.getElementById('cal-search')?.value);
 
   const students = _calStudents.filter(s => {
-    const matchSearch = normalizeAdminSearch(`${s.full_name || ''} ${s.dni || ''}`).includes(searchFilter);
+    const matchSearch = normalizeAdminSearch(`${s.full_name || ''} ${s.first_names || ''} ${s.last_names || ''} ${s.dni || ''} ${s.codigo_legacy || ''}`).includes(searchFilter);
     const matchTurno = !turnoFilter || (s.turno || '').toLowerCase() === turnoFilter.toLowerCase();
     const matchSede = !sedeFilter || (s.sede || '').toLowerCase() === sedeFilter.toLowerCase();
     return matchSearch && matchTurno && matchSede;
@@ -1373,7 +1379,7 @@ async function loadBioStudents(refresh = false) {
   if (_bioStudents.length && !refresh) return _bioStudents;
   const { data, error } = await window.supabaseClient
     .from('students')
-    .select('id, full_name, dni, sede, horario')
+    .select('id, full_name, first_names, last_names, dni, codigo_legacy, sede, horario')
     .eq('is_active', true)
     .order('full_name');
   if (error) throw error;
@@ -1387,7 +1393,7 @@ function renderBioStudents(query = '') {
   const normalized = normalizeAdminSearch(query);
   const hits = _bioStudents.filter(student => {
     if (!normalized) return true;
-    return normalizeAdminSearch(`${student.full_name || ''} ${student.dni || ''}`).includes(normalized);
+    return normalizeAdminSearch(`${student.full_name || ''} ${student.first_names || ''} ${student.last_names || ''} ${student.dni || ''} ${student.codigo_legacy || ''}`).includes(normalized);
   }).slice(0, 12);
 
   if (!hits.length) {

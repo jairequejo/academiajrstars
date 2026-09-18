@@ -539,7 +539,7 @@ async function loadAsistencia() {
 
         const [stRes, attRes] = await Promise.all([
             window.supabaseClient.from('students')
-                .select('id, full_name, dni, horario, valid_until, sede')
+                .select('id, full_name, first_names, last_names, dni, codigo_legacy, horario, turno, grupo, valid_until, sede')
                 .eq('is_active', true)
                 .order('full_name'),
             window.supabaseClient.from('attendance')
@@ -663,7 +663,7 @@ function renderAsistencia() {
         if (qSede && (a.sede || '').toLowerCase() !== qSede.toLowerCase()) return false;
         if (qGrupo && (a.grupo || '').toLowerCase() !== qGrupo.toLowerCase()) return false;
         if (qTurno && (a.turno || '').toLowerCase() !== qTurno.toLowerCase()) return false;
-        if (qNombre && !normalizeCoachSearch(`${a.full_name || ''} ${a.dni || ''}`).includes(qNombre)) return false;
+        if (qNombre && !normalizeCoachSearch(`${a.full_name || ''} ${a.first_names || ''} ${a.last_names || ''} ${a.dni || ''} ${a.codigo_legacy || ''}`).includes(qNombre)) return false;
 
         return true;
     });
@@ -677,7 +677,7 @@ function renderAsistencia() {
         if (qSede && (a.sede || '').toLowerCase() !== qSede.toLowerCase()) return false;
         if (qGrupo && (a.grupo || '').toLowerCase() !== qGrupo.toLowerCase()) return false;
         if (qTurno && (a.turno || '').toLowerCase() !== qTurno.toLowerCase()) return false;
-        if (qNombre && !normalizeCoachSearch(`${a.full_name || ''} ${a.dni || ''}`).includes(qNombre)) return false;
+        if (qNombre && !normalizeCoachSearch(`${a.full_name || ''} ${a.first_names || ''} ${a.last_names || ''} ${a.dni || ''} ${a.codigo_legacy || ''}`).includes(qNombre)) return false;
         return true;
     });
 

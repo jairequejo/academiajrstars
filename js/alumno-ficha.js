@@ -96,8 +96,8 @@
       <section class="ficha-section ficha-chart"><h3>${adminIcon('chart')} Asistencia · últimos 6 meses</h3><div id="ficha-attendance" aria-live="polite"><p class="ficha-message">Cargando asistencia…</p></div></section>
       <div class="ficha-grid">
         ${details('Entrenamiento', 'ball', [['Categoría', a.categoria], ['Sede', a.sede], ['Horario', ({ LMV: 'Lunes, miércoles y viernes', MJS: 'Martes, jueves y sábado' })[a.horario] || a.horario], ['Turno', a.turno], ['Grupo', a.grupo], ['Inscrito desde', dateLabel(a.created_at)]])}
-        ${details('Datos y contacto', 'user', [['DNI', a.dni], ['Fecha de nacimiento', dateLabel(a.fecha_nacimiento)], ['Edad', ageLabel(a.fecha_nacimiento)], ['Apoderado', a.parent_name], ['Teléfono', a.parent_phone], ['Código de alumno', a.codigo_legacy]])}
-        ${details('Mensualidad y créditos', 'wallet', [['Estado del pago', paymentStatus], ['Vencimiento', dateLabel(a.valid_until)], ['Tarifa mensual', fee], ['Créditos de batidos', a.batido_credits ?? 0]])}
+        ${details('Datos y contacto', 'user', [['Nombres', a.first_names], ['Apellidos', a.last_names], ['DNI', a.dni], ['Fecha de nacimiento', dateLabel(a.fecha_nacimiento)], ['Edad', ageLabel(a.fecha_nacimiento)], ['Apoderado', a.parent_name], ['Teléfono', a.parent_phone], ['Teléfono alternativo', a.parent_phone_secondary], ['Código de alumno', a.codigo_legacy], ['Observación', a.notes]])}
+        ${details('Mensualidad y créditos', 'wallet', [['Estado del pago', paymentStatus], ['Vencimiento', dateLabel(a.valid_until)], ['Tarifa mensual', fee], ['Matrícula', a.enrollment_amount == null ? null : `S/ ${Number(a.enrollment_amount).toFixed(2)}`], ['Créditos de batidos', a.batido_credits ?? 0]])}
       </div>
       <section class="ficha-section ficha-qr" id="ficha-qr-panel" hidden><h3>${adminIcon('qr')} Credencial QR</h3><p id="ficha-qr-message" class="ficha-message" role="status"></p><img id="ficha-qr-image" alt="Código QR del alumno" hidden><a id="ficha-qr-link" target="_blank" rel="noopener" hidden>Abrir imagen QR</a></section>`;
   }

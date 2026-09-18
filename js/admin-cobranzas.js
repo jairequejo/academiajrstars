@@ -295,7 +295,7 @@ async function loadCobranzas() {
     try {
         const { data, error } = await window.supabaseClient
             .from('students')
-            .select('id, full_name, dni, valid_until, parent_name, parent_phone, tarifa_mensual, historial_notificaciones(fecha_envio)')
+            .select('id, full_name, first_names, last_names, dni, codigo_legacy, valid_until, parent_name, parent_phone, parent_phone_secondary, tarifa_mensual, historial_notificaciones(fecha_envio)')
             .eq('is_active', true)
             .lte('valid_until', getCobranzasLimit())
             .order('valid_until', { ascending: true });
@@ -334,7 +334,7 @@ function getFilteredCobranzas() {
     const notificationFilter = getActiveCobranzaFilter('notified');
 
     return cobranzasRows.filter(student => {
-        const haystack = normalizeCobranzasSearch(`${student.full_name || ''} ${student.dni || ''} ${student.parent_name || ''} ${student.parent_phone || ''}`);
+        const haystack = normalizeCobranzasSearch(`${student.full_name || ''} ${student.first_names || ''} ${student.last_names || ''} ${student.dni || ''} ${student.codigo_legacy || ''} ${student.parent_name || ''} ${student.parent_phone || ''} ${student.parent_phone_secondary || ''}`);
         const matchesQuery = !query || haystack.includes(query);
         const matchesDue = dueFilter === 'all'
             || (dueFilter === 'expired' && student._due.days < 0)

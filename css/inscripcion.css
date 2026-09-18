@@ -44,6 +44,7 @@ body.inscripcion-open { overflow: hidden; }
 .inscripcion-dialog .form-label { font-family: var(--font-body); font-size: 0.82rem !important; font-weight: 600 !important; text-transform: none; letter-spacing: 0; color: #334155 !important; }
 .inscripcion-dialog .field-optional { color: #94a3b8; font-size: 0.74rem; font-weight: 400; }
 .inscripcion-dialog .input-jr, .inscripcion-dialog .select-jr { border: 1px solid #dce1e8 !important; border-radius: 10px !important; padding: 0.7rem 0.85rem !important; font-size: 0.92rem !important; font-weight: 500 !important; min-height: 44px; color: #111827 !important; background: #fff !important; }
+.inscripcion-dialog textarea.input-jr { min-height: 88px; resize: vertical; line-height: 1.45; }
 .inscripcion-dialog .input-jr::placeholder { color: #94a3b8; }
 .inscripcion-dialog .input-jr:focus, .inscripcion-dialog .select-jr:focus { border-color: #da1212 !important; outline: 2px solid #da12121a; outline-offset: 1px; }
 .inscripcion-dialog [aria-invalid="true"] { border-color: #da1212 !important; }

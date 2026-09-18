@@ -47,5 +47,4 @@ Ejecuta `scripts/audit-supabase.sql` después de cada migración para revisar RL
 
 - La llave `anon`/publishable puede estar en el frontend únicamente con RLS y privilegios mínimos.
 - `service_role`, `sb_secret_...`, contraseñas, PIN y llaves de firma nunca deben entrar en HTML/JS ni en Git.
-- El script `scripts/seed.mjs` usa `SUPABASE_SERVICE_ROLE_KEY` solo desde un `.env` local ignorado por Git.
 - Si una llave privada entra a Git, eliminarla del último commit no basta: hay que rotarla y luego limpiar el historial si corresponde.

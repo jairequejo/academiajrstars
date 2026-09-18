@@ -8,9 +8,9 @@
   <title>JR Stars — Admin Panel</title>
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20260904">
-  <link rel="stylesheet" href="../css/admin.css?v=20260915_uniformes">
+  <link rel="stylesheet" href="../css/admin.css?v=20260916_alumnos">
   <link rel="stylesheet" href="../css/admin-uniformes.css?v=20260916_mobile">
-  <link rel="stylesheet" href="../css/inscripcion.css?v=20260904">
+  <link rel="stylesheet" href="../css/inscripcion.css?v=20260916_alumnos">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
   <meta name="theme-color" content="#E30D13">
   <meta name="mobile-web-app-capable" content="yes">
@@ -187,7 +187,7 @@
           <div class="cobranzas-toolbar">
             <div class="cobranzas-search">
               <svg class="admin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#search"></use></svg>
-              <input id="cobranzas-search" type="search" placeholder="Nombre, DNI o apoderado" autocomplete="off" aria-label="Buscar por nombre, DNI o apoderado">
+              <input id="cobranzas-search" type="search" placeholder="Nombre, código, DNI o apoderado" autocomplete="off" aria-label="Buscar por nombre, código, DNI o apoderado">
             </div>
             <button class="cobranzas-filter-button" id="cobranzas-filter-button" type="button" aria-expanded="false" aria-controls="cobranzas-filters">
               <svg class="admin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg?v=20260909#filter"></use></svg>
@@ -245,7 +245,7 @@
             <label class="form-label" for="filtro-busqueda">Buscar alumno</label>
             <div class="alumnos-search-box">
               <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#search"></use></svg>
-              <input class="input-jr input-sm" id="filtro-busqueda" placeholder="Nombre o DNI" autocomplete="off" oninput="aplicarFiltros()">
+              <input class="input-jr input-sm" id="filtro-busqueda" placeholder="Nombre, código o DNI" autocomplete="off" oninput="aplicarFiltros()">
               <button class="alumnos-search-clear" id="alumnos-search-clear" type="button" onclick="limpiarBusquedaAlumnos()" aria-label="Limpiar búsqueda"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#close"></use></svg></button>
             </div>
             <button class="alumnos-filter-toggle" id="alumnos-filter-toggle" type="button" onclick="toggleAlumnosFiltros()" aria-controls="alumnos-filtros-panel" aria-expanded="false">
@@ -391,7 +391,7 @@
                 <span>Alumno matriculado</span>
                 <div class="uniform-search-box">
                   <svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#search"></use></svg>
-                  <input id="uniform-student-search" type="search" placeholder="Nombre, apellido o DNI" autocomplete="off" aria-controls="uniform-student-results">
+                  <input id="uniform-student-search" type="search" placeholder="Nombre, código o DNI" autocomplete="off" aria-controls="uniform-student-results">
                 </div>
               </label>
               <div class="uniform-student-results" id="uniform-student-results" aria-live="polite"></div>
@@ -491,7 +491,7 @@
         <div class="form-card" style="margin-bottom:1.5rem">
           <div class="form-card-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#search"></use></svg> Buscar Atleta</div>
           <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-            <input class="input-jr" id="bio-search" placeholder="Nombre o DNI" style="flex:1;min-width:160px"
+            <input class="input-jr" id="bio-search" placeholder="Nombre, código o DNI" style="flex:1;min-width:160px"
               oninput="buscarParaBio()">
           </div>
           <div id="bio-search-results" style="margin-top:.8rem"></div>
@@ -591,7 +591,7 @@
           <select class="select-jr" id="cal-filter-sede" aria-label="Filtrar por sede" data-admin-sede data-sede-placeholder="Todas las sedes" onchange="renderCalendario()" style="width:auto">
             <option value="">Todas las sedes</option>
           </select>
-          <input class="input-jr" type="text" id="cal-search" aria-label="Buscar alumno por nombre o DNI" placeholder="Nombre o DNI"
+          <input class="input-jr" type="text" id="cal-search" aria-label="Buscar alumno por nombre, código o DNI" placeholder="Nombre, código o DNI"
             oninput="renderCalendario()" style="max-width:220px">
         </div>
 
@@ -773,9 +773,13 @@
         <!-- ── Datos Personales ── -->
         <div class="modal-section-title"><svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#user"></use></svg> Datos Personales</div>
         <div class="form-row">
-          <div class="form-group" style="grid-column:span 2">
-            <label class="form-label">Nombre completo</label>
-            <input class="input-jr" id="edit-full-name" type="text" placeholder="Nombre Apellido" required>
+          <div class="form-group">
+            <label class="form-label" for="edit-first-names">Nombres</label>
+            <input class="input-jr" id="edit-first-names" type="text" placeholder="Ej. Jhair Alexis" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-last-names">Apellidos</label>
+            <input class="input-jr" id="edit-last-names" type="text" placeholder="Ej. Pérez Sánchez">
           </div>
           <div class="form-group">
             <label class="form-label">DNI</label>
@@ -797,6 +801,14 @@
           <div class="form-group">
             <label class="form-label">Teléfono (WhatsApp)</label>
             <input class="input-jr" id="edit-parent-phone" type="tel" placeholder="987654321">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-parent-phone-secondary">Teléfono alternativo</label>
+            <input class="input-jr" id="edit-parent-phone-secondary" type="tel" placeholder="Opcional">
+          </div>
+          <div class="form-group" style="grid-column:span 2">
+            <label class="form-label" for="edit-notes">Observación / nota</label>
+            <textarea class="input-jr admin-notes-input" id="edit-notes" rows="3" placeholder="Ej. Beca, indicación médica o dato pendiente"></textarea>
           </div>
         </div>
 
@@ -820,6 +832,7 @@
           <div class="form-group">
             <label class="form-label">Horario</label>
             <select class="select-jr" id="edit-horario">
+              <option value="">Por asignar</option>
               <option value="LMV">Lunes, Miércoles, Viernes</option>
               <option value="MJS">Martes, Jueves, Sábado</option>
             </select>
@@ -839,6 +852,7 @@
             <label class="form-label">Categoría (año)</label>
             <select class="select-jr" id="edit-categoria">
               <option value="">Sin categoría</option>
+              <option value="2012">2012</option>
               <option value="2013">2013</option>
               <option value="2014">2014</option>
               <option value="2015">2015</option>
@@ -847,6 +861,8 @@
               <option value="2018">2018</option>
               <option value="2019">2019</option>
               <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
             </select>
           </div>
         </div>
@@ -867,6 +883,10 @@
           <div class="form-group">
             <label class="form-label">Código legacy</label>
             <input class="input-jr" id="edit-codigo-legacy" type="text" placeholder="Ej: JR-2024-001">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-enrollment-amount">Matrícula / inscripción (S/)</label>
+            <input class="input-jr" id="edit-enrollment-amount" type="number" step="0.01" min="0" placeholder="Ej: 60.00">
           </div>
         </div>
 
@@ -935,11 +955,15 @@
       <div class="inscripcion-content">
         <section data-inscripcion-step aria-labelledby="inscripcion-alumno-title">
           <h3 class="inscripcion-step-title" id="inscripcion-alumno-title" tabindex="-1">¿A quién vamos a inscribir?</h3>
-          <p class="inscripcion-step-description">Empieza por sus datos personales. Solo el nombre es obligatorio.</p>
+          <p class="inscripcion-step-description">Empieza por sus datos personales. Los nombres son obligatorios.</p>
           <div class="inscripcion-fields">
-            <div class="form-group inscripcion-field-wide">
-              <label class="form-label" for="a-nombre">Nombre completo <span aria-hidden="true">*</span></label>
-              <input class="input-jr" id="a-nombre" name="nombre" placeholder="Nombres y apellidos del alumno" autocomplete="off" required>
+            <div class="form-group">
+              <label class="form-label" for="a-nombres">Nombres <span aria-hidden="true">*</span></label>
+              <input class="input-jr" id="a-nombres" name="nombres" placeholder="Ej. Jhair Alexis" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-apellidos">Apellidos <span class="field-optional">(opcional)</span></label>
+              <input class="input-jr" id="a-apellidos" name="apellidos" placeholder="Ej. Pérez Sánchez" autocomplete="off">
             </div>
             <div class="form-group">
               <label class="form-label" for="a-fecha-nacimiento">Fecha de nacimiento del niño <span class="field-optional">(opcional)</span></label>
@@ -965,6 +989,14 @@
               <label class="form-label" for="a-telefono">Teléfono / WhatsApp <span class="field-optional">(opcional)</span></label>
               <input class="input-jr" id="a-telefono" name="telefono" placeholder="Ej. 987 654 321" type="tel" autocomplete="off">
             </div>
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-telefono-alternativo">Teléfono alternativo <span class="field-optional">(opcional)</span></label>
+              <input class="input-jr" id="a-telefono-alternativo" name="telefonoAlternativo" placeholder="Otro número de contacto" type="tel" autocomplete="off">
+            </div>
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-observacion">Observación / nota <span class="field-optional">(opcional)</span></label>
+              <textarea class="input-jr admin-notes-input" id="a-observacion" name="observacion" rows="3" placeholder="Ej. Beca, indicación médica o dato pendiente"></textarea>
+            </div>
           </div>
         </section>
 
@@ -984,6 +1016,7 @@
               <label class="form-label" for="a-categoria">Categoría (año)</label>
               <select class="select-jr" id="a-categoria" name="categoria">
                 <option value="">Por asignar</option>
+                <option value="2012">2012</option>
                 <option value="2013">2013</option>
                 <option value="2014">2014</option>
                 <option value="2015">2015</option>
@@ -992,11 +1025,14 @@
                 <option value="2018">2018</option>
                 <option value="2019">2019</option>
                 <option value="2020">2020</option>
+                <option value="2021">2021</option>
+                <option value="2022">2022</option>
               </select>
             </div>
             <div class="form-group inscripcion-field-wide">
               <label class="form-label" for="a-horario">Días de entrenamiento</label>
               <select class="select-jr" id="a-horario" name="horario">
+                <option value="">Por asignar</option>
                 <option value="LMV">Lunes, Miércoles, Viernes</option>
                 <option value="MJS">Martes, Jueves, Sábado</option>
               </select>
@@ -1030,6 +1066,7 @@
             <div><dt>Alumno</dt><dd id="inscripcion-resumen-alumno"></dd></div>
             <div><dt>Nacimiento</dt><dd id="inscripcion-resumen-nacimiento"></dd></div>
             <div><dt>Apoderado</dt><dd id="inscripcion-resumen-apoderado"></dd></div>
+            <div><dt>Observación</dt><dd id="inscripcion-resumen-observacion"></dd></div>
             <div><dt>Entrenamiento</dt><dd id="inscripcion-resumen-deporte"></dd></div>
           </dl>
           <div class="inscripcion-fields">
@@ -1071,12 +1108,12 @@
 
   <script src="../js/admin-icons.js?v=20260915_uniformes"></script>
   <script src="../js/admin-sedes.js?v=20260904"></script>
-  <script src="../js/admin.js?v=20260915_uniformes"></script>
-  <script src="../js/alumno-ficha.js?v=20260904"></script>
-  <script src="../js/inscripcion.js?v=20260904"></script>
+  <script src="../js/admin.js?v=20260916_alumnos"></script>
+  <script src="../js/alumno-ficha.js?v=20260916_alumnos"></script>
+  <script src="../js/inscripcion.js?v=20260916_alumnos"></script>
   <script src="../js/admin-configuracion.js?v=20260915_uniformes"></script>
-  <script src="../js/admin-cobranzas.js?v=20260909c"></script>
-  <script src="../js/admin-uniformes.js?v=20260916_mobile"></script>
+  <script src="../js/admin-cobranzas.js?v=20260916_alumnos"></script>
+  <script src="../js/admin-uniformes.js?v=20260916_alumnos"></script>
 </body>
 
 </html>

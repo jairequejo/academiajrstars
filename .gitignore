@@ -1,7 +1,6 @@
 # Configuración privada y dependencias locales
 .env
 .env.*
-!.env.example
 node_modules/
 
 # Archivos del sistema y herramientas locales
@@ -22,6 +21,3 @@ test-results/
 coverage/
 .cache/
 *.tmp
-demo_seed.sql
-demo_seed_200.sql
-demo_fix_biometria.sql

@@ -34,18 +34,18 @@ Abre `http://127.0.0.1:5501/`. Utiliza HTTP; los iconos SVG y algunas funciones 
 - `js/`: interfaz, acceso a Supabase y workers compartidos.
 - `img/`: identidad y recursos visuales; los iconos de navegador viven en `img/favicons/`.
 - `migrations/`: cambios SQL versionados para Supabase.
-- `scripts/`: utilidades manuales de mantenimiento y datos de prueba.
+- `scripts/`: consultas manuales de mantenimiento y auditoría.
 - `docs/`: documentación técnica y convenciones del repositorio.
 
 `js/supabaseClient.js` contiene la URL y la clave pública del proyecto Supabase. La autorización de datos depende de las políticas del servicio. No se deben incluir claves privadas o `service_role` en el frontend.
-
-`scripts/seed.mjs` es una utilidad manual que escribe datos de prueba en Supabase; no forma parte del arranque del sitio y no debe ejecutarse contra producción. Sus variables requeridas se documentan en `.env.example`.
 
 Antes de desplegar cambios de autenticación, sigue [SECURITY.md](SECURITY.md). La migración `migrations/20260905_security_hardening.sql` elimina tokens de entrenador en texto plano, restringe su tabla, protege las operaciones de Caja y exige registrar explícitamente al administrador.
 
 La ficha consulta la fecha de registro de `students.created_at` y cuenta días distintos de asistencia en `attendance.created_at`, según la zona horaria de Perú. Un día con varios escaneos cuenta una sola vez. Si falla la consulta, se muestra que la asistencia no está disponible.
 
 `migrations/20260903_datos_alumno.sql` prepara los campos de nacimiento, apoderado, grupo, categoría, tarifa y código del alumno que faltan en el esquema actual. Debe aplicarse en el SQL Editor de Supabase para guardar esos campos; añadir el archivo al repositorio no ejecuta la migración. Mientras no haya datos, la ficha muestra «Sin registrar».
+
+`migrations/20260916_student_names_notes.sql` separa nombres y apellidos, añade observaciones y un segundo teléfono de contacto, y permite dejar el horario pendiente sin inventar LMV o MJS.
 
 ## Publicación
 

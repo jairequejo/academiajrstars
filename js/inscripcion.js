@@ -51,11 +51,12 @@
       return select.value ? select.selectedOptions[0].textContent.trim() : '';
     };
     document.getElementById('inscripcion-resumen-alumno').textContent =
-      [value('a-nombre'), value('a-dni') && 'DNI ' + value('a-dni')].filter(Boolean).join(' · ');
+      [[value('a-nombres'), value('a-apellidos')].filter(Boolean).join(' '), value('a-dni') && 'DNI ' + value('a-dni')].filter(Boolean).join(' · ');
     const birth = birthDetails();
     document.getElementById('inscripcion-resumen-nacimiento').textContent = birth ? `${birth.date} · ${birth.age}` : 'Sin completar';
     document.getElementById('inscripcion-resumen-apoderado').textContent =
-      [value('a-apoderado'), value('a-telefono')].filter(Boolean).join(' · ') || 'Sin completar';
+      [value('a-apoderado'), value('a-telefono'), value('a-telefono-alternativo') && 'Alt. ' + value('a-telefono-alternativo')].filter(Boolean).join(' · ') || 'Sin completar';
+    document.getElementById('inscripcion-resumen-observacion').textContent = value('a-observacion') || 'Sin completar';
     document.getElementById('inscripcion-resumen-deporte').textContent = [
       choice('a-sede'), choice('a-categoria') && 'Categoría ' + choice('a-categoria'),
       choice('a-horario'), choice('a-turno'), choice('a-grupo') && 'Grupo ' + choice('a-grupo')
@@ -82,7 +83,7 @@
     const fields = [...panels[index].querySelectorAll('input, select')];
     for (const field of fields) {
       field.setCustomValidity('');
-      if (field.id === 'a-nombre' && !field.value.trim()) field.setCustomValidity('Escribe el nombre completo del alumno.');
+      if (field.id === 'a-nombres' && !field.value.trim()) field.setCustomValidity('Escribe los nombres del alumno.');
       if (!field.checkValidity()) {
         step = index;
         renderStep(false);
