@@ -518,8 +518,18 @@ function renderAlumnos(data) {
         ${data.map(a => {
       let estadoColor = 'var(--red2)', estadoTexto = 'Inactivo', vencimiento = '—';
       if (a.is_active) {
-        if (a.valid_until) {
-          const fv = new Date(a.valid_until); fv.setMinutes(fv.getMinutes() + fv.getTimezoneOffset());
+        let baseDateStr = a.valid_until;
+        let isFallback = false;
+        if (!baseDateStr && a.created_at) {
+            baseDateStr = a.created_at.split('T')[0];
+            isFallback = true;
+        }
+
+        if (baseDateStr) {
+          const fv = new Date(baseDateStr + 'T12:00:00Z');
+          fv.setMinutes(fv.getMinutes() + fv.getTimezoneOffset());
+          if (isFallback) fv.setMonth(fv.getMonth() + 1);
+
           vencimiento = fv.toLocaleDateString('es-PE');
           if (fv >= hoy) { estadoColor = '#00ff88'; estadoTexto = 'Al Día'; }
           else { estadoColor = 'var(--gold)'; estadoTexto = 'Vencido'; }
@@ -564,9 +574,14 @@ async function crearAlumno() {
     return false;
   }
 
-  const hoy = new Date();
-  hoy.setDate(hoy.getDate() + 30);
+  const fechaInicioVal = document.getElementById('a-fecha-inicio')?.value;
+  const baseDate = fechaInicioVal ? new Date(fechaInicioVal + 'T12:00:00Z') : new Date();
+
+  const hoy = new Date(baseDate);
+  // Sumar exactamente 1 mes para que se conserve el mismo número de día
+  hoy.setMonth(hoy.getMonth() + 1);
   const fecha_vencimiento_str = hoy.toISOString().split('T')[0];
+  const fecha_inicio_str = baseDate.toISOString().split('T')[0];
 
   const insert_data = {
       first_names: firstNames,
@@ -613,7 +628,7 @@ async function crearAlumno() {
               student_id: nuevo_alumno.id,
               monto: pagoMes,
               metodo_pago: metodo,
-              fecha_inicio: new Date().toISOString().split('T')[0],
+              fecha_inicio: fecha_inicio_str,
               fecha_vencimiento: fecha_vencimiento_str
           });
           if (pagoErr) throw pagoErr;
@@ -625,6 +640,11 @@ async function crearAlumno() {
       document.getElementById('a-fecha-nacimiento').value = '';
       document.getElementById('a-apoderado').value = '';
       document.getElementById('a-observacion').value = '';
+      if (document.getElementById('a-fecha-inicio')) {
+          const offset = new Date().getTimezoneOffset();
+          const myDate = new Date(new Date().getTime() - (offset*60*1000));
+          document.getElementById('a-fecha-inicio').value = myDate.toISOString().split('T')[0];
+      }
   } catch (err) {
       console.error(err);
       showToast(`Error: ${err.message || 'Error de conexión'}`, 'error');
@@ -699,6 +719,7 @@ function abrirModalEdicion(student_id) {
   document.getElementById('edit-tarifa').value = tarifaRaw !== null && tarifaRaw !== undefined ? tarifaRaw : '';
   document.getElementById('edit-codigo-legacy').value = a.codigo_legacy || '';
   document.getElementById('edit-enrollment-amount').value = a.enrollment_amount ?? '';
+  document.getElementById('edit-created-at').value = (a.created_at || '').split('T')[0];
 
   window.adminAlumnoUI.actualizarEstado(a);
   document.getElementById('modal-editar-alumno').classList.remove('hidden');
@@ -760,6 +781,9 @@ async function guardarEdicionAlumno(event) {
   payload.codigo_legacy = val('edit-codigo-legacy') || null;
   const enrollmentInput = document.getElementById('edit-enrollment-amount').value;
   payload.enrollment_amount = enrollmentInput === '' ? null : parseFloat(enrollmentInput);
+
+  const createdAtInput = val('edit-created-at');
+  if (createdAtInput) payload.created_at = createdAtInput + 'T12:00:00Z';
 
   try {
     const { error } = await window.supabaseClient.from('students').update(payload).eq('id', id);
@@ -1033,6 +1057,8 @@ async function loadHistorialPagos(student_id) {
         <p class="pago-historial-message">No hay pagos registrados.</p>`;
       return;
     }
+    const tarifaOficial = parseFloat(document.getElementById('pago-overlay')?.dataset?.tarifa ?? 80);
+
     wrap.innerHTML = `
       <h3>Historial de pagos</h3>
       <div class="pago-historial-list">
@@ -1040,9 +1066,15 @@ async function loadHistorialPagos(student_id) {
       const fecha = p.created_at
         ? new Date(p.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
         : '—';
-      const monto = (p.monto ?? 0) === 0
+      
+      const pMonto = Number(p.monto ?? 0);
+      const isMismatched = pMonto > 0 && Math.abs(pMonto - tarifaOficial) > 0.01;
+      const amountStyle = isMismatched ? 'color: var(--red2); font-weight: bold;' : '';
+      
+      const monto = pMonto === 0
         ? '<span class="pago-becado">Becado</span>'
-        : `<span class="pago-historial-monto">S/ ${Number(p.monto).toFixed(2)}</span>`;
+        : `<span class="pago-historial-monto" style="${amountStyle}">S/ ${pMonto.toFixed(2)}</span>`;
+      
       const metodo = p.metodo_pago || '—';
       return `<div class="pago-historial-row">
             <span class="pago-historial-fecha">${fecha}</span>
@@ -1065,74 +1097,224 @@ async function pagarMensualidad(id) {
   const tarifa = parseFloat(overlay?.dataset?.tarifa ?? 80);
   const esBecado = tarifa === 0;
 
-  const msgConfirm = esBecado
-    ? `¿Renovar 1 mes GRATIS (BECADO) a este alumno?`
-    : `¿Confirmar el cobro de S/ ${tarifa.toFixed(2)} por 1 mes de entrenamiento?`;
-
-  const confirmacion = confirm(msgConfirm);
-  if (!confirmacion) return;
-
-  let metodo = 'Becado';
-  if (!esBecado) {
-    metodo = prompt('¿Cómo pagó? (Efectivo, Yape o Plin):', 'Efectivo');
-    if (metodo === null) return;
-    metodo = metodo.trim() || 'Efectivo';
-  }
-
   try {
-    const { data: res_alumno, error: err_alumno } = await window.supabaseClient.from('students').select('id, valid_until, full_name').eq('id', id).single();
+    const { data: res_alumno, error: err_alumno } = await window.supabaseClient.from('students').select('id, valid_until, created_at, full_name, parent_phone').eq('id', id).single();
     if (err_alumno || !res_alumno) { showToast('Alumno no encontrado', 'error'); return; }
 
-    const hoy = new Date();
-    let nueva_fecha = new Date();
-    if (res_alumno.valid_until) {
-        const fecha_actual_vencimiento = new Date(res_alumno.valid_until);
-        fecha_actual_vencimiento.setMinutes(fecha_actual_vencimiento.getMinutes() + fecha_actual_vencimiento.getTimezoneOffset());
-        if (fecha_actual_vencimiento >= hoy) {
-            nueva_fecha = new Date(fecha_actual_vencimiento);
-            nueva_fecha.setDate(nueva_fecha.getDate() + 30);
-        } else {
-            nueva_fecha.setDate(hoy.getDate() + 30);
+    let anchorStr = res_alumno.valid_until;
+    if (!anchorStr && res_alumno.created_at) anchorStr = res_alumno.created_at.split('T')[0];
+    let baseDate = anchorStr ? new Date(anchorStr + 'T12:00:00Z') : new Date();
+    baseDate.setMinutes(baseDate.getMinutes() + baseDate.getTimezoneOffset());
+
+    const formatter = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric' });
+    
+    // Generar modal
+    const modalId = 'modal-pago-meses';
+    document.getElementById(modalId)?.remove();
+    
+    const html = `
+      <dialog id="${modalId}" class="alumno-dialog" style="display:block; z-index:99999;">
+        <header class="alumno-dialog-header">
+          <div>
+            <p class="ficha-eyebrow">Mensualidad · ${res_alumno.full_name}</p>
+            <h2 id="cobro-modal-title">Registrar Cobro</h2>
+          </div>
+          <button type="button" class="alumno-dialog-close" id="cobro-btn-close" aria-label="Cerrar"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#close"></use></svg></button>
+        </header>
+        
+        <div class="alumno-dialog-content" style="display:flex; flex-direction:column; gap:1.25rem;">
+          
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="margin-bottom:0.4rem;">Meses a pagar</label>
+              <div style="display:flex; align-items:center; gap:0.4rem;">
+                <button type="button" id="cobro-btn-minus" class="btn btn-outline" style="min-width:44px; padding:0; height:46px; font-size:1.2rem;">-</button>
+                <input type="text" id="cobro-qty" class="input-jr" value="1" readonly style="text-align:center; height:46px; font-weight:bold; font-size:1.1rem; flex:1; pointer-events:none; background:#f8fafc; border-color:#e2e8f0; color:#0f172a;">
+                <button type="button" id="cobro-btn-plus" class="btn btn-outline" style="min-width:44px; padding:0; height:46px; font-size:1.2rem;">+</button>
+              </div>
+            </div>
+            
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="margin-bottom:0.4rem;">Total a cobrar (S/)</label>
+              <input type="number" id="cobro-total-input" class="input-jr" value="${tarifa.toFixed(2)}" step="0.1" style="height:46px; font-size:1.25rem; font-weight:800; color:#da1212; text-align:right;" ${esBecado ? 'disabled' : ''}>
+            </div>
+          </div>
+          
+          <div id="cobro-warning" style="display:none; color:#b45309; font-size:0.85rem; padding:0.6rem 0.8rem; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; margin-top:-0.5rem;">
+            ⚠️ Monto modificado (Tarifa base: S/ <span id="cobro-tarifa-esperada"></span>)
+          </div>
+
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="margin-bottom:0.4rem;">Período cubierto</label>
+            <div id="cobro-lista-meses" style="font-size:0.9rem; color:#475569; padding:0.85rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; line-height:1.5;"></div>
+          </div>
+
+          ${!esBecado ? `
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" style="margin-bottom:0.4rem;">Método de Pago</label>
+            <select class="select-jr" id="cobro-metodo" style="height:46px;">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+          ` : ''}
+          
+        </div>
+        
+        <footer class="alumno-dialog-footer">
+          <button type="button" class="btn btn-outline" id="cobro-btn-cancel">Cancelar</button>
+          <button type="button" class="btn btn-red" id="cobro-btn-confirm" style="flex:1; font-size:1.1rem;">Confirmar Pago</button>
+        </footer>
+      </dialog>
+      <div id="${modalId}-backdrop" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99998;"></div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+    
+    let qty = 1;
+    let endDates = [];
+    const inputTotal = document.getElementById('cobro-total-input');
+    const warning = document.getElementById('cobro-warning');
+    const lblEsperada = document.getElementById('cobro-tarifa-esperada');
+    
+    // updateUI acts in two modes: fromQty (user clicked +/-) or fromInput (user typed a manual total)
+    const updateUI = (fromQty = false) => {
+      if (fromQty && !esBecado) {
+        inputTotal.value = (qty * tarifa).toFixed(2);
+      }
+      
+      let currentTotal = parseFloat(inputTotal.value);
+      if (isNaN(currentTotal)) currentTotal = 0;
+      
+      const expectedTotal = qty * tarifa;
+      
+      if (!esBecado && Math.abs(currentTotal - expectedTotal) > 0.01) {
+        lblEsperada.textContent = expectedTotal.toFixed(2);
+        warning.style.display = 'block';
+      } else {
+        warning.style.display = 'none';
+      }
+
+      document.getElementById('cobro-qty').textContent = qty;
+      const wrapMeses = document.getElementById('cobro-lista-meses');
+      wrapMeses.innerHTML = '';
+      let tempDate = new Date(baseDate);
+      endDates = [];
+      
+      let names = [];
+      for(let i=0; i<qty; i++) {
+        tempDate.setMonth(tempDate.getMonth() + 1);
+        let monthName = formatter.format(tempDate);
+        names.push(monthName.charAt(0).toUpperCase() + monthName.slice(1));
+        endDates.push(new Date(tempDate));
+      }
+      wrapMeses.textContent = names.join(', ');
+    };
+    
+    inputTotal.addEventListener('input', () => updateUI(false));
+    const closeFn = () => {
+      document.getElementById(modalId).remove();
+      document.getElementById(`${modalId}-backdrop`).remove();
+    };
+    
+    document.getElementById('cobro-btn-minus').onclick = () => { if(qty > 1) { qty--; updateUI(true); } };
+    document.getElementById('cobro-btn-plus').onclick = () => { if(qty < 12) { qty++; updateUI(true); } };
+    document.getElementById('cobro-btn-close').onclick = closeFn;
+    document.getElementById('cobro-btn-cancel').onclick = closeFn;
+    
+    document.getElementById('cobro-btn-confirm').onclick = async () => {
+      const btn = document.getElementById('cobro-btn-confirm');
+      btn.disabled = true;
+      btn.textContent = 'Procesando...';
+      
+      const currentTotal = parseFloat(inputTotal.value) || 0;
+      const montoMes = (currentTotal / qty).toFixed(2);
+
+      const metodo = esBecado ? 'Becado' : document.getElementById('cobro-metodo').value;
+      const finalDate = endDates[endDates.length - 1];
+      const fecha_str = finalDate.toISOString().split('T')[0];
+      
+      try {
+        const { error: err_upd } = await window.supabaseClient.from('students').update({valid_until: fecha_str}).eq('id', id);
+        if (err_upd) throw err_upd;
+        
+        try {
+          const nuevo_jrs_code = await generate_jrs_code(id, res_alumno.full_name, fecha_str);
+          const { data: cred_res } = await window.supabaseClient.from('credentials').select('id').eq('student_id', id).eq('is_active', true).limit(1);
+          if (cred_res && cred_res.length > 0) {
+              await window.supabaseClient.from('credentials').update({code: nuevo_jrs_code}).eq('id', cred_res[0].id);
+          } else {
+              await window.supabaseClient.from('credentials').insert({student_id: id, code: nuevo_jrs_code, is_active: true});
+          }
+        } catch (e) { console.warn(e); }
+        
+        let insertDate = new Date(baseDate);
+        for(let i=0; i<qty; i++) {
+          const m_inicio = insertDate.toISOString().split('T')[0];
+          insertDate.setMonth(insertDate.getMonth() + 1);
+          const m_vencimiento = insertDate.toISOString().split('T')[0];
+          
+          await window.supabaseClient.from('mensualidades').insert({
+              student_id: id,
+              monto: esBecado ? 0 : parseFloat(montoMes),
+              metodo_pago: metodo,
+              fecha_inicio: m_inicio,
+              fecha_vencimiento: m_vencimiento
+          });
         }
-    } else {
-        nueva_fecha.setDate(hoy.getDate() + 30);
-    }
-    const fecha_str = nueva_fecha.toISOString().split('T')[0];
-
-    const { error: err_upd } = await window.supabaseClient.from('students').update({valid_until: fecha_str}).eq('id', id);
-    if (err_upd) throw err_upd;
-
-    try {
-        const nuevo_jrs_code = await generate_jrs_code(id, res_alumno.full_name, fecha_str);
-        const { data: cred_res } = await window.supabaseClient.from('credentials').select('id').eq('student_id', id).eq('is_active', true).limit(1);
-
-        if (cred_res && cred_res.length > 0) {
-            await window.supabaseClient.from('credentials').update({code: nuevo_jrs_code}).eq('id', cred_res[0].id);
-        } else {
-            await window.supabaseClient.from('credentials').insert({student_id: id, code: nuevo_jrs_code, is_active: true});
-        }
-    } catch (e) {
-        console.warn("No se pudo regenerar el código JRS:", e);
-    }
-
-    try {
-        await window.supabaseClient.from('mensualidades').insert({
-            student_id: id,
-            monto: esBecado ? 0 : tarifa,
-            metodo_pago: metodo,
-            fecha_inicio: new Date().toISOString().split('T')[0],
-            fecha_vencimiento: fecha_str
+        
+        const phone = res_alumno.parent_phone ? res_alumno.parent_phone.replace(/\D/g, '') : '';
+        const phoneParam = (phone.length === 9) ? '51' + phone : phone;
+        
+        const formatterStr = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric' });
+        const monthNames = endDates.map(d => {
+            let m = formatterStr.format(d);
+            return m.charAt(0).toUpperCase() + m.slice(1);
         });
-    } catch(e) {
-        console.warn("Error al guardar recibo:", e);
-    }
-
-    showToast('Pago registrado con éxito (+30 días)');
-    loadAlumnos();
-    if (typeof loadCreditos === 'function') loadCreditos();
-  } catch (err) {
-      console.error(err);
-      showToast('Error de red o base de datos', 'error');
+        
+        let msg = `Hola! ⚽ Confirmamos el pago de mensualidad en la academia *JR Stars*.\n\n`;
+        msg += `👦 *Alumno:* ${res_alumno.full_name}\n`;
+        msg += `📅 *Meses cubiertos:* ${monthNames.join(', ')}\n`;
+        msg += `💰 *Monto cobrado:* S/ ${currentTotal.toFixed(2)}\n`;
+        
+        let fvStr = formatterStr.format(finalDate);
+        fvStr = fvStr.charAt(0).toUpperCase() + fvStr.slice(1);
+        msg += `✅ *Próximo vencimiento:* ${fvStr}\n\n`;
+        msg += `¡Gracias por ser parte de la familia JR Stars! 🌟`;
+        
+        const whatsappLink = `https://wa.me/${phoneParam}?text=${encodeURIComponent(msg)}`;
+        
+        document.getElementById(modalId).innerHTML = `
+          <div style="padding:40px 20px; text-align:center;">
+            <svg class="admin-icon" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" style="width:60px;height:60px;margin-bottom:15px;"><use href="../img/admin-icons.svg#check"></use></svg>
+            <h2 style="color:white; margin-bottom:10px; font-family:var(--font-cond);">¡Cobro Registrado!</h2>
+            <p style="color:var(--gray); margin-bottom:25px; font-size:0.95rem;">Se cobraron <strong>S/ ${currentTotal.toFixed(2)}</strong> por ${qty} mes(es).</p>
+            
+            ${phone ? `<a href="${whatsappLink}" target="_blank" class="btn btn-gold" style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; text-decoration:none;"><svg class="admin-icon" viewBox="0 0 24 24"><use href="../img/admin-icons.svg#phone"></use></svg> Enviar Recibo por WhatsApp</a>` : `<p style="color:var(--red2); font-size:0.8rem; margin-bottom:15px;">El apoderado no tiene celular registrado.</p>`}
+            
+            <button type="button" class="btn btn-outline" style="width:100%;" id="cobro-btn-finalizar">Finalizar y Cerrar</button>
+          </div>
+        `;
+        
+        document.getElementById('cobro-btn-finalizar').onclick = () => {
+          closeFn();
+          document.getElementById('pago-overlay')?.remove();
+          loadAlumnos();
+        };
+      } catch (e) {
+        console.error(e);
+        showToast('Error de conexión', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Procesar Pago';
+      }
+    };
+    
+    updateUI();
+  } catch(e) {
+    console.error(e);
+    showToast('Error de conexión', 'error');
   }
 }
 
@@ -1161,6 +1343,101 @@ document.addEventListener('click', (e) => {
 
 
 
+async function checkBirthdays() {
+  if (sessionStorage.getItem('jrstars_birthdays_checked')) return;
+  sessionStorage.setItem('jrstars_birthdays_checked', 'true');
+  
+  try {
+    const { data: students, error } = await window.supabaseClient
+      .from('students')
+      .select('full_name, fecha_nacimiento')
+      .eq('is_active', true)
+      .not('fecha_nacimiento', 'is', null);
+      
+    if (error || !students) return;
+    
+    const today = new Date();
+    const todayM = today.getMonth() + 1;
+    const todayD = today.getDate();
+    
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomM = tomorrow.getMonth() + 1;
+    const tomD = tomorrow.getDate();
+    
+    let hoyCumplen = [];
+    let mananaCumplen = [];
+    
+    students.forEach(s => {
+      if(!s.fecha_nacimiento) return;
+      const parts = s.fecha_nacimiento.split('-');
+      if(parts.length === 3) {
+        const sm = parseInt(parts[1], 10);
+        const sd = parseInt(parts[2], 10);
+        
+        if (sm === todayM && sd === todayD) {
+          hoyCumplen.push(s.full_name);
+        } else if (sm === tomM && sd === tomD) {
+          mananaCumplen.push(s.full_name);
+        }
+      }
+    });
+    
+    if (hoyCumplen.length > 0 || mananaCumplen.length > 0) {
+      showBirthdayModal(hoyCumplen, mananaCumplen);
+    }
+    
+  } catch(e) {
+    console.error("Error al revisar cumpleaños", e);
+  }
+}
+
+function showBirthdayModal(hoy, manana) {
+  const modalId = 'modal-cumpleanos';
+  document.getElementById(modalId)?.remove();
+  document.getElementById(`${modalId}-backdrop`)?.remove();
+  
+  let contentHtml = '';
+  
+  if(hoy.length > 0) {
+    contentHtml += `<div style="margin-bottom:20px;">
+      <h3 style="color:#00ff88; font-size:1.1rem; font-family:var(--font-cond); margin-bottom:8px; display:flex; align-items:center; gap:6px;">🎂 ¡Hoy es su cumpleaños!</h3>
+      <ul style="list-style:none; padding:0; margin:0;">
+        ${hoy.map(n => `<li style="background:rgba(0,255,136,0.1); border-left:2px solid #00ff88; padding:8px 12px; margin-bottom:5px; border-radius:4px; font-weight:bold;">${n}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+  
+  if(manana.length > 0) {
+    contentHtml += `<div style="margin-bottom:10px;">
+      <h3 style="color:var(--gold); font-size:1.1rem; font-family:var(--font-cond); margin-bottom:8px; display:flex; align-items:center; gap:6px;">🎁 Cumplen mañana</h3>
+      <ul style="list-style:none; padding:0; margin:0;">
+        ${manana.map(n => `<li style="background:rgba(255,191,0,0.1); border-left:2px solid var(--gold); padding:8px 12px; margin-bottom:5px; border-radius:4px;">${n}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  const html = `
+    <div id="${modalId}-backdrop" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:99998;backdrop-filter:blur(3px);"></div>
+    <dialog id="${modalId}" class="alumno-dialog" style="display:block; z-index:99999; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.5);">
+      <header class="alumno-dialog-header" style="background:var(--dark);">
+        <div>
+          <p class="ficha-eyebrow" style="color:var(--gray);">Sistema de Alertas</p>
+          <h2 style="margin:0; font-family:var(--font-cond); font-size:1.4rem;">Recordatorio de Cumpleaños</h2>
+        </div>
+        <button type="button" class="alumno-dialog-close" onclick="document.getElementById('${modalId}').remove(); document.getElementById('${modalId}-backdrop').remove();"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#close"></use></svg></button>
+      </header>
+      <div class="alumno-dialog-content" style="padding:24px;">
+        ${contentHtml}
+      </div>
+      <footer class="alumno-dialog-footer" style="padding:15px 24px; border-top:1px solid rgba(255,255,255,0.05);">
+        <button type="button" class="btn btn-outline" style="width:100%;" onclick="document.getElementById('${modalId}').remove(); document.getElementById('${modalId}-backdrop').remove();">Entendido</button>
+      </footer>
+    </dialog>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
 // ── INIT ──────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   requireAdminSession().then(isValid => {
@@ -1169,9 +1446,11 @@ window.addEventListener('DOMContentLoaded', () => {
     if (requestedSection && document.getElementById(`page-${requestedSection}`)) {
       goTo(requestedSection);
       window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(checkBirthdays, 1500);
       return;
     }
     loadStats();
+    setTimeout(checkBirthdays, 1500);
   });
 }, { once: true });
 
@@ -1728,6 +2007,7 @@ function renderEntrenadores() {
           <div style="font-family:var(--font-mono);font-size:.72rem;color:var(--gray)">${e.is_active ? '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#check"></use></svg> Acceso habilitado' : '<svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><use href="../img/admin-icons.svg#ban"></use></svg> Acceso revocado'}</div>
         </div>
         <div class="alumno-card-actions">
+          <button class="btn btn-outline" data-ent-action="edit" data-ent-id="${escapeAdminHtml(e.id)}" data-ent-name="${escapeAdminHtml(e.nombre)}" style="font-size:.75rem;padding:.3rem .9rem;border-color:var(--gold);color:var(--gold);margin-right:8px;">Editar</button>
           ${e.is_active
       ? `<button class="btn btn-red" data-ent-action="toggle" data-ent-id="${escapeAdminHtml(e.id)}" data-ent-name="${escapeAdminHtml(e.nombre)}" data-ent-active="false" style="font-size:.75rem;padding:.3rem .9rem">Revocar</button>`
       : `<button class="btn btn-outline" data-ent-action="toggle" data-ent-id="${escapeAdminHtml(e.id)}" data-ent-name="${escapeAdminHtml(e.nombre)}" data-ent-active="true" style="font-size:.75rem;padding:.3rem .9rem;border-color:#00ff88;color:#00ff88">Reactivar</button>`
@@ -1743,6 +2023,12 @@ function renderEntrenadores() {
       </div>` : ''}
     </div>`).join('');
 
+  el.querySelectorAll('[data-ent-action="edit"]').forEach(button => {
+    button.addEventListener('click', () => editEntrenador(
+      button.dataset.entId,
+      button.dataset.entName
+    ));
+  });
   el.querySelectorAll('[data-ent-action="toggle"]').forEach(button => {
     button.addEventListener('click', () => toggleEntrenador(
       button.dataset.entId,
@@ -1793,6 +2079,80 @@ async function rotateEntrenadorAccess(id, nombre) {
 }
 
 
+
+async function editEntrenador(id) {
+  const e = _entrenadoresData.find(x => x.id === id);
+  if (!e) return;
+  
+  const html = `
+    <dialog id="ent-modal" class="alumno-dialog" style="display:block; z-index:9999;">
+      <header class="alumno-dialog-header">
+        <div>
+          <p class="ficha-eyebrow">JR Stars · Staff</p>
+          <h2 id="ent-modal-title">Editar Perfil de Entrenador</h2>
+        </div>
+        <button type="button" class="alumno-dialog-close" id="ent-btn-close" aria-label="Cerrar"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#close"></use></svg></button>
+      </header>
+      <div class="alumno-dialog-content">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ent-nom">Nombres</label>
+            <input class="input-jr" id="ent-nom" value="${escapeAdminHtml(e.nombre||'')}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ent-ape">Apellidos</label>
+            <input class="input-jr" id="ent-ape" value="${escapeAdminHtml(e.apellidos||'')}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ent-tel">Celular</label>
+          <input class="input-jr" id="ent-tel" value="${escapeAdminHtml(e.telefono||'')}">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ent-pago">Pago Mensual (S/)</label>
+            <input class="input-jr" type="number" step="0.1" id="ent-pago" value="${e.pago_mensual||''}">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ent-sede">Sede</label>
+            <input class="input-jr" id="ent-sede" value="${escapeAdminHtml(e.sede||'')}">
+          </div>
+        </div>
+      </div>
+      <footer class="alumno-dialog-footer">
+        <button id="ent-btn-cancel" class="btn btn-outline">Cancelar</button>
+        <button id="ent-btn-save" class="btn btn-red">Guardar Cambios</button>
+      </footer>
+    </dialog>
+    <div id="ent-modal-backdrop" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9998;"></div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+  
+    inputMonto.addEventListener('input', updateUI);
+  const closeFn = () => {
+    document.getElementById('ent-modal').remove();
+    document.getElementById('ent-modal-backdrop').remove();
+  };
+  
+  document.getElementById('ent-btn-close').onclick = closeFn;
+  document.getElementById('ent-btn-cancel').onclick = closeFn;
+  document.getElementById('ent-btn-save').onclick = async () => {
+    const data = {
+      p_entrenador_id: id,
+      p_nombre: document.getElementById('ent-nom').value,
+      p_apellidos: document.getElementById('ent-ape').value,
+      p_telefono: document.getElementById('ent-tel').value,
+      p_pago_mensual: parseFloat(document.getElementById('ent-pago').value) || null,
+      p_sede: document.getElementById('ent-sede').value
+    };
+    document.getElementById('ent-modal').innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><h3 style="color:var(--gold);font-family:var(--font-cond);">Guardando...</h3></div>';
+    const { error } = await window.supabaseClient.rpc('admin_update_entrenador', data);
+    document.getElementById('ent-modal').remove();
+    if(error) return showToast('Error al actualizar', 'error');
+    showToast('Perfil actualizado correctamente');
+    loadEntrenadores();
+  };
+}
 
 async function toggleEntrenador(id, nombre, reactivar) {
   if (!confirm(`¿${reactivar ? 'Reactivar' : 'Desactivar'} a ${nombre}?`)) return;

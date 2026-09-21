@@ -15,10 +15,12 @@
     const select = typeof id === 'string' ? document.getElementById(id) : id;
     if (!select) return;
     // Conservar las sedes de alumnos anteriores aunque ya no estén en el catálogo.
-    if (value && ![...select.options].some(option => option.value === value)) {
+    if (value && ![...select.options].some(option => option.value.toLowerCase() === value.toLowerCase())) {
       select.add(new Option(value, value));
     }
-    select.value = value || '';
+    // Set the value case-insensitively if it exists
+    const match = [...select.options].find(option => option.value.toLowerCase() === (value || '').toLowerCase());
+    select.value = match ? match.value : '';
   }
 
   function render() {
@@ -65,7 +67,13 @@
     return pending;
   }
 
-  window.adminSedes = { load, setValue };
+  function getAlias(nombre) {
+    if (!catalog || !nombre) return nombre;
+    const match = catalog.find(s => s.nombre.toLowerCase() === nombre.toLowerCase());
+    return match && match.alias ? match.alias : nombre;
+  }
+
+  window.adminSedes = { load, setValue, getAlias };
   retry?.addEventListener('click', () => load(true));
   load();
 })();

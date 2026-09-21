@@ -295,7 +295,7 @@ async function loadCobranzas() {
     try {
         const { data, error } = await window.supabaseClient
             .from('students')
-            .select('id, full_name, first_names, last_names, dni, codigo_legacy, valid_until, parent_name, parent_phone, parent_phone_secondary, tarifa_mensual, historial_notificaciones(fecha_envio)')
+            .select('id, full_name, first_names, last_names, dni, codigo_legacy, valid_until, parent_name, parent_phone, parent_phone_secondary, tarifa_mensual, notes, historial_notificaciones(fecha_envio)')
             .eq('is_active', true)
             .lte('valid_until', getCobranzasLimit())
             .order('valid_until', { ascending: true });
@@ -437,6 +437,12 @@ function renderCobranzaCard(student, now) {
             <div class="cobranza-contact">
                 <span>Apoderado</span><strong>${parentName}</strong><small>${escapeCobranzasHtml(phoneDisplay)}</small>
             </div>
+            <div class="cobranza-obs" style="margin: 0 15px 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); font-size: 0.7rem; color: var(--gray); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="line-height: 1.2; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><i>Nota: ${escapeCobranzasHtml(student.notes || '—')}</i></div>
+                <button type="button" data-cobranza-action="edit-obs" data-student-id="${id}" style="background:none; border:none; color:rgba(255,255,255,0.4); padding:4px; cursor:pointer; display:flex; align-items:center;" aria-label="Editar nota" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="../img/admin-icons.svg#edit"></use></svg>
+                </button>
+            </div>
             <div class="cobranza-actions">
                 <button class="cobranza-action cobranza-action--notify ${wasNotified ? 'is-sent' : ''}" type="button" data-cobranza-action="${wasNotified ? 'review-notify' : 'notify'}" data-student-id="${id}" ${phone ? '' : 'disabled'}>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.4.2-.7.1-1.7-.8-2.9-1.7-3.8-3.5-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5L9.3 6.7c-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.8 1.2 3c.2.2 2.1 3.2 5 4.5 1.9.8 2.6.9 3.6.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1 0-.4-.1-.7-.2ZM12 22a10 10 0 0 1-5-1.3L2 22l1.3-4.9A10 10 0 1 1 12 22Z"/></svg>
@@ -564,7 +570,23 @@ document.getElementById('cobranzas-list')?.addEventListener('click', event => {
     if (button.dataset.cobranzaAction === 'cancel-renotify') toggleCobranzaRenotify(studentId, true);
     if (button.dataset.cobranzaAction === 'confirm-renotify') sendCobranzaWhatsApp(studentId, true);
     if (button.dataset.cobranzaAction === 'disable') inhabilitarMoroso(studentId);
+    if (button.dataset.cobranzaAction === 'edit-obs') editarObservacion(studentId);
 });
+
+async function editarObservacion(studentId) {
+    const student = cobranzasById.get(String(studentId));
+    if (!student) return;
+    const newObs = prompt('Ingresa la observación para este alumno:', student.notes || '');
+    if (newObs === null || newObs.trim() === (student.notes || '')) return;
+    
+    const obs = newObs.trim();
+    const { error } = await window.supabaseClient.from('students').update({ notes: obs }).eq('id', student.id);
+    if (error) return showToast('Error al actualizar observación', 'error');
+    
+    student.notes = obs;
+    showToast('Observación actualizada');
+    renderFilteredCobranzas();
+}
 
 registerAdminPwa().then(() => refreshCobranzasNavState());
 document.addEventListener('visibilitychange', () => {

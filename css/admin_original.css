@@ -68,6 +68,10 @@ body {
   display: flex;
   flex-direction: column;
   padding: 0.5rem 0;
+  position: sticky;
+  top: 57px;
+  height: calc(100vh - 57px);
+  overflow-y: auto;
 }
 
 .sidebar-close-row {

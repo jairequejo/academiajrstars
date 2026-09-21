@@ -167,3 +167,4 @@
     }
   });
 })();
+document.addEventListener('DOMContentLoaded', () => { const f_i = document.getElementById('a-fecha-inicio'); if (f_i) { const offset = new Date().getTimezoneOffset(); const myDate = new Date(new Date().getTime() - (offset*60*1000)); f_i.value = myDate.toISOString().split('T')[0]; } });

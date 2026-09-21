@@ -79,12 +79,13 @@
     const fee = a.tarifa_mensual == null ? 'S/ 80.00 · Por defecto' : Number(a.tarifa_mensual) === 0 ? 'Becado · S/ 0.00' : `S/ ${Number(a.tarifa_mensual).toFixed(2)}`;
     const expires = dayKey(a.valid_until), today = dayKey(new Date());
     const paymentStatus = !expires ? 'Sin pago registrado' : expires >= today ? 'Al día' : 'Vencido';
+    const displaySede = (window.adminSedes && window.adminSedes.getAlias) ? window.adminSedes.getAlias(a.sede) : a.sede;
     content.innerHTML = `
       <div class="ficha-hero">
         <div class="ficha-avatar" aria-hidden="true">${escape(initials)}</div>
         <div class="ficha-identity"><h3>${display(a.full_name)}</h3><div class="ficha-tags">
           <span class="ficha-tag ${active ? 'is-active' : 'is-inactive'}">${active ? 'Activo' : 'Inactivo'}</span>
-          <span class="ficha-tag">Categoría: ${display(a.categoria)}</span><span class="ficha-tag">${display(a.sede)}</span>
+          <span class="ficha-tag">Categoría: ${display(a.categoria)}</span><span class="ficha-tag">${display(displaySede)}</span>
         </div></div>
       </div>
       <div class="ficha-stats">
@@ -95,7 +96,7 @@
       </div>
       <section class="ficha-section ficha-chart"><h3>${adminIcon('chart')} Asistencia · últimos 6 meses</h3><div id="ficha-attendance" aria-live="polite"><p class="ficha-message">Cargando asistencia…</p></div></section>
       <div class="ficha-grid">
-        ${details('Entrenamiento', 'ball', [['Categoría', a.categoria], ['Sede', a.sede], ['Horario', ({ LMV: 'Lunes, miércoles y viernes', MJS: 'Martes, jueves y sábado' })[a.horario] || a.horario], ['Turno', a.turno], ['Grupo', a.grupo], ['Inscrito desde', dateLabel(a.created_at)]])}
+        ${details('Entrenamiento', 'ball', [['Categoría', a.categoria], ['Sede', displaySede], ['Horario', ({ LMV: 'Lunes, miércoles y viernes', MJS: 'Martes, jueves y sábado' })[a.horario] || a.horario], ['Turno', a.turno], ['Grupo', a.grupo], ['Inscrito desde', dateLabel(a.created_at)]])}
         ${details('Datos y contacto', 'user', [['Nombres', a.first_names], ['Apellidos', a.last_names], ['DNI', a.dni], ['Fecha de nacimiento', dateLabel(a.fecha_nacimiento)], ['Edad', ageLabel(a.fecha_nacimiento)], ['Apoderado', a.parent_name], ['Teléfono', a.parent_phone], ['Teléfono alternativo', a.parent_phone_secondary], ['Código de alumno', a.codigo_legacy], ['Observación', a.notes]])}
         ${details('Mensualidad y créditos', 'wallet', [['Estado del pago', paymentStatus], ['Vencimiento', dateLabel(a.valid_until)], ['Tarifa mensual', fee], ['Matrícula', a.enrollment_amount == null ? null : `S/ ${Number(a.enrollment_amount).toFixed(2)}`], ['Créditos de batidos', a.batido_credits ?? 0]])}
       </div>
