@@ -457,3 +457,326 @@ body {
   .streak-stage.is-active .streak-star path { animation: none; }
   .portal-scan-line { animation: none; top: 50%; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PALETA COMPARTIDA CON EL LANDING
+   El portal y la web pública usan los mismos tokens para no tener dos
+   identidades distintas: se cambia el token y cambia en todas partes.
+   Valores tomados de css/landing-effects.css.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  --jr-red: #e5191b;
+  --jr-blue: #153a79;
+  --jr-deep: #091d45;
+  --jr-ink: #050505;
+  --jr-gold: #f5a623;
+  --jr-burgundy: #76263a;
+  --jr-muted: #687083;
+  --jr-line-dark: rgba(255, 255, 255, .14);
+  --jr-nav-h: 72px;
+  --jr-nav-z: 90;
+  --jr-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --jr-font-display: "Bebas Neue", Impact, sans-serif;
+
+  /* Alias: el resto de la hoja sigue usando los nombres del portal. */
+  --portal-red: var(--jr-red);
+  --portal-gold: var(--jr-gold);
+  --portal-black: var(--jr-ink);
+  --portal-deep: var(--jr-deep);
+  --portal-blue: var(--jr-blue);
+  --portal-burgundy: var(--jr-burgundy);
+}
+
+html { scroll-behavior: smooth; }
+
+/* Componentes que vivían en el bloque Tailwind en línea: sin el CDN ese
+   bloque no se procesa, así que las tarjetas y el spinner salían planos. */
+.bento-card {
+  background-color: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 1.5rem;
+}
+.spinner {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, .18);
+  border-top-color: var(--portal-red);
+  border-radius: 50%;
+  animation: pt-spin 1s ease-in-out infinite;
+}
+@keyframes pt-spin { to { transform: rotate(360deg); } }
+
+/* Ayuda breve bajo el buscador */
+.pt-help {
+  margin: 2px 0 0;
+  padding: 12px 14px;
+  color: #fff;
+  border: 1px solid rgba(0, 0, 0, .22);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, .2);
+  font-family: var(--jr-font-body);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+.pt-help strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.pt-help a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Enlace para saltar al contenido: solo aparece con teclado */
+.pt-skip {
+  position: absolute;
+  top: -80px;
+  left: 16px;
+  z-index: 300;
+  padding: 12px 18px;
+  color: var(--jr-deep);
+  border-radius: 0 0 12px 12px;
+  background: var(--jr-gold);
+  font: 800 12px/1 var(--jr-font-body);
+  letter-spacing: .06em;
+  text-decoration: none;
+}
+.pt-skip:focus { top: 0; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BARRA DE NAVEGACIÓN DE ESCRITORIO
+   Desde 1024px el portal muestra una barra fija con la misma jerarquía que
+   la cabecera del landing: marca, secciones y acciones. En móvil se
+   conserva la cabecera compacta del portal, que ya funciona bien.
+   ═══════════════════════════════════════════════════════════════════════ */
+.pt-nav { display: none; }
+
+/* 992px es el ancho mínimo real de la barra: por debajo manda la cabecera
+   compacta del portal, que ya funciona bien en móvil y en pantallas angostas. */
+@media (min-width: 992px) {
+  /* La barra es fija: el contenido empieza debajo para no quedar tapado. */
+  .portal-body { padding-top: var(--jr-nav-h); }
+
+  /* La barra ya lleva marca y salida: la cabecera compacta sobra. */
+  .portal-body .portal-topbar,
+  .portal-body.portal-player-view .portal-topbar { display: none !important; }
+  .portal-body > .portal-visual,
+  .portal-body > .portal-main { min-height: calc(100vh - var(--jr-nav-h)) !important; }
+
+  .pt-nav {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: var(--jr-nav-z);
+    display: flex;
+    align-items: center;
+    gap: clamp(14px, 2.2vw, 34px);
+    height: var(--jr-nav-h);
+    padding: 0 clamp(1rem, 3.2vw, 3rem);
+    color: #fff;
+    font-family: var(--jr-font-body);
+    background: rgba(9, 29, 69, .95);
+    border-bottom: 1px solid var(--jr-line-dark);
+    box-shadow: 0 12px 34px rgba(5, 5, 5, .3);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+  .pt-nav::after {
+    content: "";
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: min(34%, 380px);
+    height: 2px;
+    background: linear-gradient(90deg, var(--jr-red), rgba(229, 25, 27, 0));
+  }
+
+  /* Marca */
+  .pt-nav-brand {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+  }
+  .pt-nav-brand img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .45));
+    transition: transform .25s ease;
+  }
+  .pt-nav-brand:hover img { transform: scale(1.06); }
+  .pt-nav-brand-copy { display: flex; flex-direction: column; line-height: 1; }
+  .pt-nav-brand-copy strong {
+    font-family: var(--jr-font-display);
+    font-size: 23px;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: .07em;
+  }
+  .pt-nav-brand-copy small {
+    margin-top: 5px;
+    color: var(--jr-gold);
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+  }
+
+  /* Secciones: cambian según se esté buscando o viendo una ficha. */
+  .pt-nav-links {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(2px, .5vw, 8px);
+    min-width: 0;
+  }
+  .pt-nav-set { display: none; flex: 0 0 auto; align-items: center; gap: clamp(2px, .5vw, 8px); }
+  .portal-body:not(.portal-player-view) .pt-nav-set[data-pt-set="buscador"],
+  .portal-player-view .pt-nav-set[data-pt-set="ficha"] { display: flex; }
+
+  .pt-nav-link {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 12px;
+    color: rgba(255, 255, 255, .74);
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .2s ease, background-color .2s ease;
+  }
+  .pt-nav-link:hover { color: #fff; background: rgba(255, 255, 255, .09); }
+  .pt-nav-link.is-current { color: #fff; }
+  .pt-nav-link.is-current::after {
+    content: "";
+    position: absolute;
+    right: 12px;
+    bottom: 7px;
+    left: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--jr-gold);
+  }
+  .pt-nav-link:focus-visible,
+  .pt-nav-ghost:focus-visible,
+  .pt-nav-cta:focus-visible {
+    outline: 3px solid var(--jr-gold);
+    outline-offset: 2px;
+  }
+
+  /* Acciones */
+  .pt-nav-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
+  .pt-nav-who {
+    display: inline-flex;
+    align-items: center;
+    max-width: 200px;
+    height: 32px;
+    padding: 0 12px;
+    overflow: hidden;
+    color: var(--jr-gold);
+    border: 1px solid rgba(245, 166, 35, .38);
+    border-radius: 999px;
+    background: rgba(245, 166, 35, .12);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pt-nav-who[hidden] { display: none; }
+
+  .pt-nav-ghost {
+    display: none;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 16px;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 999px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color .2s ease, border-color .2s ease;
+  }
+  .portal-player-view .pt-nav-ghost { display: inline-flex; }
+  .pt-nav-ghost:hover { border-color: rgba(255, 255, 255, .55); background: rgba(255, 255, 255, .12); }
+
+  .pt-nav-cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 0 18px;
+    color: var(--jr-deep);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color .2s ease, color .2s ease;
+  }
+  .pt-nav-cta:hover { color: #2a1c00; background: var(--jr-gold); }
+
+  /* Anclas de la ficha: no quedan debajo de la barra fija. */
+  #ficha-jugador, #asistencia, #progreso, #kiosko, #ranking-card {
+    scroll-margin-top: calc(var(--jr-nav-h) + 18px);
+  }
+
+  /* Botones deportivos inclinados, como en la portada del club. */
+  .slant-btn {
+    transform: skewX(-10deg);
+    transition: transform .3s cubic-bezier(.25, 1, .5, 1), box-shadow .3s ease, background-color .2s ease;
+  }
+  .slant-btn-content { display: block; transform: skewX(10deg); }
+  .slant-btn:hover { transform: skewX(-10deg) scale(1.02); box-shadow: 0 0 22px rgba(229, 25, 27, .32); }
+}
+
+/* Etiqueta larga/corta del botón «Buscar otro jugador» */
+.pt-ghost-corto { display: none; }
+
+/* Escritorio estrecho: la barra se compacta antes de apretarse. */
+@media (min-width: 992px) and (max-width: 1439px) {
+  .pt-nav-who { display: none; }
+}
+
+@media (min-width: 992px) and (max-width: 1279px) {
+  .pt-nav { gap: 10px; padding: 0 16px; }
+  .pt-nav-links, .pt-nav-set { gap: 2px; }
+  .pt-nav-link { padding: 0 8px; font-size: 10px; letter-spacing: .1em; }
+  .pt-nav-link.is-current::after { right: 8px; left: 8px; }
+  .pt-nav-brand-copy strong { font-size: 21px; }
+  .pt-nav-brand-copy small { letter-spacing: .16em; }
+  .pt-nav-cta { padding: 0 14px; }
+  .pt-ghost-largo { display: none; }
+  .pt-ghost-corto { display: inline; }
+}
+
+/* Mensualidad bloqueada: la navegación no ofrece secciones que no existen. */
+.portal-locked-view .pt-nav-link[href="#asistencia"],
+.portal-locked-view .pt-nav-link[href="#progreso"] { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .pt-nav-brand img { transition: none; }
+  .slant-btn { transition: none; }
+  .spinner { animation: none; }
+}

@@ -10,7 +10,7 @@
   })();
   </script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <title>Portal del Jugador | JR Stars 2026</title>
   <link rel="icon" href="../img/escudo.png" type="image/png">
@@ -66,11 +66,49 @@
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <link rel="stylesheet" href="../css/player-card.css?v=20261018_pagos2">
-  <link rel="stylesheet" href="../css/portal.css?v=20260905_night">
+  <link rel="stylesheet" href="../css/portal.css?v=20261018_nav3">
   <link rel="stylesheet" href="../css/tailwind.css">
 </head>
 
 <body class="portal-body min-h-screen flex flex-col lg:flex-row font-body antialiased selection:bg-brand selection:text-white">
+
+  <a class="pt-skip" href="#portal-contenido">Saltar al contenido</a>
+
+  <!-- Navegación de escritorio: misma jerarquía y paleta que el landing -->
+  <header class="pt-nav" id="pt-nav">
+    <a class="pt-nav-brand" href="../">
+      <img src="../img/escudo.png" alt="" width="400" height="400">
+      <span class="pt-nav-brand-copy">
+        <strong>JR STARS</strong>
+        <small>Portal del jugador</small>
+      </span>
+    </a>
+
+    <nav class="pt-nav-links" aria-label="Secciones del portal">
+      <div class="pt-nav-set" data-pt-set="buscador">
+        <a class="pt-nav-link is-current" href="#p1" aria-current="true">Buscar jugador</a>
+        <a class="pt-nav-link" href="../#propuesta">Propuesta</a>
+        <a class="pt-nav-link" href="../#primera-visita">Primera visita</a>
+        <a class="pt-nav-link" href="../#preguntas">Preguntas</a>
+      </div>
+      <div class="pt-nav-set" data-pt-set="ficha">
+        <a class="pt-nav-link" href="#ficha-jugador">Resumen</a>
+        <a class="pt-nav-link" href="#asistencia">Asistencia</a>
+        <a class="pt-nav-link" href="#progreso">Progreso</a>
+        <a class="pt-nav-link" href="#kiosko">Kiosko JR</a>
+        <a class="pt-nav-link" href="#ranking-card">Ranking</a>
+      </div>
+    </nav>
+
+    <div class="pt-nav-actions">
+      <span class="pt-nav-who" id="pt-nav-who" hidden></span>
+      <button type="button" class="pt-nav-ghost" onclick="volver()">
+        <span class="pt-ghost-largo">Buscar otro jugador</span>
+        <span class="pt-ghost-corto">Buscar otro</span>
+      </button>
+      <a class="pt-nav-cta" href="https://wa.me/51955515693?text=Hola%2C%20tengo%20una%20consulta%20sobre%20el%20portal%20del%20jugador%20de%20JR%20Stars." target="_blank" rel="noopener noreferrer">Escríbenos</a>
+    </div>
+  </header>
 
   <!-- Hero Visual Izquierdo (Desktop) -->
   <div class="portal-visual hidden lg:flex relative w-1/2 min-h-screen items-center justify-center bg-[#000] border-r border-white/5 overflow-hidden">
@@ -93,7 +131,7 @@
   </div>
 
   <!-- Contenido Interactivo -->
-  <main class="portal-main w-full lg:w-1/2 min-h-screen flex flex-col px-4 py-6 sm:p-12 relative overflow-y-auto bg-[#050505]">
+  <main id="portal-contenido" class="portal-main w-full lg:w-1/2 min-h-screen flex flex-col px-4 py-6 sm:p-12 relative overflow-y-auto bg-[#050505]">
 
     <!-- Mobile Topbar -->
     <div class="portal-topbar lg:hidden flex items-center justify-between mb-8 pb-4 border-b border-white/10 relative">
@@ -176,6 +214,11 @@
               <span class="slant-btn-content text-center">CONTACTAR ACADEMIA</span>
             </a>
           </div>
+
+          <p class="pt-help">
+            <strong>¿Dónde encuentro el código?</strong>
+            Está en la credencial del jugador. Si no la tienes a mano, <a href="https://wa.me/51955515693?text=Hola%2C%20necesito%20el%20c%C3%B3digo%20del%20portal%20para%20un%20jugador%20de%20JR%20Stars." target="_blank" rel="noopener noreferrer">escríbenos por WhatsApp</a> con el nombre del jugador y te ayudamos.
+          </p>
         </div>
       </section>
 
@@ -193,7 +236,7 @@
 
         <div class="grid grid-cols-1 gap-6">
           <!-- Kiosko Bento -->
-          <div class="bento-card p-6 flex flex-col gap-6 relative overflow-hidden">
+          <div id="kiosko" class="bento-card p-6 flex flex-col gap-6 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-[50px] rounded-full"></div>
             <div>
               <div class="text-gray-400 font-bold text-[0.65rem] uppercase tracking-widest mb-1">NUTRICIÓN</div>
@@ -219,7 +262,7 @@
           </div>
 
           <!-- Ranking Bento -->
-          <div class="bento-card p-6">
+          <div id="ranking-card" class="bento-card p-6">
             <div>
               <div class="text-gray-400 font-bold text-[0.65rem] uppercase tracking-widest mb-1">DISCIPLINA</div>
               <h2 class="font-display text-4xl uppercase italic text-white">TOP 5 <span class="text-brand">ASISTENCIAS</span></h2>
@@ -254,6 +297,76 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
   <script src="../js/supabaseClient.js"></script>
   <script src="../js/lib/html2canvas.min.js"></script>
-  <script src="../js/home.js?v=20261018_pagos2"></script>
+  <script src="../js/home.js?v=20261018_nav"></script>
+
+  <script>
+    // Navegación de escritorio: marca la sección visible y muestra de quién
+    // es la ficha abierta. Es una mejora progresiva: si algo falla, la barra
+    // sigue funcionando con sus enlaces normales.
+    (function () {
+      const nav = document.getElementById('pt-nav');
+      if (!nav) return;
+
+      const who = document.getElementById('pt-nav-who');
+      const SECCIONES = ['ficha-jugador', 'asistencia', 'progreso', 'kiosko', 'ranking-card'];
+      let temporizador = 0;
+
+      const marcar = (id) => {
+        nav.querySelectorAll('.pt-nav-link').forEach((enlace) => {
+          const activo = enlace.getAttribute('href') === '#' + id;
+          enlace.classList.toggle('is-current', activo);
+          if (activo) enlace.setAttribute('aria-current', 'true');
+          else enlace.removeAttribute('aria-current');
+        });
+      };
+
+      const seccionVisible = () => {
+        // Al llegar al final, la última sección es la que se está viendo.
+        const fin = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 6;
+        if (fin) return SECCIONES[SECCIONES.length - 1];
+        const limite = 96; // alto de la barra fija más un respiro
+        let actual = SECCIONES[0];
+        for (const id of SECCIONES) {
+          const bloque = document.getElementById(id);
+          if (!bloque) continue;
+          if (bloque.getBoundingClientRect().top - limite <= 0) actual = id;
+        }
+        return actual;
+      };
+
+      const revisar = () => {
+        if (!document.body.classList.contains('portal-player-view')) {
+          if (who) { who.hidden = true; who.textContent = ''; }
+          marcar('p1');
+          return;
+        }
+        if (who) {
+          const nombre = String(window._currentPlayerShareName || '').trim();
+          who.textContent = nombre ? 'Ficha de ' + nombre : '';
+          who.hidden = !nombre;
+        }
+        marcar(seccionVisible());
+      };
+
+      const alDesplazar = () => {
+        // Responde al primer evento y vuelve a revisar al terminar la ráfaga,
+        // para que el estado final siempre coincida con lo que se ve.
+        if (temporizador) return;
+        revisar();
+        temporizador = window.setTimeout(() => {
+          temporizador = 0;
+          revisar();
+        }, 120);
+      };
+
+      window.addEventListener('scroll', alDesplazar, { passive: true });
+      window.addEventListener('resize', alDesplazar);
+      new MutationObserver(revisar).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+      const wrap = document.getElementById('card-wrap');
+      if (wrap) new MutationObserver(revisar).observe(wrap, { childList: true });
+      window.addEventListener('load', revisar);
+      revisar();
+    })();
+  </script>
 </body>
 </html>

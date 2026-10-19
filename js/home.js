@@ -94,7 +94,7 @@ function marcarDemo(activo, estado) {
         banner.id = 'portal-demo-banner';
         banner.setAttribute('role', 'status');
         banner.style.cssText = 'position:relative;z-index:60;text-align:center;' +
-            'background:#153A79;color:#fff;font:700 11px/1.2 Inter,system-ui,sans-serif;letter-spacing:.12em;' +
+            'background:#76263a;color:#fff;font:700 11px/1.2 Inter,system-ui,sans-serif;letter-spacing:.12em;' +
             'text-transform:uppercase;padding:9px 14px';
         document.body.insertBefore(banner, document.body.firstChild);
     }
@@ -391,6 +391,7 @@ function closeMetricModal() {
 function volver() {
     localStorage.removeItem('jrstars_portal_session');
     marcarDemo(false);
+    document.body.classList.remove('portal-locked-view');
     mostrarPaneles('buscar');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -758,9 +759,12 @@ function renderCard(d) {
         </div>
       </div>`;
 
+    // La barra de escritorio oculta las secciones que no existen en esta vista.
+    document.body.classList.toggle('portal-locked-view', estadoPago === 'bloqueado');
+
     if (estadoPago === 'bloqueado') {
         wrap.innerHTML = `
-          <article class="epic-card is-locked">
+          <article class="epic-card is-locked" id="ficha-jugador">
             ${playerPanel}
             <section class="epic-data-panel epic-locked-panel">
               <div class="epic-report-head"><div><span>REPORTE DE TEMPORADA</span><h3>PROGRESO</h3></div><strong>${season}</strong></div>
@@ -798,10 +802,10 @@ function renderCard(d) {
       </div>`;
 
     wrap.innerHTML = `
-      <article class="epic-card">
+      <article class="epic-card" id="ficha-jugador">
         ${playerPanel}
         <div class="pc-body">
-          <div class="pc-section-head">
+          <div class="pc-section-head" id="asistencia">
             <div class="pc-section-head-left">
               <span>Asistencia</span>
               <h3>¿ESTÁ YENDO A ENTRENAR?</h3>
@@ -823,7 +827,7 @@ function renderCard(d) {
 
           <div class="pc-divider"></div>
 
-          <div class="pc-section-head">
+          <div class="pc-section-head" id="progreso">
             <div class="pc-section-head-left">
               <span>Progreso</span>
               <h3>SU EVOLUCIÓN</h3>
