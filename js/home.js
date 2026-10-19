@@ -94,7 +94,8 @@ function marcarDemo(activo, estado) {
         banner.id = 'portal-demo-banner';
         banner.setAttribute('role', 'status');
         banner.style.cssText = 'position:relative;z-index:60;text-align:center;' +
-            'background:#76263a;color:#fff;font:700 11px/1.2 Inter,system-ui,sans-serif;letter-spacing:.12em;' +
+            'background:#0a0a0c;color:#f5a623;border-bottom:1px solid rgba(245,166,35,.35);' +
+            'font:700 11px/1.2 Inter,system-ui,sans-serif;letter-spacing:.12em;' +
             'text-transform:uppercase;padding:9px 14px';
         document.body.insertBefore(banner, document.body.firstChild);
     }

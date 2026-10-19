@@ -16,7 +16,12 @@ body {
 *, *::before, *::after { box-sizing: border-box; }
 
 .portal-body { min-width: 320px; }
-.portal-main { background: var(--portal-paper) !important; color: var(--portal-black); }
+.portal-main {
+  color: #fff;
+  background:
+    radial-gradient(circle at 84% 6%, rgba(229, 25, 27, .16), transparent 44%),
+    linear-gradient(150deg, #131317 0%, #050505 55%, #0d0d11 100%) !important;
+}
 .portal-shell { justify-content: center; }
 
 /* Portada lateral */
@@ -76,14 +81,14 @@ body {
   letter-spacing: .14em;
 }
 .portal-auth-pill { background: var(--portal-black) !important; color: #fff !important; border-color: var(--portal-black) !important; }
-.portal-search-title { color: var(--portal-black) !important; }
-.portal-search-copy { max-width: 510px; margin: 0 0 28px; color: #656569; font-size: 14px; font-weight: 600; line-height: 1.65; }
+.portal-search-title { color: #fff !important; text-shadow: 0 10px 30px rgba(0, 0, 0, .55); }
+.portal-search-copy { max-width: 510px; margin: 0 0 28px; color: rgba(255, 255, 255, .74); font-size: 14px; font-weight: 600; line-height: 1.65; }
 .portal-search-card {
   position: relative;
   overflow: hidden;
   background: var(--portal-black) !important;
   border-color: rgba(255, 255, 255, .12) !important;
-  box-shadow: 0 28px 70px rgba(5, 5, 5, .18);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .03) inset;
 }
 .portal-search-card::before {
   content: "";
@@ -530,6 +535,16 @@ html { scroll-behavior: smooth; }
 }
 .pt-help a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 
+/* Desde tablet el buscador vive en la tarjeta negra: la nota se aclara. */
+@media (min-width: 768px) {
+  .pt-help {
+    color: #c9ccd6;
+    border-color: rgba(255, 255, 255, .14);
+    background: rgba(255, 255, 255, .05);
+  }
+  .pt-help strong { color: var(--jr-gold); }
+}
+
 /* Enlace para saltar al contenido: solo aparece con teclado */
 .pt-skip {
   position: absolute;
@@ -548,8 +563,9 @@ html { scroll-behavior: smooth; }
 
 /* ═══════════════════════════════════════════════════════════════════════
    BARRA DE NAVEGACIÓN DE ESCRITORIO
-   Desde 1024px el portal muestra una barra fija con la misma jerarquía que
-   la cabecera del landing: marca, secciones y acciones. En móvil se
+   Desde 768px el portal muestra una barra fija con la misma jerarquía que
+   la cabecera del landing —marca, secciones y acciones—, pero con la
+   identidad del portal (negro de cancha, rojo y oro). En móvil se
    conserva la cabecera compacta del portal, que ya funciona bien.
    ═══════════════════════════════════════════════════════════════════════ */
 .pt-nav { display: none; }
@@ -577,9 +593,9 @@ html { scroll-behavior: smooth; }
     padding: 0 clamp(1rem, 3.2vw, 3rem);
     color: #fff;
     font-family: var(--jr-font-body);
-    background: rgba(9, 29, 69, .95);
-    border-bottom: 1px solid var(--jr-line-dark);
-    box-shadow: 0 12px 34px rgba(5, 5, 5, .3);
+    background: linear-gradient(180deg, rgba(26, 26, 31, .97), rgba(9, 9, 11, .95));
+    border-bottom: 1px solid rgba(255, 255, 255, .09);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .55);
     backdrop-filter: blur(18px) saturate(140%);
   }
   .pt-nav::after {
@@ -587,7 +603,7 @@ html { scroll-behavior: smooth; }
     position: absolute;
     bottom: -1px;
     left: 0;
-    width: min(34%, 380px);
+    width: min(38%, 420px);
     height: 2px;
     background: linear-gradient(90deg, var(--jr-red), rgba(229, 25, 27, 0));
   }
@@ -723,18 +739,19 @@ html { scroll-behavior: smooth; }
     align-items: center;
     min-height: 40px;
     padding: 0 18px;
-    color: var(--jr-deep);
+    color: #fff;
     border-radius: 999px;
-    background: #fff;
+    background: var(--jr-red);
+    box-shadow: 0 8px 20px rgba(229, 25, 27, .34);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .12em;
     text-transform: uppercase;
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color .2s ease, color .2s ease;
+    transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
   }
-  .pt-nav-cta:hover { color: #2a1c00; background: var(--jr-gold); }
+  .pt-nav-cta:hover { color: #fff; background: #ff2a2c; box-shadow: 0 10px 26px rgba(229, 25, 27, .5); }
 
   /* Anclas de la ficha: no quedan debajo de la barra fija. */
   #ficha-jugador, #asistencia, #progreso, #kiosko, #ranking-card {
