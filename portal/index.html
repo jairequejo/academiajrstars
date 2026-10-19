@@ -66,7 +66,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <link rel="stylesheet" href="../css/player-card.css?v=20261018_pagos2">
-  <link rel="stylesheet" href="../css/portal.css?v=20261019_landing2">
+  <link rel="stylesheet" href="../css/portal.css?v=20261019_ficha3">
   <link rel="stylesheet" href="../css/tailwind.css">
 </head>
 
@@ -93,10 +93,9 @@
       </div>
       <div class="pt-nav-set" data-pt-set="ficha">
         <a class="pt-nav-link" href="#ficha-jugador">Resumen</a>
-        <a class="pt-nav-link" href="#asistencia">Asistencia</a>
-        <a class="pt-nav-link" href="#progreso">Progreso</a>
-        <a class="pt-nav-link" href="#kiosko">Kiosko JR</a>
-        <a class="pt-nav-link" href="#ranking-card">Ranking</a>
+        <a class="pt-nav-link" href="#asistencia">Su mes</a>
+        <a class="pt-nav-link" href="#progreso">Evolución</a>
+        <a class="pt-nav-link" href="#cuentas">Cuentas</a>
       </div>
     </nav>
 
@@ -231,46 +230,38 @@
         <div id="card-wrap" class="w-full" aria-live="polite"></div>
       </section>
 
-      <!-- DASHBOARD (Kiosko + Ranking) -->
-      <section id="p3" class="hidden w-full mt-10 space-y-8">
+      <!-- ADMINISTRACIÓN: mensualidad y kiosko, al final y separados de lo deportivo -->
+      <section id="p3" class="hidden w-full mt-10">
+        <div id="cuentas" class="bento-card p-6 sm:p-8">
 
-        <div class="grid grid-cols-1 gap-6">
-          <!-- Kiosko Bento -->
-          <div id="kiosko" class="bento-card p-6 flex flex-col gap-6 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-[50px] rounded-full"></div>
-            <div>
-              <div class="text-gray-400 font-bold text-[0.65rem] uppercase tracking-widest mb-1">NUTRICIÓN</div>
-              <h2 class="font-display text-4xl uppercase italic text-white">KIOSKO <span class="text-brand">JR</span></h2>
-            </div>
+          <div class="pc-admin-head">
+            <span class="pc-admin-kicker">Administración</span>
+            <h2 class="font-display text-4xl uppercase text-white">MENSUALIDAD <span class="text-brand">Y KIOSKO</span></h2>
+            <p class="pc-admin-sub">Las cuentas van aparte de lo deportivo: aquí están el estado de la mensualidad y el saldo de batidos.</p>
+          </div>
 
-            <div class="bg-white/5 rounded-lg p-4 border border-white/5">
-              <div class="flex justify-between text-[0.65rem] font-bold uppercase tracking-widest text-gray-400 mb-2">
-                <span>ENERGÍA</span><span id="kiosk-energy-label" class="text-brand">BAJA</span>
-              </div>
-              <div class="w-full h-2 bg-black rounded-full overflow-hidden border border-white/10">
-                <div id="kiosk-energy-bar" class="h-full bg-brand transition-all" style="width:0%"></div>
-              </div>
-            </div>
+          <div class="pc-admin-grid">
 
-            <div class="flex flex-col gap-2 relative z-10">
-              <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Saldo Disponible</span>
-              <div id="kiosk-credit-balance" class="font-display text-4xl text-white">0 CRÉDITOS</div>
-              <button onclick="document.getElementById('modal-yape').classList.remove('hidden')" class="slant-btn bg-brand text-white px-6 py-3 rounded-xl mt-4 border border-transparent">
-                <span class="slant-btn-content font-display text-xl tracking-wider">RECARGAR (S/20)</span>
+            <div class="pc-admin-row">
+              <span class="pc-admin-label">Mensualidad</span>
+              <strong id="admin-pago" class="pc-admin-value">—</strong>
+              <p id="admin-pago-sub" class="pc-admin-note">—</p>
+              <button type="button" onclick="document.getElementById('modal-yape').classList.remove('hidden')" class="slant-btn bg-brand text-white px-6 py-3 w-full border border-transparent">
+                <span class="slant-btn-content font-display text-lg uppercase tracking-wider">COORDINAR PAGO</span>
               </button>
             </div>
-          </div>
 
-          <!-- Ranking Bento -->
-          <div id="ranking-card" class="bento-card p-6">
-            <div>
-              <div class="text-gray-400 font-bold text-[0.65rem] uppercase tracking-widest mb-1">DISCIPLINA</div>
-              <h2 class="font-display text-4xl uppercase italic text-white">TOP 5 <span class="text-brand">ASISTENCIAS</span></h2>
+            <div class="pc-admin-row" id="kiosko">
+              <span class="pc-admin-label">Kiosko JR · batidos</span>
+              <strong id="kiosk-credit-balance" class="pc-admin-value">0 CRÉDITOS</strong>
+              <p class="pc-admin-note">El saldo se usa en el kiosco durante los entrenamientos.</p>
+              <button type="button" onclick="document.getElementById('modal-yape').classList.remove('hidden')" class="slant-btn bg-white text-black px-6 py-3 w-full border border-transparent">
+                <span class="slant-btn-content font-display text-lg uppercase tracking-wider">COORDINAR RECARGA</span>
+              </button>
             </div>
-            <div id="ranking" class="flex flex-col gap-3 mt-6"></div>
+
           </div>
         </div>
-
       </section>
     </div>
   </main>
@@ -288,7 +279,7 @@
 
       <div class="font-display text-3xl tracking-widest text-brand mb-6">955 515 693</div>
 
-      <a href="https://wa.me/51955515693?text=Yapé%20S/20%20para%20créditos%20de%20kiosko." target="_blank" class="slant-btn bg-white text-black px-6 py-3 w-full rounded-xl">
+      <a href="https://wa.me/51955515693?text=Hola%2C%20quiero%20coordinar%20un%20pago%20del%20Portal%20del%20Jugador%20de%20JR%20Stars." target="_blank" class="slant-btn bg-white text-black px-6 py-3 w-full rounded-xl">
         <span class="slant-btn-content font-display text-lg uppercase tracking-wider font-bold">ENVIAR WHATSAPP</span>
       </a>
     </div>
@@ -297,7 +288,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
   <script src="../js/supabaseClient.js"></script>
   <script src="../js/lib/html2canvas.min.js"></script>
-  <script src="../js/home.js?v=20261019_landing1"></script>
+  <script src="../js/home.js?v=20261019_ficha3"></script>
 
   <script>
     // Navegación de escritorio: marca la sección visible y muestra de quién
@@ -308,7 +299,7 @@
       if (!nav) return;
 
       const who = document.getElementById('pt-nav-who');
-      const SECCIONES = ['ficha-jugador', 'asistencia', 'progreso', 'kiosko', 'ranking-card'];
+      const SECCIONES = ['ficha-jugador', 'asistencia', 'progreso', 'cuentas'];
       let temporizador = 0;
 
       const marcar = (id) => {

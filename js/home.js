@@ -122,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    loadRanking();
     initNFC();
     const dniInput = $('dni');
     dniInput?.addEventListener('keydown', event => {
@@ -720,9 +719,41 @@ function renderCard(d) {
         ? `De ${fechaPrimera} a ${fechaUltima}`
         : 'Comparación entre controles';
 
-    const asistenciaLinea = monthSessions > 0
-        ? `Asistió <strong>${monthSessions}</strong> ${monthSessions === 1 ? 'vez' : 'veces'} este mes y suma <strong>${totalSessions}</strong> ${totalSessions === 1 ? 'entrenamiento' : 'entrenamientos'} en la temporada.`
-        : `Todavía no registra entrenamientos este mes. En la temporada suma <strong>${totalSessions}</strong>.`;
+    // ── Reto cercano: el siguiente hito de 5 entrenamientos de la temporada ──
+    const siguienteHito = (Math.floor(totalSessions / 5) + 1) * 5;
+    const faltanHito = Math.max(1, siguienteHito - totalSessions);
+    const retoTexto = totalSessions === 0
+        ? 'Su primer hito son <strong>5</strong> entrenamientos de la temporada.'
+        : `Le faltan <strong>${faltanHito}</strong> ${faltanHito === 1 ? 'entrenamiento' : 'entrenamientos'} para llegar a <strong>${siguienteHito}</strong> de la temporada.`;
+    const anilloLargo = 2 * Math.PI * 52;
+    const anilloPct = Math.max(0, Math.min(1, totalSessions / siguienteHito));
+    const anilloFin = (anilloLargo * (1 - anilloPct)).toFixed(2);
+
+    // La línea que responde la pregunta de la familia sin leer nada más.
+    const resumenLinea = monthSessions > 0
+        ? `Este mes vino a <strong>${monthSessions}</strong> ${monthSessions === 1 ? 'entrenamiento' : 'entrenamientos'}; en la temporada suma <strong>${totalSessions}</strong>.`
+        : `Este mes todavía no registra entrenamientos; en la temporada suma <strong>${totalSessions}</strong>.`;
+
+    // Lo deportivo se compara consigo mismo. El cuerpo va aparte y plegado.
+    const cuerpoKeys = ['Estatura', 'Peso'];
+    const filaCambio = ([k, v]) => `<div><span>${escapePortalHtml(k)}</span><strong>${v}</strong></div>`;
+    const cambiosJuegoHtml = cambios.filter(c => !cuerpoKeys.includes(c[0])).map(filaCambio).join('');
+    const cambiosCuerpoHtml = cambios.filter(c => cuerpoKeys.includes(c[0])).map(filaCambio).join('');
+
+    const chartsJuego = historyData.length ? `
+      <div class="pc-charts">
+        ${buildMetricSparkline(historyData, 'salto_cm', 'cm', '🦵 Salto')}
+        ${buildMetricSparkline(historyData, 'sprint_10m_seg', 's', '⚡ Sprint 10 m')}
+      </div>` : `
+      <div class="performance-empty">
+        <span aria-hidden="true">＋</span>
+        <div><strong>Primera medición pendiente</strong><p>Cuando el entrenador registre el primer control, aquí aparecerá su evolución.</p></div>
+      </div>`;
+    const chartsCuerpo = historyData.length ? `
+      <div class="pc-charts is-cuerpo">
+        ${buildMetricSparkline(historyData, 'talla', 'm', '📏 Estatura')}
+        ${buildMetricSparkline(historyData, 'peso', 'kg', '⚖️ Peso')}
+      </div>` : '';
 
     const playerPanel = `
       <div class="pc-hero">
@@ -741,24 +772,34 @@ function renderCard(d) {
           <div class="pc-identity">
             <h2 class="pc-name${nameLengthClass}">${name}</h2>
             <div class="pc-meta">${metaChips}</div>
+            <p class="pc-hero-line">${resumenLinea}</p>
           </div>
           <div class="pc-streak">
-            <span class="pc-streak-label">Mensualidad</span>
+            <span class="pc-streak-label">Constancia</span>
             <div class="pc-streak-value">
-              <div class="pc-streak-flame" aria-hidden="true">${estadoPago === 'al-dia' ? '✓' : '!'}</div>
-              <div class="pc-streak-unit">${estadoPago === 'al-dia' ? 'AL DÍA' : 'PENDIENTE'}</div>
+              <div class="pc-streak-flame" aria-hidden="true">🔥</div>
+              <div class="pc-streak-number">${streak > 0 ? streak : '—'}</div>
+              <div class="pc-streak-unit">${streak > 0 ? 'SEGUIDAS' : 'SIN RACHA'}</div>
             </div>
             <div class="pc-streak-info">
-              <div class="pc-streak-title">${estadoPago === 'al-dia'
-                  ? (vencText ? `Vence el ${vencText}` : 'Sin vencimiento registrado')
-                  : `Plazo: ${plazoText}`}</div>
-              <p class="pc-streak-copy">${estadoPago === 'al-dia'
-                  ? 'Según el registro de la academia a esta fecha.'
-                  : 'La mensualidad se paga dentro de los primeros 15 días del mes.'}</p>
+              <div class="pc-streak-title">${streakTitle}</div>
+              <p class="pc-streak-copy">${streakCopy}</p>
             </div>
           </div>
         </div>
       </div>`;
+
+    // Administración al final y separada de lo deportivo.
+    const adminPago = $('admin-pago');
+    const adminPagoSub = $('admin-pago-sub');
+    if (adminPago) {
+        adminPago.textContent = estadoPago === 'al-dia' ? 'Al día' : estadoPago === 'en-plazo' ? 'Pendiente' : 'Vencida';
+    }
+    if (adminPagoSub) {
+        adminPagoSub.textContent = estadoPago === 'al-dia'
+            ? (vencText ? `Cubierta hasta el ${vencText}.` : 'Según el registro de la academia.')
+            : `Plazo: ${plazoText}. Se registra dentro de los primeros 15 días del mes.`;
+    }
 
     // La barra de escritorio oculta las secciones que no existen en esta vista.
     document.body.classList.toggle('portal-locked-view', estadoPago === 'bloqueado');
@@ -781,26 +822,8 @@ function renderCard(d) {
         return;
     }
 
-    const waMsg = encodeURIComponent(
-        `¡${d.full_name} ya suma ${totalSessions} sesiones esta temporada en JR Stars! 🔥🏆\n` +
-        `Revisa el Portal del Jugador → ${window.location.origin}/portal/`
-    );
-    const hasPhysicalData = Boolean(d.talla_actual || d.peso_actual);
-    
     // Guardar para el modal
     window._currentHistoryData = historyData;
-
-    const charts = historyData.length ? `
-      <div class="pc-charts">
-        ${buildMetricSparkline(historyData, 'talla', 'm', '📏 Estatura')}
-        ${buildMetricSparkline(historyData, 'peso', 'kg', '⚖️ Peso')}
-        ${buildMetricSparkline(historyData, 'salto_cm', 'cm', '🦵 Salto')}
-        ${buildMetricSparkline(historyData, 'sprint_10m_seg', 's', '⚡ Sprint 10m')}
-      </div>` : `
-      <div class="performance-empty">
-        <span aria-hidden="true">＋</span>
-        <div><strong>Primera medición pendiente</strong><p>Cuando el entrenador registre talla y peso, aquí aparecerá toda su evolución.</p></div>
-      </div>`;
 
     wrap.innerHTML = `
       <article class="epic-card" id="ficha-jugador">
@@ -808,41 +831,59 @@ function renderCard(d) {
         <div class="pc-body">
           <div class="pc-section-head" id="asistencia">
             <div class="pc-section-head-left">
-              <span>Asistencia</span>
-              <h3>¿ESTÁ YENDO A ENTRENAR?</h3>
+              <span>Su mes</span>
+              <h3>ASÍ VA ${firstName.toUpperCase()}</h3>
             </div>
+            <span class="pc-section-badge">TEMPORADA ${season}</span>
           </div>
 
-          <p class="pc-lead">${asistenciaLinea}</p>
-
-          <div class="pc-att-grid">
-            <div class="pc-att-card"><strong>${monthSessions}</strong><span>Este mes</span></div>
-            <div class="pc-att-card"><strong>${totalSessions}</strong><span>En la temporada</span></div>
-            <div class="pc-att-card"><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong><span>Último entreno</span></div>
-          </div>
-
-          <div class="pc-momentum">
-            <div class="pc-momentum-icon" aria-hidden="true">↗</div>
-            <div><strong>${streakTitle}</strong><p>${streakCopy}</p></div>
+          <div class="pc-mes">
+            <div class="pc-anillo" role="img" aria-label="${totalSessions} entrenamientos en la temporada">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="pc-anillo-track" cx="60" cy="60" r="52"></circle>
+                <circle class="pc-anillo-fill" cx="60" cy="60" r="52"
+                        style="--aro-fin:${anilloFin};stroke-dasharray:${anilloLargo.toFixed(2)};stroke-dashoffset:${anilloLargo.toFixed(2)}"></circle>
+              </svg>
+              <div class="pc-anillo-centro">
+                <strong data-contar="${totalSessions}">0</strong>
+                <span>ENTRENOS</span>
+              </div>
+            </div>
+            <div class="pc-mes-info">
+              <p class="pc-reto">${retoTexto}</p>
+              <div class="pc-att-grid">
+                <div class="pc-att-card"><strong data-contar="${monthSessions}">0</strong><span>Este mes</span></div>
+                <div class="pc-att-card"><strong data-contar="${totalSessions}">0</strong><span>En la temporada</span></div>
+                <div class="pc-att-card"><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong><span>Último entreno</span></div>
+              </div>
+            </div>
           </div>
 
           <div class="pc-divider"></div>
 
           <div class="pc-section-head" id="progreso">
             <div class="pc-section-head-left">
-              <span>Progreso</span>
+              <span>Comparado consigo mismo</span>
               <h3>SU EVOLUCIÓN</h3>
             </div>
             <span class="pc-section-badge">${physicalRecords} ${physicalRecords === 1 ? 'CONTROL' : 'CONTROLES'}</span>
           </div>
 
-          ${cambiosHtml ? `
-            <p class="pc-lead">${escapePortalHtml(rangoLabel)}:</p>
-            <div class="pc-compare">${cambiosHtml}</div>
-            <details class="pc-detail">
-              <summary>Ver las gráficas de evolución</summary>
-              ${charts}
-            </details>` : charts}
+          <p class="pc-lead">${escapePortalHtml(rangoLabel)}. Son sus propias marcas: sirven para ver cómo cambia, no son una nota ni una comparación con otros niños.</p>
+
+          ${cambiosJuegoHtml ? `<div class="pc-compare">${cambiosJuegoHtml}</div>` : ''}
+          <details class="pc-detail">
+            <summary>Ver las gráficas de evolución</summary>
+            ${chartsJuego}
+          </details>
+
+          ${cambiosCuerpoHtml ? `
+          <details class="pc-crecimiento">
+            <summary>Crecimiento (registro del entrenador)</summary>
+            <p class="pc-aviso">Medidas de acompañamiento del desarrollo, tomadas hasta dos veces por trimestre. No evalúan su rendimiento ni su salud y no se comparan con otros niños.</p>
+            <div class="pc-compare">${cambiosCuerpoHtml}</div>
+            ${chartsCuerpo}
+          </details>` : ''}
 
           <!-- FOOTER PUBLICITARIO (Solo visible al compartir) -->
           <div class="pc-export-footer">
@@ -865,32 +906,41 @@ function renderCard(d) {
           </button>
         </div>
       </article>`;
+
+    // Los números entran contando y el anillo se llena: refuerzo breve, sin
+    // retrasar la lectura ni mover nada de sitio.
+    animarContadores(wrap);
+    requestAnimationFrame(() => {
+        const aro = wrap.querySelector('.pc-anillo-fill');
+        if (aro) aro.classList.add('is-on');
+    });
+}
+
+// Refuerzo visual: cuenta desde 0 hasta el dato. Se salta con movimiento
+// reducido y sirve para cualquier elemento con data-contar.
+function animarContadores(root) {
+    const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    root.querySelectorAll('[data-contar]').forEach(el => {
+        const destino = Number(el.dataset.contar) || 0;
+        if (sinMovimiento || destino <= 0) {
+            el.textContent = String(destino);
+            return;
+        }
+        const inicio = performance.now();
+        const paso = (t) => {
+            const p = Math.min(1, (t - inicio) / 700);
+            el.textContent = String(Math.round(destino * (1 - Math.pow(1 - p, 3))));
+            if (p < 1) requestAnimationFrame(paso);
+        };
+        requestAnimationFrame(paso);
+    });
 }
 
 // ── RANKING ───────────────────────────────────────────
-async function loadRanking() {
-    const el = $('ranking');
-    if (!el) return;
-    try {
-        // Ranking mediado por RPC: devuelve sólo el top 5 con nombre enmascarado.
-        const { data: result, error: errRank } = await window.supabaseClient
-            .rpc('portal_ranking');
-
-        if (errRank || !result || !result.length) {
-            el.innerHTML = '<div class="rk-empty">Datos disponibles próximamente.</div>';
-            return;
-        }
-        
-        el.innerHTML = result.map((item, i) => `
-          <div class="rk-item${i === 0 ? ' first' : ''}">
-            <div class="rk-pos">${i + 1}</div>
-            <div class="rk-name">${escapePortalHtml(item.name)}</div>
-            <div class="rk-score">🔥 ${escapePortalHtml(item.score)}</div>
-          </div>`).join('');
-    } catch {
-        el.innerHTML = '<div class="rk-empty" style="color:var(--red2)">No disponible.</div>';
-    }
-}
+// El top 5 público de asistencias se retiró de la ficha: comparar niños entre
+// sí desmotiva al que queda fuera y mezcla el esfuerzo propio con el de los
+// demás. La RPC `portal_ranking` sigue en Supabase, disponible si se decide
+// publicar una versión privada (solo la constancia del propio jugador).
 
 function getShareProgressOverlay() {
     let overlay = document.getElementById('share-progress-overlay');

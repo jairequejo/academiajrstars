@@ -837,3 +837,152 @@
 #card-wrap.export-mode .ms-svg-raster { height: 46px !important; margin-top: 1px !important; }
 #card-wrap.export-mode .pc-momentum { padding: 9px 11px 12px !important; }
 #card-wrap.export-mode .pc-momentum p { line-height: 1.5 !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FICHA v3 — JERARQUÍA PARA LA FAMILIA
+   1) Quién es y cómo va este mes. 2) Su evolución comparada consigo mismo.
+   3) Crecimiento, plegado y con aviso. 4) Cuentas, al final y aparte.
+   El refuerzo se apoya en el esfuerzo registrado (entrenos, constancia), no
+   en el cuerpo del niño ni en comparaciones con otros niños.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Línea que responde la pregunta del padre dentro del héroe. */
+.pc-hero-line {
+  margin: 10px 0 0;
+  max-width: 46ch;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, .82);
+}
+.pc-hero-line strong { color: #fff; font-weight: 800; }
+
+/* ── SU MES: el bloque de refuerzo ── */
+.pc-mes {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  margin: 0 0 18px;
+  padding: 16px;
+  color: #fff;
+  background: linear-gradient(135deg, #0d1f47 0%, #091d45 100%);
+  border-top: 4px solid var(--jr-gold, #f5a623);
+}
+.pc-reto {
+  margin: 0 0 14px;
+  max-width: 46ch;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #dfe6f5;
+}
+.pc-reto strong { color: var(--jr-gold, #f5a623); font-weight: 800; }
+
+/* Anillo de progreso: el número grande sale del registro, no de un cálculo
+   inventado. La meta es el siguiente hito de entrenamientos de la temporada. */
+.pc-anillo { position: relative; width: 132px; height: 132px; }
+.pc-anillo svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+.pc-anillo-track { fill: none; stroke: rgba(255, 255, 255, .14); stroke-width: 10; }
+.pc-anillo-fill {
+  fill: none;
+  stroke: var(--jr-gold, #f5a623);
+  stroke-width: 10;
+  transition: stroke-dashoffset 1.1s cubic-bezier(.2, .8, .2, 1);
+}
+.pc-anillo-fill.is-on { stroke-dashoffset: var(--aro-fin, 0) !important; }
+.pc-anillo-centro {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.pc-anillo-centro strong {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 54px; font-weight: 400; line-height: .85; color: #fff;
+}
+.pc-anillo-centro span {
+  margin-top: 2px;
+  font-size: 8px; font-weight: 900; letter-spacing: .18em; color: #c3cde0;
+}
+
+/* Las tres cifras dentro del panel oscuro. */
+.pc-mes .pc-att-card {
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 0;
+  background: rgba(255, 255, 255, .07);
+}
+.pc-mes .pc-att-card strong { color: #fff; }
+.pc-mes .pc-att-card span { color: #c3cde0; }
+
+/* ── CRECIMIENTO: plegado, con aviso y sin juicio ── */
+.pc-crecimiento { margin-top: 14px; }
+.pc-crecimiento > summary {
+  cursor: pointer; list-style: none;
+  padding: 12px 14px;
+  border: 1px solid #e2e2e2; border-left: 6px solid #0a0a0a;
+  background: #f7f7f5;
+  font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+  color: #0a0a0a;
+}
+.pc-crecimiento > summary::-webkit-details-marker { display: none; }
+.pc-crecimiento > summary::after { content: "  ▾"; }
+.pc-crecimiento[open] > summary::after { content: "  ▴"; }
+.pc-crecimiento[open] > summary { margin-bottom: 14px; }
+.pc-aviso {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--jr-blue, #153a79);
+  background: #f4f6fa;
+  font-size: 11px; line-height: 1.55; color: #4a5160;
+}
+
+/* ── MÓVIL (hasta 640px): el panel se apila y el anillo preside ── */
+@media (max-width: 640px) {
+  .pc-hero-line { margin-top: 8px; max-width: none; font-size: 11px; text-align: center; }
+
+  /* La constancia se lee en línea: 🔥 12 SEGUIDAS. La información no se
+     comprime a la derecha: en pantallas angostas ocupa su propia fila. */
+  .pc-streak {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .pc-streak-value { display: flex; flex-direction: row; align-items: baseline; gap: 8px; margin-right: 0; }
+  .pc-streak-flame { grid-row: auto; grid-column: auto; font-size: 1.7rem; }
+  .pc-streak-number { grid-row: auto; grid-column: auto; padding-top: 0; font-size: clamp(34px, 10vw, 44px); }
+  .pc-streak-unit { grid-row: auto; grid-column: auto; align-self: auto; }
+  .pc-streak-info {
+    flex: 1 1 100%;
+    text-align: left;
+    align-items: flex-start;
+  }
+  .pc-streak-label,
+  .pc-streak-title,
+  .pc-streak-copy { text-align: left; }
+  .pc-streak-copy { max-width: none; }
+
+  .pc-section-head-left > h3 { font-size: clamp(30px, 8.5vw, 40px); }
+
+  .pc-mes { display: block; padding: 16px 14px 18px; }
+  .pc-anillo { width: 118px; height: 118px; margin: 0 auto 14px; }
+  .pc-anillo-centro strong { font-size: 46px; }
+  .pc-reto { margin-bottom: 14px; text-align: center; font-size: 13px; }
+  .pc-att-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .pc-att-grid > :last-child { grid-column: auto; }
+  .pc-mes .pc-att-card { padding: 11px 9px; }
+}
+
+/* Pantallas muy angostas: dos columnas y la última cifra a lo ancho. */
+@media (max-width: 400px) {
+  .pc-att-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pc-att-grid > :last-child { grid-column: 1 / -1; }
+}
+
+/* ── La imagen que se comparte mantiene su rejilla y su altura ── */
+#card-wrap.export-mode .pc-hero-line { display: none !important; }
+#card-wrap.export-mode .pc-mes {
+  display: block !important;
+  margin: 0 0 10px !important;
+  padding: 12px 14px !important;
+}
+#card-wrap.export-mode .pc-anillo { display: none !important; }
+#card-wrap.export-mode .pc-reto { margin: 0 0 9px !important; font-size: 12px !important; line-height: 1.35 !important; }
+#card-wrap.export-mode .pc-att-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+#card-wrap.export-mode .pc-crecimiento { display: none !important; }
+#card-wrap.export-mode .pc-charts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }

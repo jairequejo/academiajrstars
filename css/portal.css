@@ -958,53 +958,74 @@ html { scroll-behavior: smooth; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   LA FICHA EN PANTALLA GRANDE
-   La ficha nació como tarjeta de celular y sus tipografías se miden en vw.
-   Estirada a los 1.180px del contenedor, el nombre llegaba a 78px y sobraba
-   lienzo blanco. En tablet se limita al ancho de una tarjeta; desde 1024px
-   la ficha ocupa la columna izquierda y el kiosko con el ranking la derecha.
+   ADMINISTRACIÓN: mensualidad y kiosko
+   Van al final de la ficha y separadas de lo deportivo: son cuentas, no
+   logros. Ninguna cifra de dinero se muestra sin estar verificada.
+   ═══════════════════════════════════════════════════════════════════════ */
+.portal-player-view #cuentas {
+  border-top: 4px solid var(--jr-gold, #f5a623) !important;
+  background: var(--jr-deep, #091d45) !important;
+}
+.pc-admin-head { margin-bottom: 18px; }
+.pc-admin-kicker {
+  display: block; margin-bottom: 6px;
+  font-size: .65rem; font-weight: 800; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--jr-salmon, #f4847d);
+}
+.pc-admin-sub {
+  margin: 8px 0 0; max-width: 52ch;
+  font-size: .82rem; line-height: 1.55; color: #aebad2;
+}
+.pc-admin-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.pc-admin-row {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 18px; border: 1px solid rgba(255, 255, 255, .12);
+  background: rgba(255, 255, 255, .04);
+}
+.pc-admin-label {
+  font-size: .6rem; font-weight: 800; letter-spacing: .14em;
+  text-transform: uppercase; color: #c3cde0;
+}
+.pc-admin-value {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 34px; font-weight: 400; line-height: 1; letter-spacing: .04em;
+  color: #fff;
+}
+.pc-admin-note { margin: 0 0 12px; font-size: .75rem; line-height: 1.5; color: #aebad2; }
+.pc-admin-row .slant-btn { margin-top: auto; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LA FICHA EN PANTALLA GRANDE (desde 768px)
+   La ficha nació como tarjeta de celular y sus tipografías se miden en vw:
+   estirada a los 1.180px del contenedor el nombre llegaba a 78px y sobraba
+   lienzo. Desde 768px se limita a un ancho de lectura y las cifras se miden
+   por el ancho de la tarjeta, no por el de la ventana.
    El móvil (<768px) conserva su diseño aprobado.
    ═══════════════════════════════════════════════════════════════════════ */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .portal-player-view .portal-shell { max-width: 760px !important; }
-}
-
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .portal-player-view .portal-shell {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
-    align-items: start;
-    gap: 30px;
-    max-width: 1240px !important;
+    display: block !important;
+    max-width: 940px !important;
   }
-  /* Sin `min-width: 0` la columna del grid no encoge y desborda. */
-  .portal-player-view #p2 { grid-column: 1; min-width: 0; }
-  /* El alto del botón «Volver al buscador» (16px + 16px de margen) alinea la
-     segunda columna con el borde superior de la ficha. */
-  .portal-player-view #p3 {
-    grid-column: 2;
-    min-width: 0;
-    margin-top: 32px !important;
-  }
-  .portal-player-view #p3 > .grid { grid-template-columns: 1fr; }
+  .portal-player-view .pc-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
 
   /* Escala de tarjeta, no de valla publicitaria. */
   .portal-player-view #card-wrap .pc-name {
-    font-size: clamp(36px, 3.2vw, 52px);
+    font-size: clamp(38px, 3.4vw, 54px);
   }
   .portal-player-view #card-wrap .pc-section-head-left > h3 {
-    font-size: clamp(30px, 2.8vw, 44px);
+    font-size: clamp(34px, 3vw, 46px);
   }
   .portal-player-view #card-wrap .pc-att-card strong {
     font-size: clamp(26px, 2.6vw, 36px);
   }
   .portal-player-view #card-wrap .pc-avatar,
   .portal-player-view #card-wrap .pc-avatar-fallback {
-    width: clamp(84px, 7vw, 104px);
-    height: clamp(84px, 7vw, 104px);
+    width: clamp(88px, 8vw, 108px);
+    height: clamp(88px, 8vw, 108px);
   }
   .portal-player-view #card-wrap .pc-hero-body {
-    gap: clamp(16px, 1.6vw, 24px);
+    gap: clamp(16px, 1.8vw, 26px);
   }
   /* El panel del héroe pasa de granate turbio a noche limpia, con el rojo
      del club sólo como resplandor (§4 del manual). */
