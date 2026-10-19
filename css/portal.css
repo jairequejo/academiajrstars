@@ -956,3 +956,61 @@ html { scroll-behavior: smooth; }
   /* Botones del portal: esquinas rectas, como todos los del landing. */
   .portal-main .slant-btn { border-radius: 0 !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LA FICHA EN PANTALLA GRANDE
+   La ficha nació como tarjeta de celular y sus tipografías se miden en vw.
+   Estirada a los 1.180px del contenedor, el nombre llegaba a 78px y sobraba
+   lienzo blanco. En tablet se limita al ancho de una tarjeta; desde 1024px
+   la ficha ocupa la columna izquierda y el kiosko con el ranking la derecha.
+   El móvil (<768px) conserva su diseño aprobado.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .portal-player-view .portal-shell { max-width: 760px !important; }
+}
+
+@media (min-width: 1024px) {
+  .portal-player-view .portal-shell {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr);
+    align-items: start;
+    gap: 30px;
+    max-width: 1240px !important;
+  }
+  /* Sin `min-width: 0` la columna del grid no encoge y desborda. */
+  .portal-player-view #p2 { grid-column: 1; min-width: 0; }
+  /* El alto del botón «Volver al buscador» (16px + 16px de margen) alinea la
+     segunda columna con el borde superior de la ficha. */
+  .portal-player-view #p3 {
+    grid-column: 2;
+    min-width: 0;
+    margin-top: 32px !important;
+  }
+  .portal-player-view #p3 > .grid { grid-template-columns: 1fr; }
+
+  /* Escala de tarjeta, no de valla publicitaria. */
+  .portal-player-view #card-wrap .pc-name {
+    font-size: clamp(36px, 3.2vw, 52px);
+  }
+  .portal-player-view #card-wrap .pc-section-head-left > h3 {
+    font-size: clamp(30px, 2.8vw, 44px);
+  }
+  .portal-player-view #card-wrap .pc-att-card strong {
+    font-size: clamp(26px, 2.6vw, 36px);
+  }
+  .portal-player-view #card-wrap .pc-avatar,
+  .portal-player-view #card-wrap .pc-avatar-fallback {
+    width: clamp(84px, 7vw, 104px);
+    height: clamp(84px, 7vw, 104px);
+  }
+  .portal-player-view #card-wrap .pc-hero-body {
+    gap: clamp(16px, 1.6vw, 24px);
+  }
+  /* El panel del héroe pasa de granate turbio a noche limpia, con el rojo
+     del club sólo como resplandor (§4 del manual). */
+  .portal-player-view #card-wrap .pc-hero {
+    background:
+      radial-gradient(circle at 84% 6%, rgba(229, 25, 27, .28) 0%, transparent 46%),
+      linear-gradient(155deg, #0f1626 0%, #070a12 58%, #150609 100%);
+  }
+}
