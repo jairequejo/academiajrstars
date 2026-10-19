@@ -14,10 +14,13 @@ create table if not exists private.admin_users (
   created_at timestamptz not null default now()
 );
 
-insert into private.admin_users (user_id)
-select id
-from auth.users
-on conflict (user_id) do nothing;
+-- ⚠️ NO volver a ejecutar el insert masivo: regalaba admin a TODA cuenta auth.users.
+-- Si esta migración se corrió antes del 2026-10-18, ejecuta
+-- 20261018_fix_admin_registration.sql para limpiar y registrar el admin real.
+-- Registro explícito (descomenta y cambia el correo si necesitas re-ejecutar):
+-- insert into private.admin_users (user_id)
+-- select id from auth.users where email = 'ADMIN@EJEMPLO.COM'
+-- on conflict (user_id) do nothing;
 
 create or replace function private.is_admin()
 returns boolean

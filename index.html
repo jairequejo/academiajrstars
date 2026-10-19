@@ -1,336 +1,162 @@
-<!DOCTYPE html>
-<html lang="es-PE" class="dark">
+<!doctype html>
+<html lang="es-PE">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Academia de Fútbol en Cajamarca | JR Stars</title>
-  <meta name="description" content="Academia de fútbol para niños y jóvenes en Cajamarca. Entrenamiento de alto rendimiento, disciplina táctica, métricas reales y seguimiento para padres.">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Academia de fútbol para niños en Cajamarca | JR Stars</title>
+  <meta name="description" content="Conoce la propuesta de fútbol formativo de JR Stars en Cajamarca y consulta por WhatsApp el grupo, sede y horario disponibles.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-  <meta name="theme-color" content="#050505">
+  <meta name="theme-color" content="#153A79">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_PE">
   <meta property="og:site_name" content="JR Stars Cajamarca">
-  <meta property="og:title" content="Academia de Fútbol en Cajamarca | JR Stars">
-  <meta property="og:description" content="Entrenamiento de alto rendimiento para niños y jóvenes, con disciplina táctica, métricas reales y seguimiento para padres.">
+  <meta property="og:title" content="Academia de fútbol para niños en Cajamarca | JR Stars">
+  <meta property="og:description" content="Entrena, juega y crece con tu equipo. Conoce JR Stars y consulta disponibilidad por WhatsApp.">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Academia de Fútbol en Cajamarca | JR Stars">
-  <meta name="twitter:description" content="Entrenamiento de alto rendimiento para niños y jóvenes en Cajamarca.">
+  <meta name="twitter:title" content="Academia de fútbol para niños en Cajamarca | JR Stars">
+  <meta name="twitter:description" content="Conoce la propuesta de fútbol formativo de JR Stars en Cajamarca.">
   <link rel="icon" href="./img/escudo.png" type="image/png">
   <link rel="apple-touch-icon" href="./img/escudo.png">
-  <link rel="preload" href="./img/hero.jpg" as="image" type="image/jpeg" fetchpriority="high">
-  <link rel="stylesheet" href="./css/landing-effects.css?v=20260904">
-
+  <link rel="preload" href="./img/hero-jr-stars-horizontal.png" as="image" type="image/png" media="(min-width: 681px)" fetchpriority="high">
+  <link rel="preload" href="./img/hero-jr-stars-vertical.png" as="image" type="image/png" media="(max-width: 680px)" fetchpriority="high">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/landing-effects.css?v=20261017b">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "SportsActivityLocation",
     "name": "Academia de Fútbol JR Stars Cajamarca",
-    "description": "Academia de fútbol para niños y jóvenes con entrenamiento de alto rendimiento, disciplina táctica y seguimiento mediante métricas reales.",
+    "description": "Academia de fútbol formativo para niños y jóvenes en Cajamarca.",
     "telephone": "+51 955 515 693",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Cajamarca",
-      "addressRegion": "Cajamarca",
-      "addressCountry": "PE"
-    },
-    "areaServed": {
-      "@type": "City",
-      "name": "Cajamarca"
-    },
-    "sameAs": [
-      "https://www.facebook.com/p/Academia-de-F%C3%BAtbol-JR-Stars-Cajamarca-100034777191797/"
-    ],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+51 955 515 693",
-      "contactType": "admissions",
-      "availableLanguage": "Spanish"
-    }
+    "address": {"@type":"PostalAddress","addressLocality":"Cajamarca","addressRegion":"Cajamarca","addressCountry":"PE"},
+    "areaServed": {"@type":"City","name":"Cajamarca"},
+    "sameAs": ["https://www.facebook.com/p/Academia-de-F%C3%BAtbol-JR-Stars-Cajamarca-100034777191797/"],
+    "contactPoint": {"@type":"ContactPoint","telephone":"+51 955 515 693","contactType":"customer service","availableLanguage":"Spanish"}
   }
   </script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Tailwind CSS v3 CDN (Estable) -->
-  
-  
-
-  <style type="text/tailwindcss">
-    @layer base {
-      html,
-      body {
-        margin: 0;
-        background-color: #050505;
-      }
-
-      body {
-        color: #FFFFFF;
-      }
-    }
-
-    @layer components {
-      /* Polígonos de corte deportivo */
-      .slant-btn {
-        transform: skewX(-10deg);
-        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-      }
-      .slant-btn-content {
-        display: block;
-        transform: skewX(10deg);
-      }
-      .slant-btn:hover {
-        box-shadow: 0 0 25px rgba(229, 25, 27, 0.5);
-        transform: skewX(-10deg) scale(1.02);
-      }
-
-      /* Bento Cards para Grid Modular */
-      .bento-card {
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 1.5rem;
-        overflow: hidden;
-        transition: transform 0.3s ease, border-color 0.3s ease;
-      }
-      .bento-card:hover {
-        border-color: rgba(255,255,255,0.3);
-        transform: translateY(-4px);
-      }
-
-      .bento-card-light {
-        background-color: #FFFFFF;
-        color: #050505;
-        border: 1px solid rgba(0,0,0,0.1);
-        border-radius: 1.5rem;
-        overflow: hidden;
-      }
-
-      .no-overflow-x {
-        overflow-x: hidden;
-        width: 100%;
-      }
-    }
-  </style>
-  <link rel="stylesheet" href="./css/tailwind.css">
 </head>
-<body class="no-overflow-x min-h-screen flex flex-col font-body antialiased selection:bg-brand selection:text-white">
-
-  <!-- Header transparente sobre el hero y blanco al desplazarse. -->
-  <header id="main-header" class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 sm:px-8 h-16 sm:h-20">
-    <a href="./" class="flex items-center gap-2 sm:gap-3 group" aria-label="JR Stars Cajamarca, inicio">
-      <img src="./img/escudo.png" alt="Escudo de la Academia de Fútbol JR Stars Cajamarca" width="400" height="400" decoding="async" class="h-8 w-8 sm:h-12 sm:w-12 transition-transform group-hover:scale-110" onerror="this.style.display='none'">
-      <div class="flex flex-col leading-none w-min">
-        <span class="font-display text-xl sm:text-[2rem] tracking-[0.05em] italic leading-none whitespace-nowrap">JR STARS</span>
-        <span class="font-body text-[0.35rem] sm:text-[0.54rem] font-bold text-brand uppercase tracking-[0.29em] leading-none mt-1 whitespace-nowrap">ACADEMIA DE FÚTBOL</span>
-      </div>
+<body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+  <header class="site-header" id="site-header">
+    <a class="brand" href="#inicio">
+      <img src="./img/escudo.png" alt="" width="400" height="400">
+      <span class="brand-copy"><strong>JR STARS</strong><small>Academia de fútbol</small></span>
     </a>
-    <nav class="flex items-center gap-4 font-bold text-xs sm:text-sm tracking-wider uppercase" aria-label="Navegación principal">
-      <a href="./portal/" id="nav-btn" class="bg-[#050505] text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded text-[0.65rem] sm:text-sm hover:bg-brand hover:text-white transition-colors whitespace-nowrap">PORTAL JUGADOR</a>
-      <a href="https://wa.me/51955515693" target="_blank" rel="noopener noreferrer" id="nav-wa" class="hidden md:flex items-center gap-2 text-[#050505] hover:text-brand transition-colors" aria-label="Contactar a JR Stars por WhatsApp al +51 955 515 693">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.061-.3-.15-1.265-.462-2.406-1.477-.883-.788-1.48-1.761-1.653-2.059-.173-.295-.018-.458.13-.606.134-.133.3-.343.45-.514.149-.171.2-.295.3-.492.099-.195.05-.368-.025-.515-.075-.15-.672-1.62-.922-2.206-.24-.579-.481-.501-.672-.51l-.573-.008c-.198 0-.52.074-.792.369-.271.295-1.04 1.01-1.04 2.459 0 1.449 1.063 2.848 1.213 3.046.149.195 2.079 3.178 5.039 4.458.704.305 1.253.488 1.68.625.707.227 1.35.195 1.851.119.567-.085 1.767-.722 2.016-1.42.249-.697.249-1.294.175-1.42-.074-.125-.274-.2-.574-.35zM12 21.942A9.914 9.914 0 017 20.6l-.36-.214-3.53.926.945-3.441-.235-.373A9.91 9.91 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.12 1.545 5.864L0 24l6.284-1.646A11.91 11.91 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
-        +51 955 515 693
-      </a>
+    <nav class="desktop-nav" aria-label="Navegación principal">
+      <a href="#propuesta">Propuesta</a><a href="#primera-visita">Primera visita</a><a href="#preguntas">Preguntas</a>
     </nav>
+    <div class="header-actions">
+      <a class="portal-link" href="./portal/">Portal jugador</a>
+      <a class="header-whatsapp" data-wa-location="header" href="https://wa.me/51955515693?text=Hola%2C%20quiero%20conocer%20JR%20Stars.%20Edad%20del%20ni%C3%B1o%2Fa%3A%20__%20Zona%20o%20sede%20preferida%3A%20__%20Horario%20preferido%3A%20__" target="_blank" rel="noopener noreferrer">Escríbenos</a>
+    </div>
   </header>
 
-  <!-- HERO APEX SPORT DARK -->
-  <main class="flex-grow">
-    <section id="hero" class="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-[#050505] pt-20 sm:pt-24 pb-10 sm:pb-12">
-      <!-- Background Visuals -->
-      <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent z-10 h-full w-full"></div>
-        <img class="w-full h-full object-cover opacity-30 mix-blend-screen filter grayscale" src="./img/hero.jpg" alt="Entrenamiento de fútbol para niños y jóvenes en JR Stars Cajamarca" width="1376" height="768" fetchpriority="high" decoding="async" onerror="this.style.display='none'">
-        <!-- Red glow accent -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] md:w-[40vw] md:h-[40vw] bg-brand rounded-full blur-[150px] opacity-10"></div>
+  <main id="contenido">
+    <section class="hero" id="inicio">
+      <div class="hero-media" aria-hidden="true">
+        <picture>
+          <source media="(max-width: 680px)" srcset="./img/hero-jr-stars-vertical.png">
+          <img src="./img/hero-jr-stars-horizontal.png" alt="" width="2055" height="765" fetchpriority="high">
+        </picture>
+        <span class="hero-visual-note">Imagen ilustrativa · Uniforme JR Stars</span>
       </div>
-      
-      <div class="hero-content container mx-auto px-4 sm:px-8 relative z-20 flex flex-col items-center text-center">
-
-        <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-white border border-white/20 px-4 py-1.5 rounded-full mb-5 mt-2 sm:mt-0">
-          <span class="w-2 h-2 rounded-full bg-brand animate-pulse shadow-[0_0_8px_#E5191B]"></span>
-          <span class="text-[0.65rem] sm:text-sm font-bold tracking-widest uppercase">Cajamarca • Inscripciones Abiertas</span>
+      <div class="hero-shape hero-shape-one" aria-hidden="true"></div><div class="hero-shape hero-shape-two" aria-hidden="true"></div>
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> Fútbol formativo · Cajamarca</p>
+          <h1>ENTRENA.<br><em>JUEGA.</em><br>CRECE EN EQUIPO.</h1>
+          <p class="hero-lead">Conoce JR Stars y descubre una propuesta que busca unir aprendizaje, esfuerzo y pertenencia dentro de la cancha.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" data-wa-location="hero" href="https://wa.me/51955515693?text=Hola%2C%20quiero%20conocer%20JR%20Stars.%20Edad%20del%20ni%C3%B1o%2Fa%3A%20__%20Zona%20o%20sede%20preferida%3A%20__%20Horario%20preferido%3A%20__" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.2-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2.1-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.8 1.2 3c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.6-.4zM12 21.9a9.9 9.9 0 0 1-5-1.3l-.4-.2-3.5.9.9-3.4-.2-.4A9.9 9.9 0 0 1 2 12a10 10 0 1 1 10 9.9zM12 0A12 12 0 0 0 1.5 17.9L0 24l6.3-1.6A12 12 0 1 0 12 0z"/></svg>
+              Agendar una visita
+            </a>
+            <a class="button button-ghost" href="#propuesta">Conocer la propuesta <span aria-hidden="true">↓</span></a>
+          </div>
+          <div class="hero-note"><span class="hero-note-mark">JR</span><p><strong>Sangre de Campeón</strong><br>Esfuerzo, respeto y pertenencia.</p></div>
         </div>
+        <aside class="hero-card" aria-label="Información de contacto">
+          <span class="hero-card-label">Tu siguiente jugada</span>
+          <strong>Conoce el grupo que mejor se adapta a tu familia.</strong>
+          <p>Cuéntanos la edad del jugador, tu zona y el horario que prefieres. Te responderemos con la información disponible.</p>
+          <div class="hero-card-contact"><span>WhatsApp</span><a href="tel:+51955515693">+51 955 515 693</a></div>
+        </aside>
+      </div>
+      <div class="hero-marquee" aria-hidden="true"><div>CAJAMARCA <span>★</span> APRENDER <span>★</span> JUGAR <span>★</span> CRECER <span>★</span> PERTENECER <span>★</span> CAJAMARCA <span>★</span> APRENDER <span>★</span></div></div>
+    </section>
 
-        <h1 class="font-display text-[3.75rem] sm:text-[5rem] lg:text-[5.5rem] xl:text-[5.75rem] leading-[0.82] uppercase italic text-white drop-shadow-2xl text-center mb-4">
-          TU HIJO <br> MERECE <br>
-          <span class="text-white bg-brand px-4 py-1 inline-block my-2">ENTRENAR</span> <br>
-          <span class="text-[#F5A623] drop-shadow-[0_0_15px_rgba(245,166,35,0.3)] mt-2 inline-block">EN SERIO.</span>
-        </h1>
-
-        <p class="font-body text-sm sm:text-lg text-gray-300 font-medium max-w-2xl mt-2 sm:mt-4 leading-relaxed px-4">
-          Metodología profesional de alto rendimiento. Métricas exactas, disciplina táctica y resultados medibles desde tu smartphone.
-        </p>
-
-        <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mt-6 sm:mt-7 px-4 sm:px-0">
-          <a href="https://wa.me/51955515693?text=Hola,%20quiero%20separar%20un%20cupo%20para%20mi%20hijo%20en%20JR%20Stars." target="_blank" rel="noopener noreferrer" class="slant-btn flex items-center justify-center bg-brand text-white px-8 sm:px-10 py-3 sm:py-4 w-full sm:w-auto group border border-transparent">
-            <span class="slant-btn-content font-display text-xl sm:text-2xl uppercase tracking-wider flex items-center gap-3">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.498 14.382c-.301-.15-1.767-.867-2.04-.966-.273-.101-.473-.15-.673.15-.197.295-.771.964-.944 1.162-.175.195-.349.21-.646.061-.3-.15-1.265-.462-2.406-1.477-.883-.788-1.48-1.761-1.653-2.059-.173-.295-.018-.458.13-.606.134-.133.3-.343.45-.514.149-.171.2-.295.3-.492.099-.195.05-.368-.025-.515-.075-.15-.672-1.62-.922-2.206-.24-.579-.481-.501-.672-.51l-.573-.008c-.198 0-.52.074-.792.369-.271.295-1.04 1.01-1.04 2.459 0 1.449 1.063 2.848 1.213 3.046.149.195 2.079 3.178 5.039 4.458.704.305 1.253.488 1.68.625.707.227 1.35.195 1.851.119.567-.085 1.767-.722 2.016-1.42.249-.697.249-1.294.175-1.42-.074-.125-.274-.2-.574-.35zM12 21.942A9.914 9.914 0 017 20.6l-.36-.214-3.53.926.945-3.441-.235-.373A9.91 9.91 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zM12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.12 1.545 5.864L0 24l6.284-1.646A11.91 11.91 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>
-              +51 955 515 693
-            </span>
-          </a>
-          <a href="./portal/" class="slant-btn flex items-center justify-center bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 sm:px-10 py-3 sm:py-4 w-full sm:w-auto hover:bg-white hover:text-[#050505] transition-colors">
-            <span class="slant-btn-content font-display text-xl sm:text-2xl uppercase tracking-wider">
-              PORTAL JUGADOR
-            </span>
-          </a>
-        </div>
+    <section class="section promise-section" id="propuesta">
+      <div class="section-heading">
+        <div><p class="eyebrow eyebrow-dark"><span></span> Una identidad con propósito</p><h2>FÚTBOL QUE DEJA<br><em>HUELLA.</em></h2></div>
+        <p class="section-intro">Queremos que cada jugador encuentre un lugar para aprender, disfrutar el juego y sentirse parte del equipo. Ese es el estándar que JR Stars busca construir en Cajamarca.</p>
+      </div>
+      <div class="promise-grid">
+        <article class="promise-card promise-card-blue"><span class="card-number">01</span><div class="card-icon" aria-hidden="true">↗</div><h3>Aprender jugando</h3><p>Actividades con balón, retos y decisiones propias de cada etapa formativa.</p></article>
+        <article class="promise-card promise-card-red"><span class="card-number">02</span><div class="card-icon" aria-hidden="true">✦</div><h3>Pertenecer al equipo</h3><p>Una cultura que valora el esfuerzo, el compañerismo y el respeto por los demás.</p></article>
+        <article class="promise-card promise-card-light"><span class="card-number">03</span><div class="card-icon" aria-hidden="true">◎</div><h3>Familias informadas</h3><p>Información clara antes de empezar y un canal directo para resolver preguntas.</p></article>
       </div>
     </section>
 
-    <!-- SECTION 2: BENTO GRID SPORT (Color Blocking - White Section) -->
-    <section class="landing-stars py-16 sm:py-20 px-4 sm:px-8 bg-white text-[#050505] rounded-t-[2rem] sm:rounded-t-[3rem] relative z-30 overflow-hidden">
-      <div class="container mx-auto relative z-10">
-        <div class="max-w-3xl mb-10 sm:mb-12 flex flex-col items-center sm:items-start text-center sm:text-left">
-          <div class="text-brand font-bold tracking-widest text-[0.7rem] sm:text-sm uppercase mb-4 flex items-center justify-center sm:justify-start gap-3">
-            <span class="w-6 sm:w-8 h-[2px] bg-brand"></span> Filosofía Deportiva
-          </div>
-          <h2 class="font-display text-[3rem] sm:text-5xl md:text-7xl uppercase italic leading-[0.9] sm:leading-none mb-4 sm:mb-6">MÁS QUE FÚTBOL. <br class="hidden sm:block"> FORMAMOS <span class="text-brand">PERSONAS.</span></h2>
-          <p class="font-body text-gray-600 text-sm sm:text-xl font-medium leading-relaxed px-2 sm:px-0">No solo buscamos que patee una pelota. Forjamos carácter, resiliencia y un entorno competitivo sano basado en métricas reales.</p>
-        </div>
+    <section class="section visit-section" id="primera-visita">
+      <div class="visit-header">
+        <p class="eyebrow"><span></span> Empieza sin complicarte</p><h2>TU PRIMERA<br><em>VISITA.</em></h2>
+        <p>El primer paso no es matricularte a ciegas: es conversar, confirmar la información vigente y conocer la experiencia.</p>
+      </div>
+      <ol class="steps">
+        <li><span class="step-number">1</span><div><h3>Escríbenos</h3><p>Indica la edad del jugador, zona o sede de interés y horario preferido.</p></div></li>
+        <li><span class="step-number">2</span><div><h3>Confirma los detalles</h3><p>Te informaremos el grupo, lugar, horario, costo y disponibilidad vigentes.</p></div></li>
+        <li><span class="step-number">3</span><div><h3>Conoce JR Stars</h3><p>Agenda una visita y resuelve tus dudas antes de tomar una decisión.</p></div></li>
+      </ol>
+      <a class="visit-cta" data-wa-location="steps" href="https://wa.me/51955515693?text=Hola%2C%20quiero%20conocer%20JR%20Stars.%20Edad%20del%20ni%C3%B1o%2Fa%3A%20__%20Zona%20o%20sede%20preferida%3A%20__%20Horario%20preferido%3A%20__" target="_blank" rel="noopener noreferrer"><span>Quiero conocer JR Stars</span><strong>→</strong></a>
+    </section>
 
-        <!-- BENTO GRID 2026 -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 auto-rows-auto md:auto-rows-[320px]">
-
-          <!-- Card 1: Data (Dark) -->
-          <div class="bento-card bg-[#050505] text-white p-6 sm:p-8 md:col-span-2 flex flex-col items-center sm:items-start text-center sm:text-left relative group">
-            <div class="absolute inset-0 bg-brand/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div class="relative z-10 flex flex-col items-center sm:items-start">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-brand mb-3 sm:mb-4"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-              <h3 class="font-display text-2xl sm:text-4xl mb-2 uppercase italic tracking-wide">Métricas Crudas</h3>
-              <p class="font-body text-gray-400 font-medium text-[0.8rem] sm:text-base max-w-md px-2 sm:px-0">Monitoreo de rendimiento, racha de asistencia y desgaste calórico desde el Portal del Jugador. Todo medible, nada subjetivo.</p>
-            </div>
-            <div class="relative z-10 flex flex-row justify-center sm:justify-start gap-4 sm:gap-5 mt-auto pt-8 w-full pb-2">
-              <div class="bg-white/10 px-5 sm:px-6 py-3 rounded-lg font-display text-2xl sm:text-3xl text-center shadow-[0_4px_15px_rgba(0,0,0,0.2)] border border-white/5">200+ <span class="text-[0.65rem] sm:text-xs text-gray-400 font-body uppercase tracking-wider block mt-1">Jugadores</span></div>
-              <div class="bg-white/10 px-5 sm:px-6 py-3 rounded-lg font-display text-2xl sm:text-3xl text-center shadow-[0_4px_15px_rgba(0,0,0,0.2)] border border-white/5">100% <span class="text-[0.65rem] sm:text-xs text-gray-400 font-body uppercase tracking-wider block mt-1">Disciplina</span></div>
-            </div>
-          </div>
-
-          <!-- Card 2: Valores (Red) -->
-          <div class="bento-card bg-brand text-white p-6 sm:p-8 flex flex-col items-center sm:items-start text-center sm:text-left justify-between relative overflow-hidden group">
-            <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-4 translate-y-4 group-hover:scale-110 transition-transform">
-              <svg width="100" height="100" sm:width="120" sm:height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            </div>
-            <div class="relative z-10 mt-4 sm:mt-0">
-              <h3 class="font-display text-2xl sm:text-4xl mb-2 uppercase italic tracking-wide">Disciplina</h3>
-              <p class="font-body text-white/90 font-medium text-[0.8rem] sm:text-base leading-relaxed px-4 sm:px-0">Puntualidad militar y trabajo en equipo. Asimilar el fracaso para construir el éxito.</p>
-            </div>
-          </div>
-
-          <!-- Card 3: Metodologia (Light) -->
-          <div class="bento-card-light p-6 sm:p-8 md:col-span-3 flex flex-col-reverse sm:flex-row justify-between items-center gap-6 sm:gap-8 bg-gray-50 text-center sm:text-left">
-            <div class="flex-1 flex flex-col items-center sm:items-start">
-              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-[#050505] rounded-full flex items-center justify-center text-white mb-3 sm:mb-4">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              </div>
-              <h3 class="font-display text-2xl sm:text-4xl mb-2 uppercase italic tracking-wide text-[#050505]">Entrenamiento Real</h3>
-              <p class="font-body text-gray-600 font-medium text-[0.8rem] sm:text-base max-w-xl px-2 sm:px-0">Metodología de clubes profesionales adaptada a nuestra geografía. Técnica y táctica del juego colectivo.</p>
-            </div>
-            <img src="./img/escudo.png" alt="Escudo JR Stars" width="400" height="400" loading="lazy" decoding="async" class="w-24 h-24 sm:w-32 sm:h-32 opacity-30 sm:opacity-20 object-contain grayscale" onerror="this.style.display='none'">
-          </div>
-
-        </div>
+    <section class="section faq-section" id="preguntas">
+      <div class="faq-heading"><p class="eyebrow eyebrow-dark"><span></span> Preguntas frecuentes</p><h2>ANTES DE<br><em>EMPEZAR.</em></h2></div>
+      <div class="faq-list">
+        <details><summary>¿Para qué edades hay grupos?<span>+</span></summary><p>Las categorías disponibles pueden cambiar. Escríbenos con la edad del jugador y te diremos qué opción vigente puede corresponderle.</p></details>
+        <details><summary>¿Dónde y a qué hora entrenan?<span>+</span></summary><p>Antes de agendar confirmaremos contigo la sede, el horario y la disponibilidad actuales. No queremos que viajes con información desactualizada.</p></details>
+        <details><summary>¿Puedo conocer la academia antes de matricular?<span>+</span></summary><p>Sí puedes solicitar una visita. Por WhatsApp te explicaremos cómo coordinarla según el grupo disponible.</p></details>
+        <details><summary>¿Qué debo consultar antes de la visita?<span>+</span></summary><p>Pregunta por grupo, sede, horario, costo total, qué debe llevar el jugador y cómo funciona la primera experiencia.</p></details>
       </div>
     </section>
 
-    <!-- SECTION 3: SEDES (Dark Blocking) -->
-    <section class="py-20 px-4 sm:px-8 bg-[#050505] text-white overflow-hidden">
-      <div class="container mx-auto relative z-10">
-        <div class="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-6">
-          <div>
-            <div class="text-brand font-bold tracking-widest text-sm uppercase mb-2 flex items-center gap-3">
-              <span class="w-8 h-[2px] bg-brand"></span> Infraestructura
-            </div>
-            <h2 class="font-display text-5xl sm:text-7xl uppercase italic leading-none">SEDES <span class="text-white relative inline-block"><span class="relative z-10">ACTIVAS</span><span class="absolute bottom-1 left-0 w-full h-1/2 bg-brand -z-10 -skew-x-12"></span></span></h2>
-          </div>
-        </div>
-
-        <div id="sedes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div class="col-span-full flex flex-col items-center justify-center p-12 bento-card bg-white/5 border border-white/10">
-            <div class="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin mb-4"></div>
-            <div class="font-display text-xl uppercase tracking-widest text-gray-400">Extraendo Nodos de Base de Datos...</div>
-          </div>
-        </div>
-      </div>
+    <section class="final-cta">
+      <div class="final-cta-crest"><img src="./img/escudo.png" alt="" width="400" height="400" loading="lazy"></div>
+      <div><p class="eyebrow"><span></span> Academia de fútbol · Cajamarca</p><h2>LA PRÓXIMA JUGADA<br><em>EMPIEZA AQUÍ.</em></h2><p>Conversa con JR Stars y conoce la información vigente para tu familia.</p></div>
+      <a class="button button-primary" data-wa-location="final" href="https://wa.me/51955515693?text=Hola%2C%20quiero%20conocer%20JR%20Stars.%20Edad%20del%20ni%C3%B1o%2Fa%3A%20__%20Zona%20o%20sede%20preferida%3A%20__%20Horario%20preferido%3A%20__" target="_blank" rel="noopener noreferrer">Hablar por WhatsApp</a>
     </section>
   </main>
 
-  <!-- FOOTER SPORT OSCURO -->
-  <footer class="bg-[#020202] text-white py-12 px-4 sm:px-8 border-t border-white/5">
-    <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-      <div class="flex items-center gap-4 group">
-        <img src="./img/escudo.webp" alt="Escudo JR Stars" width="400" height="400" loading="lazy" decoding="async" class="h-12 w-12 grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" onerror="this.style.display='none'">
-        <div class="font-display text-2xl italic tracking-wide text-gray-400 group-hover:text-white transition-colors">JR STARS <br> <span class="text-brand">CAJAMARCA</span></div>
-      </div>
-      <nav class="flex flex-wrap justify-center gap-x-8 gap-y-4 font-bold text-sm tracking-widest uppercase text-gray-500">
-        <a href="https://www.facebook.com/p/Academia-de-F%C3%BAtbol-JR-Stars-Cajamarca-100034777191797/" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Facebook Oficial</a>
-        <a href="./portal/" class="hover:text-white transition-colors">Portal Jugador</a>
-        <a href="./admin/login.html" class="hover:text-brand transition-colors">Intranet</a>
-      </nav>
-    </div>
+  <footer class="site-footer">
+    <div class="footer-brand"><img src="./img/escudo.png" alt="Escudo JR Stars" width="400" height="400" loading="lazy"><div><strong>JR STARS</strong><span>Sangre de Campeón · Cajamarca</span></div></div>
+    <div class="footer-links"><a href="https://www.facebook.com/p/Academia-de-F%C3%BAtbol-JR-Stars-Cajamarca-100034777191797/" target="_blank" rel="noopener noreferrer">Facebook</a><a href="./portal/">Portal jugador</a><a href="./admin/login.html">Intranet</a></div>
+    <p>© <span id="current-year">2026</span> Academia de Fútbol JR Stars.</p>
   </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
-  <script src="./js/supabaseClient.js"></script>
+  <a class="mobile-whatsapp" data-wa-location="mobile-sticky" href="https://wa.me/51955515693?text=Hola%2C%20quiero%20conocer%20JR%20Stars.%20Edad%20del%20ni%C3%B1o%2Fa%3A%20__%20Zona%20o%20sede%20preferida%3A%20__%20Horario%20preferido%3A%20__" target="_blank" rel="noopener noreferrer" aria-label="Agendar una visita por WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.2-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2.1-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.8 1.2 3c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1-.2-.3-.2-.6-.4zM12 21.9a9.9 9.9 0 0 1-5-1.3l-.4-.2-3.5.9.9-3.4-.2-.4A9.9 9.9 0 0 1 2 12a10 10 0 1 1 10 9.9zM12 0A12 12 0 0 0 1.5 17.9L0 24l6.3-1.6A12 12 0 1 0 12 0z"/></svg><span>Agendar visita</span>
+  </a>
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      // Medir el final real del hero, también al recargar y redimensionar.
-      const header = document.getElementById('main-header');
-      const hero = document.getElementById('hero');
-      const updateHeader = () => {
-        const visible = hero.getBoundingClientRect().bottom <= 0;
-        header.classList.toggle('is-visible', visible);
-      };
-      let scrollPending = false;
-      window.addEventListener('scroll', () => {
-        if (scrollPending) return;
-        scrollPending = true;
-        requestAnimationFrame(() => {
-          updateHeader();
-          scrollPending = false;
-        });
-      }, { passive: true });
-      window.addEventListener('resize', updateHeader);
-      window.addEventListener('pageshow', updateHeader);
-      new ResizeObserver(updateHeader).observe(hero);
-      updateHeader();
-
-      // Sedes
-      const container = document.getElementById('sedes-container');
-      const escapeSiteHtml = value => String(value ?? '').replace(/[&<>'"]/g, char => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-      })[char]);
-      const mapsUrlForSede = sede => {
-        const compactUrl = String(sede.google_maps_url || '').replace(/\s+/g, '');
-        try {
-          const parsed = new URL(compactUrl);
-          if (parsed.protocol === 'https:' || parsed.protocol === 'http:') return parsed.href;
-        } catch {}
-        const query = [sede.nombre, sede.alias, 'Cajamarca'].filter(Boolean).join(' ');
-        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
-      };
-      try {
-        if (!window.supabaseClient) throw new Error('Supabase no inicializado');
-        const { data, error } = await window.supabaseClient.from('sedes').select('*').order('created_at');
-        if (error || !data?.length) throw error;
-        
-        container.innerHTML = data.map(s => `
-          <div class="bento-card bg-white/5 p-8 flex flex-col justify-between group hover:bg-white/10 transition-colors">
-            <div>
-              <div class="inline-flex items-center gap-2 bg-brand/20 text-brand font-bold text-[0.65rem] uppercase tracking-widest px-3 py-1 rounded-full mb-6">
-                <span class="w-1.5 h-1.5 rounded-full bg-brand"></span> SEDE ACTIVA
-              </div>
-              <h3 class="font-display text-3xl sm:text-4xl uppercase italic mb-3 text-white group-hover:text-brand transition-colors">${escapeSiteHtml(s.nombre)}</h3>
-              <p class="font-body text-sm sm:text-base text-gray-400 mb-8 font-medium">${s.alias ? `<strong class="text-gray-300">${escapeSiteHtml(s.alias)}.</strong> ` : ''}${escapeSiteHtml(s.descripcion)}</p>
-            </div>
-            <a href="${escapeSiteHtml(mapsUrlForSede(s))}" target="_blank" rel="noopener noreferrer" class="slant-btn inline-flex items-center justify-center bg-white/10 hover:bg-brand text-white px-6 py-3 font-display text-lg uppercase tracking-wide transition-all border border-white/10 hover:border-brand">
-              <span class="slant-btn-content flex items-center gap-2">ABRIR MAPA <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-            </a>
-          </div>
-        `).join('');
-      } catch(err) {
-        container.innerHTML = '<div class="col-span-full p-6 bg-brand/10 border border-brand/20 text-brand rounded-2xl font-bold text-center text-sm sm:text-base">Datos de sedes no disponibles.</div>';
-      }
-    });
+    const header = document.getElementById('site-header');
+    const mobileCta = document.querySelector('.mobile-whatsapp');
+    const hero = document.querySelector('.hero');
+    const updateScrollUi = () => {
+      header.classList.toggle('is-scrolled', window.scrollY > 24);
+      mobileCta.classList.toggle('is-visible', window.scrollY > hero.offsetHeight * .55);
+    };
+    window.addEventListener('scroll', updateScrollUi, { passive: true });
+    window.addEventListener('resize', updateScrollUi);
+    updateScrollUi();
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+    document.querySelectorAll('details').forEach(item => item.addEventListener('toggle', () => {
+      if (!item.open) return;
+      document.querySelectorAll('details[open]').forEach(other => { if (other !== item) other.removeAttribute('open'); });
+    }));
+    document.querySelectorAll('[data-wa-location]').forEach(link => link.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('jrstars:whatsapp-click', { detail: { placement: link.dataset.waLocation } }));
+    }));
   </script>
 </body>
 </html>

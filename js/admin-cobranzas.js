@@ -247,7 +247,12 @@ function getCobranzaDueMeta(value, now = new Date()) {
     const shortDate = formatCobranzasDate(value, { day: 'numeric', month: 'short' });
     const fullDate = formatCobranzasDate(value, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
-    if (days < 0) return { days, state: 'expired', headline: `Venció el ${shortDate}`, phrase: `venció el ${shortDate}`, fullDate };
+    // Regla de negocio: 15 días de gracia desde el inicio del nuevo mes (es decir, valid_until + 15 días)
+    if (days < -15) return { days, state: 'expired', headline: `¡En Mora! (Venció el ${shortDate})`, phrase: `venció el ${shortDate} y expiró su periodo de gracia`, fullDate };
+    if (days < 0 && days >= -15) {
+        const diasRestantes = 15 + days;
+        return { days, state: 'today', headline: `Plazo de gracia: ${diasRestantes} días`, phrase: `tiene ${diasRestantes} días restantes para pagar este mes`, fullDate };
+    }
     if (days === 0) return { days, state: 'today', headline: 'Vence hoy', phrase: 'vence hoy', fullDate };
     if (days === 1) return { days, state: 'tomorrow', headline: 'Vence mañana', phrase: 'vence mañana', fullDate };
     return { days, state: 'upcoming', headline: `Vence el ${shortDate}`, phrase: `vence el ${shortDate}`, fullDate };
@@ -304,7 +309,7 @@ async function loadCobranzas() {
 
         cobranzasReferenceNow = new Date();
         cobranzasRows = (data || []).map(prepareCobranzaStudent);
-        const expired = cobranzasRows.filter(student => student._due.days < 0).length;
+        const expired = cobranzasRows.filter(student => student._due.days < -15).length;
 
         setCobranzasMetrics(cobranzasRows.length, expired);
         setCobranzasNavState(cobranzasRows.length);

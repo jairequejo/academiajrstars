@@ -54,6 +54,15 @@
   content: ""; width: 7px; height: 7px; border-radius: 50%;
   background: #22c55e; box-shadow: 0 0 10px rgba(34,197,94,.8);
 }
+/* Mensualidad del mes en curso, aún dentro del plazo de pago (días 1 al 15). */
+.pc-status-pending {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: #fde68a; font-size: 10px; font-weight: 800; letter-spacing: .06em;
+}
+.pc-status-pending::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: #f59e0b; box-shadow: 0 0 10px rgba(245,158,11,.8);
+}
 .pc-status-locked {
   display: inline-flex; align-items: center; gap: 6px;
   color: #fca5a5; font-size: 10px; font-weight: 800;
@@ -80,6 +89,15 @@
   border: 3px solid var(--portal-red);
   box-shadow: 0 0 0 5px rgba(229,25,27,.18), 0 12px 30px rgba(0,0,0,.6);
   object-fit: cover; background: #1a1a1e;
+}
+/* Iniciales locales: sin depender de servicios externos y visibles al compartir */
+.pc-avatar-fallback {
+  display: grid; place-items: center;
+  background: linear-gradient(145deg, #e5191b 0%, #8f0b0e 100%);
+  color: #fff;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: clamp(30px, 6vw, 46px); line-height: 1; letter-spacing: .05em;
+  text-align: center; user-select: none;
 }
 
 /* NOMBRE + CHIPS */
@@ -179,6 +197,39 @@
 .pc-att-label::before {
   content: ""; width: 16px; height: 3px; background: var(--portal-red); border-radius: 2px;
 }
+
+/* ── LENGUAJE LLANO PARA LA FAMILIA ── */
+.pc-lead {
+  margin: 0 0 14px; font-size: 15px; line-height: 1.55; color: #3f3f46;
+}
+.pc-lead strong { color: #0a0a0a; }
+
+.pc-compare { margin: 0 0 4px; }
+.pc-compare > div {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 11px 2px; border-bottom: 1px solid #ececec;
+}
+.pc-compare > div:last-child { border-bottom: 0; }
+.pc-compare span {
+  font-size: 11px; font-weight: 900; letter-spacing: .05em;
+  text-transform: uppercase; color: #6a6a70;
+}
+.pc-compare strong {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 22px; font-weight: 400; letter-spacing: .02em; color: #0a0a0a;
+}
+
+.pc-detail { margin-top: 10px; }
+.pc-detail > summary {
+  cursor: pointer; list-style: none; padding: 12px 14px;
+  border: 1px solid #e2e2e2; border-radius: 12px; background: #f7f7f5;
+  font-size: 11px; font-weight: 900; letter-spacing: .07em;
+  text-transform: uppercase; color: #0a0a0a;
+}
+.pc-detail > summary::-webkit-details-marker { display: none; }
+.pc-detail > summary::after { content: "  ▾"; }
+.pc-detail[open] > summary::after { content: "  ▴"; }
+.pc-detail[open] > summary { margin-bottom: 14px; }
 .pc-att-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .pc-att-card { padding: 13px; border-radius: 12px; background: #f3f3f0; }
 .pc-att-card strong {
@@ -388,8 +439,9 @@
     padding-top: 4px;
   }
   .pc-streak-unit {
-    grid-row: 2;
+    grid-row: 1 / 3;
     grid-column: 2;
+    align-self: center;
     font-size: 10px;
     letter-spacing: .16em;
     margin: 0;
@@ -442,7 +494,7 @@
 /* ── EXPORT MODE (1080×1080 para WhatsApp, Instagram y Facebook) ── */
 #card-wrap.export-mode {
   width: 900px !important;
-  height: 900px !important;
+  height: 1125px !important;
   max-width: none !important;
   padding: 24px !important;
   box-sizing: border-box;
@@ -454,7 +506,9 @@
 }
 #card-wrap.export-mode .epic-card {
   display: grid !important;
-  grid-template-rows: 258px minmax(0, 1fr) !important;
+  /* La fila del encabezado crece con el contenido: así un nombre largo o un
+     chip de más nunca queda recortado por el borde del héroe. */
+  grid-template-rows: auto minmax(0, 1fr) !important;
   width: 100% !important;
   height: 100% !important;
   border-radius: 26px !important;
@@ -464,7 +518,8 @@
 }
 #card-wrap.export-mode .pc-hero {
   width: 100% !important;
-  height: 258px !important;
+  height: auto !important;
+  min-height: 246px !important;
   margin: 0 !important;
   padding: 22px 30px !important;
   border-radius: 0 !important;
@@ -483,7 +538,7 @@
 #card-wrap.export-mode .pc-kicker { display: block !important; }
 #card-wrap.export-mode .pc-hero-body {
   display: grid !important;
-  grid-template-columns: 118px minmax(0, 1fr) 188px !important;
+  grid-template-columns: 118px minmax(0, 1fr) 196px !important;
   align-items: center !important;
   gap: 20px !important;
   margin: 0 !important;
@@ -521,58 +576,50 @@
   gap: 5px !important;
   margin-top: 10px !important;
 }
-#card-wrap.export-mode .pc-chip { padding: 4px 8px !important; font-size: 8px !important; }
+#card-wrap.export-mode .pc-chip { padding: 5px 9px 6px !important; font-size: 8px !important; line-height: 1 !important; }
 #card-wrap.export-mode .pc-streak {
-  display: grid !important;
-  grid-template-columns: auto minmax(0, 1fr) !important;
-  align-items: center !important;
-  width: 188px !important;
-  min-width: 188px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  width: 196px !important;
+  min-width: 196px !important;
   margin: 0 !important;
-  padding: 14px !important;
-  gap: 10px !important;
+  padding: 13px 15px 15px !important;
+  gap: 5px !important;
   border-radius: 16px !important;
   text-align: left !important;
   box-sizing: border-box;
 }
+#card-wrap.export-mode .pc-streak-label { font-size: 8px !important; text-align: left !important; }
 #card-wrap.export-mode .pc-streak-value {
-  display: grid !important;
-  grid-template-columns: auto auto !important;
-  grid-template-rows: auto auto !important;
-  column-gap: 5px !important;
+  display: flex !important;
+  flex-direction: row !important;
   align-items: center !important;
+  gap: 7px !important;
   margin: 0 !important;
 }
 #card-wrap.export-mode .pc-streak-flame {
-  grid-column: 1 !important;
-  grid-row: 1 / 3 !important;
-  align-self: center !important;
   margin: 0 !important;
-  font-size: 32px !important;
+  font-size: 26px !important;
+  line-height: 1 !important;
 }
 #card-wrap.export-mode .pc-streak-number {
-  grid-column: 2 !important;
-  grid-row: 1 !important;
   margin: 0 !important;
   padding: 0 !important;
   font-size: 50px !important;
 }
 #card-wrap.export-mode .pc-streak-unit {
-  grid-column: 2 !important;
-  grid-row: 2 !important;
-  align-self: start !important;
   padding: 0 !important;
-  font-size: 7px !important;
+  font-size: 13px !important;
+  letter-spacing: .13em !important;
 }
 #card-wrap.export-mode .pc-streak-info {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
+  display: block !important;
   min-width: 0;
   text-align: left !important;
 }
-#card-wrap.export-mode .pc-streak-label { font-size: 7px !important; text-align: left !important; }
-#card-wrap.export-mode .pc-streak-title { margin-top: 3px !important; font-size: 16px !important; line-height: 1 !important; text-align: left !important; }
+#card-wrap.export-mode .pc-streak-title { margin-top: 4px !important; font-size: 15px !important; line-height: 1.1 !important; text-align: left !important; }
 #card-wrap.export-mode .pc-streak-copy { display: none !important; }
 #card-wrap.export-mode .pc-hero::after { right: -50px !important; bottom: -135px !important; }
 
@@ -598,12 +645,29 @@
 }
 #card-wrap.export-mode .pc-section-head {
   align-items: flex-end !important;
-  padding-bottom: 9px !important;
-  margin-bottom: 9px !important;
+  padding-bottom: 14px !important;
+  margin-bottom: 12px !important;
   border-bottom-width: 4px !important;
 }
 #card-wrap.export-mode .pc-section-head-left > span { font-size: 8px !important; }
-#card-wrap.export-mode .pc-section-head-left > h3 { margin-top: 2px !important; font-size: 42px !important; }
+#card-wrap.export-mode .pc-section-head-left > h3 { margin-top: 2px !important; font-size: 42px !important; line-height: 1 !important; }
+/* html2canvas dibuja el texto con su propio cálculo de línea: con line-height < 1
+   las letras se salían de su caja y chocaban con los bordes. Se normaliza aquí. */
+#card-wrap.export-mode .pc-name,
+#card-wrap.export-mode .pc-streak-title,
+#card-wrap.export-mode .pc-att-card strong,
+#card-wrap.export-mode .pc-momentum strong,
+#card-wrap.export-mode .pc-compare strong,
+#card-wrap.export-mode .pc-export-brand strong { line-height: 1 !important; }
+#card-wrap.export-mode .pc-att-card span,
+#card-wrap.export-mode .pc-compare span,
+#card-wrap.export-mode .pc-lead { line-height: 1.4 !important; }
+#card-wrap.export-mode .pc-att-card span { margin-top: 5px !important; }
+#card-wrap.export-mode .pc-compare > div { padding: 10px 2px !important; }
+/* En la imagen compartida las gráficas sí se muestran (van abiertas y sin el
+   botón "ver más"), compactas para que quepan junto al resumen numérico. */
+#card-wrap.export-mode .pc-detail { display: block !important; margin-top: 4px !important; }
+#card-wrap.export-mode .pc-detail > summary { display: none !important; }
 #card-wrap.export-mode .pc-section-badge { padding: 6px 9px !important; font-size: 8px !important; }
 #card-wrap.export-mode .pc-charts {
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -618,11 +682,11 @@
 }
 #card-wrap.export-mode .ms-head { gap: 4px !important; }
 #card-wrap.export-mode .ms-label { font-size: 7px !important; letter-spacing: .07em !important; }
-#card-wrap.export-mode .ms-value { font-size: 27px !important; }
+#card-wrap.export-mode .ms-value { font-size: 23px !important; }
 #card-wrap.export-mode .ms-trend { padding: 3px 5px !important; font-size: 9px !important; }
-#card-wrap.export-mode .ms-svg { height: 55px !important; margin-top: 1px !important; }
+#card-wrap.export-mode .ms-svg { height: 46px !important; margin-top: 1px !important; }
 #card-wrap.export-mode .ms-foot { margin-top: 2px !important; font-size: 6px !important; letter-spacing: .02em !important; }
-#card-wrap.export-mode .ms-minmax { font-size: 6px !important; }
+#card-wrap.export-mode .ms-minmax { display: none !important; }
 #card-wrap.export-mode .performance-empty { margin: 8px 0 !important; padding: 12px !important; }
 #card-wrap.export-mode .pc-divider { margin: 8px 0 !important; }
 #card-wrap.export-mode .pc-att-label { margin-bottom: 6px !important; font-size: 8px !important; }
@@ -757,3 +821,19 @@
   .share-progress-card { grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 17px; }
   .share-progress-card > img { width: 56px; height: 56px; }
 }
+
+/* ── Unidades y gráficas en la imagen compartida ──────────────────
+   Las métricas usan Bebas, que no tiene minúsculas: la unidad va en
+   Inter para que se lea «132 cm» y no «132 CM». */
+.pc-unit {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: .58em;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+/* Al compartir, cada gráfica se reemplaza por un PNG de igual proporción:
+   html2canvas desborda los SVG con degradados y sombras. */
+.ms-svg-raster { display: block; width: 100%; height: 80px; margin-top: 4px; object-fit: contain; }
+#card-wrap.export-mode .ms-svg-raster { height: 46px !important; margin-top: 1px !important; }
+#card-wrap.export-mode .pc-momentum { padding: 9px 11px 12px !important; }
+#card-wrap.export-mode .pc-momentum p { line-height: 1.5 !important; }

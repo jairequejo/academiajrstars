@@ -293,11 +293,11 @@ async function handleScan(decodedText) {
         queueScan(parsed.student_id);
 
         // Si hay conexión, también llamar al servidor para dedup inmediato
+        // (vía RPC: el rol anónimo ya no escribe en attendance directamente)
         if (navigator.onLine) {
-            window.supabaseClient.from('attendance').insert({
-                student_id: parsed.student_id,
-                created_at: new Date().toISOString(),
-                source: 'scanner'
+            window.supabaseClient.rpc('entrenador_marcar_asistencia', {
+                p_token: token,
+                p_student_id: parsed.student_id
             }).then(() => {}).catch(() => {});
         }
 
@@ -320,35 +320,14 @@ async function handleScan(decodedText) {
         let is_active = true;
         let credential_id = null;
 
-        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(code);
-        if (isUuid) {
-            const { data } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').eq('id', code).maybeSingle();
-            if (data) { student_id = data.id; nombre_final = data.full_name; valid_until = data.valid_until; is_active = data.is_active; }
-        } else if (code.length === 8 && /^[0-9a-fA-F]+$/.test(code)) {
-            const { data } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').ilike('id', `${code}%`).maybeSingle();
-            if (data) {
-                student_id = data.id; nombre_final = data.full_name; valid_until = data.valid_until; is_active = data.is_active;
-            } else {
-                const { data: cred } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true).maybeSingle();
-                if (cred) {
-                    student_id = cred.student_id; credential_id = cred.id;
-                    const st = cred.students;
-                    if (st) {
-                        const s = Array.isArray(st) ? st[0] : st;
-                        nombre_final = s.full_name; valid_until = s.valid_until; is_active = s.is_active;
-                    }
-                }
-            }
-        } else {
-            const { data: cred } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true).maybeSingle();
-            if (cred) {
-                student_id = cred.student_id; credential_id = cred.id;
-                const st = cred.students;
-                if (st) {
-                    const s = Array.isArray(st) ? st[0] : st;
-                    nombre_final = s.full_name; valid_until = s.valid_until; is_active = s.is_active;
-                }
-            }
+        const { data: look } = await window.supabaseClient
+            .rpc('entrenador_lookup', { p_token: token, p_code: code });
+        if (look && look.found && look.student) {
+            student_id = look.student.id;
+            nombre_final = look.student.full_name;
+            valid_until = look.student.valid_until;
+            is_active = look.student.is_active;
+            credential_id = look.credential_id;
         }
 
         if (!student_id) {
@@ -385,24 +364,25 @@ async function handleScan(decodedText) {
             scheduleResume(); return;
         }
 
-        const todayStartUTC = new Date();
-        todayStartUTC.setUTCHours(0,0,0,0);
-        const { data: attData } = await window.supabaseClient.from('attendance')
-            .select('id').eq('student_id', student_id).gte('created_at', todayStartUTC.toISOString()).limit(1);
+        // Dedup + registro vía RPC (atómico en el servidor, sin acceso anónimo a la tabla)
+        let marcado = { status: 'ok' };
+        try {
+            const { data } = await window.supabaseClient.rpc('entrenador_marcar_asistencia', {
+                p_token: token,
+                p_student_id: student_id,
+                p_credential_id: credential_id
+            });
+            if (data) marcado = data;
+        } catch (e) {
+            console.error(e);
+        }
 
-        if (attData && attData.length > 0) {
+        if (marcado.status === 'duplicado') {
             playWarning();
             showFlash('warning', nombre_final, 'Este alumno ya marcó asistencia hoy.');
             addHistory('warning', nombre_final);
             scheduleResume(); return;
         }
-
-        await window.supabaseClient.from('attendance').insert({
-            student_id: student_id,
-            credential_id: credential_id,
-            created_at: new Date().toISOString(),
-            source: 'scanner'
-        });
 
         playSuccess();
         showFlash('success', nombre_final, '');
@@ -533,32 +513,16 @@ async function loadAsistencia() {
     if (listEl) listEl.innerHTML = '<div class="loading-msg">Cargando...</div>';
 
     try {
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        const startIso = todayStart.toISOString();
+        // Roster + asistencia del día vía RPC (sin acceso anónimo a students/attendance)
+        const { data: roster, error: rosterError } = await window.supabaseClient
+            .rpc('entrenador_asistencia_hoy', { p_token: token });
 
-        const [stRes, attRes] = await Promise.all([
-            window.supabaseClient.from('students')
-                .select('id, full_name, first_names, last_names, dni, codigo_legacy, horario, turno, grupo, valid_until, sede')
-                .eq('is_active', true)
-                .order('full_name'),
-            window.supabaseClient.from('attendance')
-                .select('student_id, created_at')
-                .gte('created_at', startIso)
-        ]);
-
-        if (stRes.error) throw stRes.error;
-        if (attRes.error) throw attRes.error;
-
-        const attendedIds = {};
-        for (const r of attRes.data) {
-            attendedIds[r.student_id] = r.created_at;
-        }
+        if (rosterError) throw rosterError;
 
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
 
-        asistenciaData = stRes.data.map(student => {
+        asistenciaData = (roster || []).map(student => {
             let debe = false;
             if (student.valid_until) {
                 const [y, m, d] = student.valid_until.split('-');
@@ -568,13 +532,16 @@ async function loadAsistencia() {
             return {
                 id: student.id,
                 full_name: student.full_name,
+                first_names: student.first_names || "",
+                last_names: student.last_names || "",
+                codigo_legacy: student.codigo_legacy || "",
                 dni: student.dni || "",
                 horario: student.horario || "",
                 turno: inferTurno(student.horario),
                 sede: student.sede || "",
-                grupo: "",
-                present: !!attendedIds[student.id],
-                time: attendedIds[student.id],
+                grupo: student.grupo || "",
+                present: !!student.present,
+                time: student.time,
                 debe,
                 valid_until: student.valid_until
             };
@@ -741,11 +708,12 @@ async function guardarBiometria() {
     if (!id) return;
     
     try {
-        const { error } = await window.supabaseClient.from('biometria').insert({
-            student_id: id,
-            talla: talla,
-            peso: peso,
-            tiempo_sprint: sprint
+        const { error } = await window.supabaseClient.rpc('entrenador_guardar_biometria', {
+            p_token: token,
+            p_student_id: id,
+            p_talla: talla,
+            p_peso: peso,
+            p_sprint: sprint
         });
 
         if (error) throw error;

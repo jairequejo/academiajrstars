@@ -33,13 +33,23 @@
 4. Rota todos los enlaces de entrenador desde el panel. Los tokens estuvieron expuestos por permisos anónimos y deben considerarse comprometidos.
 5. Rota cualquier QR con formato `JRS:`. La versión anterior se firmaba con una clave embebida en el navegador. Los nuevos códigos `STU-` son identificadores aleatorios opacos.
 
-## Riesgo pendiente antes de producción
+## Estado del riesgo de acceso anónimo (actualizado 18/10/2026)
 
-El portal público, el PWA de entrenador y el scanner todavía hacen consultas directas con el rol `anon` a `students`, `credentials`, `attendance` y `biometria`. No publiques datos reales mientras esas tablas permitan lecturas/escrituras anónimas.
+Se implementó la corrección. Las tablas `students`, `credentials`, `attendance`, `biometria`, `mensualidades` y `sedes` quedan con RLS activo y **sin acceso directo para `anon`**; el portal público, el entrenador y el scanner pasan a usar funciones `SECURITY DEFINER` estrechas.
 
-La corrección definitiva es mover esas operaciones a funciones SQL o Edge Functions estrechas que validen la identidad del padre/entrenador/scanner, habilitar RLS en todas las tablas expuestas y revocar el acceso directo de `anon`. El frontend no puede convertir una llave pública en un secreto.
+Orden de despliegue (no alterar):
 
-La función de PIN incluida evita que la interfaz de Caja y el canje nuevo funcionen sin PIN, pero un PIN por sí solo no sustituye identidad, rate limiting ni auditoría. Para producción, Caja y Scanner deben autenticarse como dispositivos o usuarios reales en una Edge Function.
+1. Ejecuta `migrations/20261018_fix_admin_registration.sql` (corrige el fallo C4: la migración `20260915` había registrado como administrador a **toda** cuenta `auth.users`). Cambia el correo antes de correrla.
+2. Publica el frontend con el JS adaptado (`home.js`, `entrenador.js`, `scanner.js` llaman a `portal_lookup`, `portal_ranking`, `entrenador_lookup`, `entrenador_asistencia_hoy`, `entrenador_marcar_asistencia`, `entrenador_guardar_biometria`). Se subió el cache-buster a `?v=20261018_rpc` en `portal/index.html` y `entrenador/index.html`; `scanner` ya usa `?_=Date.now()`.
+3. Ejecuta `migrations/20261018_lockdown_anon_rls.sql` para activar RLS y revocar `anon`.
+4. Ejecuta `scripts/audit-supabase.sql` y revisa que `anon` no conserve privilegios en esas tablas.
+
+Si se ejecuta el paso 3 **sin** haber publicado el paso 2, el portal y el scanner fallarán hasta que el nuevo JS esté en línea.
+
+### Riesgo residual honesto
+
+- El portal sigue permitiendo buscar por **DNI**. Quien conozca o adivine un DNI puede ver nombre, categoría y biometría de ese alumno. Es mucho menos grave que la lectura masiva anterior, pero para producción conviene exigir el **código del medallón** (`JRS:...`) en lugar del DNI, y añadir límite de intentos.
+- Caja y Scanner comparten llave pública. Un PIN o un token por sí solos no sustituyen identidad fuerte: la siguiente etapa es autenticarlos como dispositivo o usuario real en una Edge Function con rate limiting y auditoría.
 
 Ejecuta `scripts/audit-supabase.sql` después de cada migración para revisar RLS, políticas, permisos de tablas y permisos de funciones sin leer datos personales.
 

@@ -423,78 +423,23 @@ async function _doOnlineScan(code) {
             if (!parsed) {
                 playError(); showFlash('error', 'QR INVÁLIDO', 'Firma incorrecta.'); resume(); return;
             }
-            const short_id = parsed.short_id;
             nombre_final = parsed.name;
-
-            const { data: creds } = await window.supabaseClient.from('credentials').select('student_id').like('code', `JRS:${short_id}:%`).eq('is_active', true).limit(1);
-            if (!creds || creds.length === 0) {
-                playError(); showFlash('error', 'RECHAZADO', 'Credencial JRS no registrada'); resume(); return;
-            }
-            student_id = creds[0].student_id;
-
-            const { data: st } = await window.supabaseClient.from('students').select('id, is_active, valid_until, full_name').eq('id', student_id);
-            if (!st || st.length === 0) {
-                playError(); showFlash('error', 'RECHAZADO', 'Alumno no encontrado'); resume(); return;
-            }
-            valid_until = st[0].valid_until;
-            is_active = st[0].is_active;
-            nombre_final = st[0].full_name || nombre_final;
-
-        } else {
-            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-            if (uuidRegex.test(code)) {
-                const { data: st } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').eq('id', code);
-                if (!st || st.length === 0) {
-                    playError(); showFlash('error', 'RECHAZADO', 'Alumno no encontrado (por UUID)'); resume(); return;
-                }
-                student_id = st[0].id;
-                nombre_final = st[0].full_name || 'Sin Nombre';
-                valid_until = st[0].valid_until;
-                is_active = st[0].is_active;
-            } else if (code.length === 8) {
-                const { data: st } = await window.supabaseClient.from('students').select('id, full_name, valid_until, is_active').ilike('id', `${code}%`);
-                if (st && st.length > 0) {
-                    student_id = st[0].id;
-                    nombre_final = st[0].full_name || 'Sin Nombre';
-                    valid_until = st[0].valid_until;
-                    is_active = st[0].is_active;
-                } else {
-                    const { data: creds } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true);
-                    if (!creds || creds.length === 0) {
-                        playError(); showFlash('error', 'RECHAZADO', 'Credencial inválida'); resume(); return;
-                    }
-                    student_id = creds[0].student_id;
-                    cred_id = creds[0].id;
-                    const stData = creds[0].students;
-                    if (Array.isArray(stData) && stData.length > 0) {
-                        nombre_final = stData[0].full_name || 'Sin Nombre';
-                        valid_until = stData[0].valid_until;
-                        is_active = stData[0].is_active;
-                    } else if (stData) {
-                        nombre_final = stData.full_name || 'Sin Nombre';
-                        valid_until = stData.valid_until;
-                        is_active = stData.is_active;
-                    }
-                }
-            } else {
-                const { data: creds } = await window.supabaseClient.from('credentials').select('id, student_id, students(full_name, valid_until, is_active)').eq('code', code).eq('is_active', true);
-                if (!creds || creds.length === 0) {
-                    playError(); showFlash('error', 'RECHAZADO', 'Credencial inválida'); resume(); return;
-                }
-                student_id = creds[0].student_id;
-                cred_id = creds[0].id;
-                const stData = creds[0].students;
-                if (Array.isArray(stData) && stData.length > 0) {
-                    nombre_final = stData[0].full_name || 'Sin Nombre';
-                    valid_until = stData[0].valid_until;
-                    is_active = stData[0].is_active;
-                } else if (stData) {
-                    nombre_final = stData.full_name || 'Sin Nombre';
-                    valid_until = stData.valid_until;
-                    is_active = stData.is_active;
-                }
-            }
         }
+
+        // Resolución vía RPC (sin acceso anónimo directo a students/credentials)
+        const scanToken = localStorage.getItem('jr_entrenador_token') || localStorage.getItem('trainer_token') || '';
+        const { data: look } = await window.supabaseClient
+            .rpc('entrenador_lookup', { p_token: scanToken, p_code: code });
+
+        if (!look || !look.found || !look.student) {
+            playError(); showFlash('error', 'RECHAZADO', 'Alumno o credencial no encontrada'); resume(); return;
+        }
+
+        student_id = look.student.id;
+        nombre_final = look.student.full_name || nombre_final;
+        valid_until = look.student.valid_until;
+        is_active = look.student.is_active;
+        cred_id = look.credential_id;
 
         if (!is_active) {
             playWarning(); showFlash('debe', nombre_final, `${nombre_final} — Alumno inactivo`); addHistory('debe', nombre_final); resume(); return;
@@ -520,20 +465,22 @@ async function _doOnlineScan(code) {
             playWarning(); showFlash('debe', nombre_final, `Mensualidad vencida. Venció hace ${dias_vencido} días.`); addHistory('debe', nombre_final); resume(); return;
         }
 
-        const startDay = new Date();
-        startDay.setHours(0,0,0,0);
-        const { data: att } = await window.supabaseClient.from('attendance').select('id').eq('student_id', student_id).gte('created_at', startDay.toISOString()).limit(1);
-
-        if (att && att.length > 0) {
-            playWarning(); showFlash('warning', nombre_final, `Ya registrado hoy: ${nombre_final}`); addHistory('warning', nombre_final); resume(); return;
+        // Dedup + registro vía RPC (el rol anónimo ya no lee/escribe attendance)
+        let marcado = { status: 'ok' };
+        try {
+            const { data } = await window.supabaseClient.rpc('entrenador_marcar_asistencia', {
+                p_token: scanToken,
+                p_student_id: student_id,
+                p_credential_id: cred_id
+            });
+            if (data) marcado = data;
+        } catch (e) {
+            console.error(e);
         }
 
-        await window.supabaseClient.from('attendance').insert({
-            student_id: student_id,
-            credential_id: cred_id,
-            source: 'scanner',
-            created_at: new Date().toISOString()
-        });
+        if (marcado.status === 'duplicado') {
+            playWarning(); showFlash('warning', nombre_final, `Ya registrado hoy: ${nombre_final}`); addHistory('warning', nombre_final); resume(); return;
+        }
 
         playSuccess();
         showFlash('success', nombre_final, `¡Bienvenido, ${nombre_final}!`);

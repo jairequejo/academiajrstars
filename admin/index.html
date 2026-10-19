@@ -1080,20 +1080,28 @@
           </dl>
           <div class="inscripcion-fields">
             <div class="form-group">
-              <label class="form-label" for="a-pago-mes">Mensualidad (S/)</label>
-              <input class="input-jr" id="a-pago-mes" name="mensualidad" type="number" min="0" step="0.01" value="80.00" inputmode="decimal" required aria-describedby="inscripcion-beca-hint">
-              <small class="inscripcion-field-hint" id="inscripcion-beca-hint">Ingresa 0 si el alumno es becado.</small>
+              <label class="form-label" for="a-pago-mat">Matrícula (S/)</label>
+              <input class="input-jr" id="a-pago-mat" name="matricula" type="number" min="0" step="0.01" value="20.00" inputmode="decimal">
             </div>
             <div class="form-group">
-              <label class="form-label" for="a-pago-mat">Matrícula (S/) <span class="field-optional">(opcional)</span></label>
-              <input class="input-jr" id="a-pago-mat" name="matricula" type="number" min="0" step="0.01" value="0.00" inputmode="decimal">
+              <label class="form-label" for="a-pago-uni">Uniforme (S/)</label>
+              <input class="input-jr" id="a-pago-uni" name="uniforme" type="number" min="0" step="0.01" value="70.00" inputmode="decimal">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-pago-primer">Días de Entrenamiento (Mes Actual)</label>
+              <input class="input-jr" id="a-pago-primer" name="primer_mes" type="number" min="0" step="0.01" value="80.00" inputmode="decimal">
+              <small class="inscripcion-field-hint" style="margin-top: 4px; display: block; color: var(--gold);">Calculado según días restantes.</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a-pago-mes">Mensualidad Fija (Futuros meses S/)</label>
+              <input class="input-jr" id="a-pago-mes" name="mensualidad" type="number" min="0" step="0.01" value="80.00" inputmode="decimal" required aria-describedby="inscripcion-beca-hint">
             </div>
             <div class="form-group inscripcion-field-wide">
-              <label class="form-label" for="a-fecha-inicio">Empieza el (Día de cobro)</label>
+              <label class="form-label" for="a-fecha-inicio">Empieza el</label>
               <input class="input-jr" id="a-fecha-inicio" name="fecha_inicio" type="date" required>
             </div>
             <div class="form-group inscripcion-field-wide">
-              <label class="form-label" for="a-metodo">Método de pago</label>
+              <label class="form-label" for="a-metodo">Método de pago inicial</label>
               <select class="select-jr" id="a-metodo" name="metodo">
                 <option value="Efectivo">Efectivo</option>
                 <option value="Yape">Yape</option>
@@ -1101,7 +1109,7 @@
               </select>
             </div>
           </div>
-          <p class="inscripcion-payment-note">Al crear la inscripción se habilitan 30 días de acceso y se registra la mensualidad indicada.</p>
+          <p class="inscripcion-payment-note">El alumno quedará habilitado hasta el fin del mes calendario actual.</p>
         </section>
         <p class="inscripcion-message" id="inscripcion-message" role="alert" hidden></p>
       </div>

@@ -39,6 +39,31 @@
   birthInput.addEventListener('input', updateBirthHint);
   birthInput.addEventListener('change', updateBirthHint);
 
+  
+  const fechaInicioInput = document.getElementById('a-fecha-inicio');
+  const pagoPrimerMesInput = document.getElementById('a-pago-primer');
+  const pagoMesFijoInput = document.getElementById('a-pago-mes');
+  
+  function recalculatePrimerMes() {
+      if(!fechaInicioInput || !pagoPrimerMesInput || !pagoMesFijoInput) return;
+      if(!fechaInicioInput.value) return;
+      const baseDate = new Date(fechaInicioInput.value + 'T12:00:00Z');
+      const month = baseDate.getMonth();
+      const year = baseDate.getFullYear();
+      const lastDay = new Date(year, month + 1, 0).getDate();
+      const currentDay = baseDate.getDate();
+      const remainingDays = lastDay - currentDay + 1;
+      
+      const tarifaFija = parseFloat(pagoMesFijoInput.value) || 80.00;
+      let costo = (tarifaFija / lastDay) * remainingDays;
+      pagoPrimerMesInput.value = costo.toFixed(2);
+  }
+
+  if(fechaInicioInput && pagoPrimerMesInput && pagoMesFijoInput) {
+      fechaInicioInput.addEventListener('change', recalculatePrimerMes);
+      pagoMesFijoInput.addEventListener('input', recalculatePrimerMes);
+  }
+
   function setMessage(text = '') {
     message.textContent = text;
     message.hidden = !text;

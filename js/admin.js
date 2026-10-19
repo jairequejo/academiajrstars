@@ -565,6 +565,8 @@ async function crearAlumno() {
   const categoria = document.getElementById('a-categoria')?.value || null;
   const pagoMes = parseFloat(document.getElementById('a-pago-mes').value) || 0;
   const pagoMat = parseFloat(document.getElementById('a-pago-mat').value) || 0;
+  const pagoUni = parseFloat(document.getElementById('a-pago-uni').value) || 0;
+  const pagoPrimerMes = parseFloat(document.getElementById('a-pago-primer').value) || 0;
   const metodo = document.getElementById('a-metodo').value;
   const horario = document.getElementById('a-horario').value;
   const turno = document.getElementById('a-turno')?.value || null;
@@ -577,10 +579,9 @@ async function crearAlumno() {
   const fechaInicioVal = document.getElementById('a-fecha-inicio')?.value;
   const baseDate = fechaInicioVal ? new Date(fechaInicioVal + 'T12:00:00Z') : new Date();
 
-  const hoy = new Date(baseDate);
-  // Sumar exactamente 1 mes para que se conserve el mismo número de día
-  hoy.setMonth(hoy.getMonth() + 1);
-  const fecha_vencimiento_str = hoy.toISOString().split('T')[0];
+  // Regla del Mes Calendario: Vencimiento siempre es el último día del mes actual.
+  const valid_until_date = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0); 
+  const fecha_vencimiento_str = valid_until_date.toISOString().split('T')[0];
   const fecha_inicio_str = baseDate.toISOString().split('T')[0];
 
   const insert_data = {
@@ -623,15 +624,68 @@ async function crearAlumno() {
           throw new Error('Error al generar credencial');
       }
 
-      if (pagoMes > 0) {
+      // Insertar el total pagado en la inscripción (Matrícula + Primer Mes) en mensualidades
+      const totalPagado = pagoPrimerMes + pagoMat;
+      if (totalPagado > 0) {
           const { error: pagoErr } = await window.supabaseClient.from('mensualidades').insert({
               student_id: nuevo_alumno.id,
-              monto: pagoMes,
+              monto: totalPagado,
               metodo_pago: metodo,
               fecha_inicio: fecha_inicio_str,
               fecha_vencimiento: fecha_vencimiento_str
           });
           if (pagoErr) throw pagoErr;
+      }
+      
+      // Si hay cobro de uniforme, registrarlo en uniform_orders si existe, o solo como nota.
+      if (pagoUni > 0) {
+          try {
+             await window.supabaseClient.from('uniform_orders').insert({
+                 student_id: nuevo_alumno.id,
+                 kit_type: 'Completo',
+                 size: 'Por definir',
+                 name_on_shirt: firstNames.split(' ')[0],
+                 is_paid: true,
+                 total_price: pagoUni,
+                 is_delivered: false
+             });
+          } catch(e) { console.error('No se pudo guardar orden de uniforme', e); }
+      }
+
+      // Enviar WhatsApp al apoderado
+      if (telefono) {
+          const phoneParam = (telefono.length === 9) ? '51' + telefono : telefono;
+          let msg = `Hola! ⚽ Bienvenidos a la familia *JR Stars*.
+
+`;
+          msg += `👦 *Alumno:* ${nombre}
+
+`;
+          msg += `🧾 *Boleta de Inscripción:*
+`;
+          if (pagoMat > 0) msg += `✅ Matrícula: S/ ${pagoMat.toFixed(2)}
+`;
+          if (pagoUni > 0) msg += `✅ Uniforme: S/ ${pagoUni.toFixed(2)}
+`;
+          if (pagoPrimerMes > 0) msg += `✅ Entrenamiento (Mes actual): S/ ${pagoPrimerMes.toFixed(2)}
+`;
+          const sumaTotal = pagoMat + pagoUni + pagoPrimerMes;
+          msg += `*Total Abonado:* S/ ${sumaTotal.toFixed(2)} (${metodo})
+
+`;
+          
+          const formatterStr = new Intl.DateTimeFormat('es-PE', { month: 'long', year: 'numeric' });
+          let mesSiguiente = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 1);
+          let mesSiguienteStr = formatterStr.format(mesSiguiente);
+          mesSiguienteStr = mesSiguienteStr.charAt(0).toUpperCase() + mesSiguienteStr.slice(1);
+          
+          msg += `🗓️ Su próxima mensualidad regular (S/ ${pagoMes.toFixed(2)}) corresponde al mes de *${mesSiguienteStr}* (tienen hasta el 15 de cada mes para cancelar).
+
+`;
+          msg += `¡A darle con todo en los entrenamientos! 🌟`;
+          
+          const whatsappUrl = `https://wa.me/${phoneParam}?text=${encodeURIComponent(msg)}`;
+          window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
       }
 
       document.getElementById('a-nombres').value = '';
