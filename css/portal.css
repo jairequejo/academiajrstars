@@ -554,9 +554,9 @@ html { scroll-behavior: smooth; }
    ═══════════════════════════════════════════════════════════════════════ */
 .pt-nav { display: none; }
 
-/* 992px es el ancho mínimo real de la barra: por debajo manda la cabecera
-   compacta del portal, que ya funciona bien en móvil y en pantallas angostas. */
-@media (min-width: 992px) {
+/* 768px (tablet) es el ancho mínimo real de la barra: por debajo manda la
+   cabecera compacta del portal, que es la que usan los teléfonos. */
+@media (min-width: 768px) {
   /* La barra es fija: el contenido empieza debajo para no quedar tapado. */
   .portal-body { padding-top: var(--jr-nav-h); }
 
@@ -754,11 +754,11 @@ html { scroll-behavior: smooth; }
 .pt-ghost-corto { display: none; }
 
 /* Escritorio estrecho: la barra se compacta antes de apretarse. */
-@media (min-width: 992px) and (max-width: 1439px) {
+@media (min-width: 768px) and (max-width: 1439px) {
   .pt-nav-who { display: none; }
 }
 
-@media (min-width: 992px) and (max-width: 1279px) {
+@media (min-width: 768px) and (max-width: 1279px) {
   .pt-nav { gap: 10px; padding: 0 16px; }
   .pt-nav-links, .pt-nav-set { gap: 2px; }
   .pt-nav-link { padding: 0 8px; font-size: 10px; letter-spacing: .1em; }
@@ -768,6 +768,19 @@ html { scroll-behavior: smooth; }
   .pt-nav-cta { padding: 0 14px; }
   .pt-ghost-largo { display: none; }
   .pt-ghost-corto { display: inline; }
+}
+
+/* Tablet (768–991): solo marca, secciones y volver. El botón de WhatsApp se
+   reserva para pantallas con espacio; en el celular queda la cabecera. */
+@media (min-width: 768px) and (max-width: 991px) {
+  .pt-nav { gap: 8px; padding: 0 12px; }
+  .pt-nav-link { padding: 0 6px; font-size: 9.5px; letter-spacing: .07em; }
+  .pt-nav-link.is-current::after { right: 6px; left: 6px; }
+  .pt-nav-brand img { width: 32px; height: 32px; }
+  .pt-nav-brand-copy strong { font-size: 19px; }
+  .pt-nav-brand-copy small { margin-top: 4px; font-size: 7.5px; letter-spacing: .12em; }
+  .pt-nav-cta { display: none; }
+  .pt-nav-ghost { min-height: 38px; padding: 0 12px; font-size: 10px; letter-spacing: .1em; }
 }
 
 /* Mensualidad bloqueada: la navegación no ofrece secciones que no existen. */
