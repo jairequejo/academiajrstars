@@ -961,6 +961,115 @@
   font-size: 11px; line-height: 1.5; color: #8a8f9c;
 }
 
+/* ── BANDAS EDITORIALES: la ficha deja de repetir tarjetas ──
+   Cada bloque es una banda a lo ancho con su propio encabezado; el ritmo lo
+   marca una línea fina, no un marco alrededor de cada dato. */
+.pc-band { padding-bottom: 28px; }
+.pc-band + .pc-band { border-top: 1px solid #e9ebf1; padding-top: 28px; }
+.pc-band-head { margin-bottom: 20px; }
+.pc-band-kicker {
+  display: block;
+  font-size: 9px; font-weight: 900; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--portal-red, #e5191b);
+}
+.pc-band-title {
+  margin: 7px 0 0;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: clamp(32px, 8vw, 46px);
+  font-weight: 400; font-style: italic; line-height: .9; letter-spacing: .01em;
+}
+.pc-band-sub { margin: 11px 0 0; max-width: 60ch; font-size: 14px; line-height: 1.55; color: #3f3f46; }
+.pc-band-sub strong { font-weight: 800; color: #0a0a0a; box-shadow: inset 0 -.4em 0 rgba(245,166,35,.36); }
+
+/* ── RITMO DE ENTRENAMIENTO: columnas por mes (asistencia real) ── */
+.pc-ritmo { display: grid; gap: 24px; }
+.pc-ritmo-grafica {
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: clamp(6px, 2vw, 18px);
+  height: 168px;
+}
+.pc-ritmo-col { display: flex; flex-direction: column; align-items: center; height: 100%; min-width: 0; }
+/* El número va pegado a la parte alta de su barra: así el mes sin datos se
+   lee como un cero sin barra y no como una columna vacía. */
+.pc-ritmo-num {
+  position: absolute; left: 0; right: 0;
+  bottom: calc(var(--h, 0%) + 7px);
+  text-align: center;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 22px; line-height: 1; color: #9aa0ae;
+}
+/* Sin caja de fondo: sólo la línea base. */
+.pc-ritmo-pista {
+  position: relative;
+  flex: 1 1 auto; display: flex; align-items: flex-end;
+  width: 100%; max-width: 68%;
+  border-bottom: 1px solid #e3e5ec;
+}
+.pc-ritmo-pista i {
+  display: block; width: 100%; height: var(--h, 0%);
+  background: linear-gradient(180deg, #e5191b 0%, #8f0b0e 100%);
+  transition: height .7s cubic-bezier(.2, .8, .2, 1);
+}
+.pc-ritmo-mes {
+  margin-top: 9px;
+  font-size: 9px; font-weight: 900; letter-spacing: .14em; color: #8a91a3;
+}
+/* El mes en curso se distingue del historial: azul, no rojo. */
+.pc-ritmo-col.is-actual .pc-ritmo-num { color: #0a0a0a; }
+.pc-ritmo-col.is-actual .pc-ritmo-pista { box-shadow: 0 1px 0 0 #153a79; }
+.pc-ritmo-col.is-actual .pc-ritmo-pista i { background: linear-gradient(180deg, #153a79 0%, #091d45 100%); }
+.pc-ritmo-col.is-actual .pc-ritmo-mes { color: #0a0a0a; }
+
+.pc-ritmo-lado { display: flex; align-items: center; gap: 24px; }
+.pc-ritmo-copy { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.pc-ritmo-datos { display: flex; flex-wrap: wrap; gap: 26px; margin: 0; }
+.pc-ritmo-datos dt {
+  font-size: 9px; font-weight: 900; letter-spacing: .16em;
+  text-transform: uppercase; color: #8a91a3;
+}
+.pc-ritmo-datos dd {
+  margin: 5px 0 0;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 30px; font-weight: 400; line-height: 1; color: #091d45;
+}
+
+/* Camino al siguiente hito de la temporada. */
+.pc-ritmo-hito { max-width: 280px; }
+.pc-ritmo-hito-pista { display: block; height: 8px; background: #f1f2f6; }
+.pc-ritmo-hito-pista i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, #e5191b 0%, #f5a623 100%);
+  transition: width .7s cubic-bezier(.2, .8, .2, 1);
+}
+.pc-ritmo-hito small { display: block; margin-top: 9px; font-size: 11px; line-height: 1.4; color: #8a91a3; }
+.pc-ritmo-hito small strong { color: #0a0a0a; }
+
+/* ── MARCAS PROPIAS: dato, barra y referencia ── */
+.pc-atrs { display: grid; gap: 22px; }
+.pc-atr-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+.pc-atr-label {
+  font-size: 10px; font-weight: 900; letter-spacing: .16em;
+  text-transform: uppercase; color: #6a6a70;
+}
+.pc-atr-valor {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: clamp(30px, 8vw, 40px); font-weight: 400; line-height: 1;
+  color: #0a0a0a;
+}
+.pc-atr-valor small {
+  margin-left: 5px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 12px; font-weight: 800; letter-spacing: .04em; color: #8a91a3;
+}
+.pc-atr-pista { display: block; margin-top: 9px; height: 8px; background: #f1f2f6; }
+.pc-atr-pista i {
+  display: block; height: 100%;
+  background: linear-gradient(90deg, #153a79 0%, #e5191b 100%);
+  transition: width .7s cubic-bezier(.2, .8, .2, 1);
+}
+.pc-atr-nota { display: block; margin-top: 8px; font-size: 11px; color: #8a91a3; }
+.pc-evo-vacio { margin: 0; font-size: 13px; line-height: 1.6; color: #6a6a70; }
+
 /* ── MÓVIL (hasta 640px): el panel se apila y el anillo preside ── */
 @media (max-width: 640px) {
   .pc-hero-line { margin-top: 8px; max-width: none; font-size: 11px; text-align: center; }
@@ -987,14 +1096,15 @@
 
   .pc-section-head-left > h3 { font-size: clamp(30px, 8.5vw, 40px); }
 
-  .pc-mes { display: block; margin-bottom: 24px; padding: 0; }
-  .pc-anillo { width: 104px; height: 104px; margin: 0 auto 18px; }
+  .pc-anillo { width: 104px; height: 104px; margin: 0; }
   .pc-anillo-centro strong { font-size: 42px; }
-  .pc-reto { margin-bottom: 20px; text-align: center; font-size: 14px; }
-  .pc-mes .pc-att-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
-  .pc-mes .pc-att-grid > :last-child { grid-column: auto; }
-  .pc-mes .pc-att-card { padding: 14px 0 0; }
-  .pc-mes .pc-att-card + .pc-att-card { padding-left: 14px; }
+  /* En el móvil el anillo preside y los datos van debajo, centrados. */
+  .pc-ritmo-lado { flex-direction: column; align-items: center; gap: 18px; }
+  .pc-ritmo-copy { align-items: center; text-align: center; width: 100%; }
+  .pc-ritmo-datos { justify-content: center; }
+  .pc-ritmo-hito { width: 100%; max-width: 320px; }
+  .pc-ritmo-grafica { height: 130px; }
+  .pc-ritmo-num { font-size: 18px; }
 }
 
 /* Pantallas muy angostas: dos columnas y la última cifra a lo ancho. */

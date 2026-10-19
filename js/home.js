@@ -248,6 +248,23 @@ async function buscar() {
         const ultima_sesion = fechas_ord.length
             ? fechas_ord[0].toLocaleDateString('es-PE', { day: '2-digit', month: 'short' }).replace('.', '')
             : '—';
+
+        // Ritmo por mes: seis cubos con los días de asistencia realmente
+        // registrados. Es el único gráfico del portal que sale de la asistencia
+        // y no de una medición corporal.
+        const meses = (() => {
+            const base = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            const cubos = [];
+            for (let i = 5; i >= 0; i--) {
+                const d0 = new Date(base.getFullYear(), base.getMonth() - i, 1);
+                cubos.push({ y: d0.getFullYear(), m: d0.getMonth(), n: 0 });
+            }
+            for (const f of fechas_ord) {
+                const c = cubos.find(x => x.y === f.getFullYear() && x.m === f.getMonth());
+                if (c) c.n += 1;
+            }
+            return cubos;
+        })();
         
         const bioData = (_portalLook && _portalLook.biometria) ? _portalLook.biometria : [];
             
@@ -302,6 +319,7 @@ async function buscar() {
             total_sesiones,
             sesiones_mes,
             ultima_sesion,
+            meses,
             registros_fisicos: historial.length,
             talla_actual,
             peso_actual,
@@ -737,7 +755,6 @@ function renderCard(d) {
     // Lo deportivo se compara consigo mismo. El cuerpo va aparte y plegado.
     const cuerpoKeys = ['Estatura', 'Peso'];
     const filaCambio = ([k, v]) => `<div><span>${escapePortalHtml(k)}</span><strong>${v}</strong></div>`;
-    const cambiosJuegoHtml = cambios.filter(c => !cuerpoKeys.includes(c[0])).map(filaCambio).join('');
     const cambiosCuerpoHtml = cambios.filter(c => cuerpoKeys.includes(c[0])).map(filaCambio).join('');
 
     const chartsJuego = historyData.length ? `
@@ -780,6 +797,61 @@ function renderCard(d) {
         salto: (saltoIni !== null && saltoFin !== null) ? { ini: saltoIni, fin: saltoFin } : null,
         sprint: (sprintIni !== null && sprintFin !== null) ? { ini: sprintIni, fin: sprintFin } : null
     };
+
+    // ── Ritmo por mes: la asistencia real, en columnas ────────────────
+    const CORTOS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
+    const mesesData = Array.isArray(d.meses) ? d.meses : [];
+    const maxMes = Math.max(1, ...mesesData.map(m => Number(m.n) || 0));
+    const mesHoy = new Date().getMonth();
+    const mesesHtml = mesesData.map(m => {
+        const n = Number(m.n) || 0;
+        const alto = n ? Math.max(8, Math.round((n / maxMes) * 80)) : 0;
+        return `
+          <div class="pc-ritmo-col${m.m === mesHoy ? ' is-actual' : ''}" style="--h:${alto}%">
+            <span class="pc-ritmo-pista">
+              ${n ? '<i></i>' : ''}
+              <span class="pc-ritmo-num">${n}</span>
+            </span>
+            <span class="pc-ritmo-mes">${CORTOS[m.m]}</span>
+          </div>`;
+    }).join('');
+
+    // ── Marcas: dónde cae su último control dentro de su propio historial ──
+    const serie = key => historyData.map(r => Number(r[key])).filter(v => Number.isFinite(v));
+    const posicion = (valores, mayorEsMejor) => {
+        if (valores.length < 2) return 100;
+        const min = Math.min(...valores);
+        const max = Math.max(...valores);
+        if (max === min) return 100;
+        const actual = valores[0];
+        const p = mayorEsMejor ? (actual - min) / (max - min) : (max - actual) / (max - min);
+        return Math.max(8, Math.min(100, Math.round(p * 100)));
+    };
+    const f1 = n => Number(n).toFixed(1).replace(/\.0$/, '');
+    const f2 = n => Number(n).toFixed(2);
+    const atrHtml = (etiqueta, valor, unidad, p, nota) => `
+        <div class="pc-atr">
+          <div class="pc-atr-head">
+            <span class="pc-atr-label">${escapePortalHtml(etiqueta)}</span>
+            <strong class="pc-atr-valor">${valor}<small>${unidad}</small></strong>
+          </div>
+          <span class="pc-atr-pista" aria-hidden="true"><i style="width:${p}%"></i></span>
+          <small class="pc-atr-nota">${nota}</small>
+        </div>`;
+    const atrs = [];
+    const saltoVals = serie('salto_cm');
+    if (saltoVals.length) {
+        const mejor = Math.max(...saltoVals);
+        atrs.push(atrHtml('Salto', f1(saltoVals[0]), 'cm', posicion(saltoVals, true),
+            saltoVals[0] >= mejor ? 'Su mejor marca registrada' : `Su mejor marca: ${f1(mejor)} cm`));
+    }
+    const sprintVals = serie('sprint_10m_seg');
+    if (sprintVals.length) {
+        const mejor = Math.min(...sprintVals);
+        atrs.push(atrHtml('Sprint 10 m', f2(sprintVals[0]), 's', posicion(sprintVals, false),
+            sprintVals[0] <= mejor ? 'Su mejor tiempo registrado' : `Su mejor tiempo: ${f2(mejor)} s`));
+    }
+    const atributosHtml = atrs.length ? `<div class="pc-atrs">${atrs.join('')}</div>` : '';
 
     const playerPanel = `
       <div class="pc-hero">
@@ -855,55 +927,61 @@ function renderCard(d) {
       <article class="epic-card" id="ficha-jugador">
         ${playerPanel}
         <div class="pc-body">
-          <div class="pc-section-head" id="asistencia">
-            <div class="pc-section-head-left">
-              <span>Su mes</span>
-              <h3>ASÍ VA ${firstName.toUpperCase()}</h3>
-            </div>
-            <span class="pc-section-badge">TEMPORADA ${season}</span>
-          </div>
 
-          <div class="pc-mes">
-            <div class="pc-anillo" role="img" aria-label="${totalSessions} entrenamientos en la temporada">
-              <svg viewBox="0 0 120 120" aria-hidden="true">
-                <circle class="pc-anillo-track" cx="60" cy="60" r="52"></circle>
-                <circle class="pc-anillo-fill" cx="60" cy="60" r="52"
-                        style="--aro-fin:${anilloFin};stroke-dasharray:${anilloLargo.toFixed(2)};stroke-dashoffset:${anilloLargo.toFixed(2)}"></circle>
-              </svg>
-              <div class="pc-anillo-centro">
-                <strong data-contar="${totalSessions}">0</strong>
-                <span>ENTRENOS</span>
+          <!-- BANDA 1 · LA TEMPORADA: ritmo de asistencia, dato real -->
+          <section class="pc-band pc-band--ritmo" id="asistencia">
+            <header class="pc-band-head">
+              <span class="pc-band-kicker">La temporada</span>
+              <h3 class="pc-band-title">SU RITMO DE ENTRENAMIENTO</h3>
+              <p class="pc-band-sub">${retoTexto}</p>
+            </header>
+
+            <div class="pc-ritmo">
+              <div class="pc-ritmo-grafica" role="img" aria-label="Días entrenados en cada uno de los últimos seis meses">
+                ${mesesHtml}
+              </div>
+              <div class="pc-ritmo-lado">
+                <div class="pc-anillo" role="img" aria-label="${totalSessions} entrenamientos en la temporada">
+                  <svg viewBox="0 0 120 120" aria-hidden="true">
+                    <circle class="pc-anillo-track" cx="60" cy="60" r="52"></circle>
+                    <circle class="pc-anillo-fill" cx="60" cy="60" r="52"
+                            style="--aro-fin:${anilloFin};stroke-dasharray:${anilloLargo.toFixed(2)};stroke-dashoffset:${anilloLargo.toFixed(2)}"></circle>
+                  </svg>
+                  <div class="pc-anillo-centro">
+                    <strong data-contar="${totalSessions}">0</strong>
+                    <span>ENTRENOS</span>
+                  </div>
+                </div>
+                <div class="pc-ritmo-copy">
+                  <dl class="pc-ritmo-datos">
+                    <div><dt>Este mes</dt><dd data-contar="${monthSessions}">0</dd></div>
+                    <div><dt>Último entreno</dt><dd>${escapePortalHtml(d.ultima_sesion || '—')}</dd></div>
+                  </dl>
+                  <div class="pc-ritmo-hito">
+                    <span class="pc-ritmo-hito-pista" aria-hidden="true"><i style="width:${Math.round(anilloPct * 100)}%"></i></span>
+                    <small>Siguiente hito: <strong>${siguienteHito}</strong> entrenos de la temporada</small>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="pc-mes-info">
-              <p class="pc-reto">${retoTexto}</p>
-              <div class="pc-att-grid">
-                <div class="pc-att-card"><strong data-contar="${monthSessions}">0</strong><span>Este mes</span></div>
-                <div class="pc-att-card"><strong data-contar="${totalSessions}">0</strong><span>En la temporada</span></div>
-                <div class="pc-att-card"><strong>${escapePortalHtml(d.ultima_sesion || '—')}</strong><span>Último entreno</span></div>
+          </section>
+
+          <!-- BANDA 2 · SU EVOLUCIÓN: marcas propias y gráficas -->
+          <section class="pc-band pc-band--evolucion" id="progreso">
+            <header class="pc-band-head">
+              <span class="pc-band-kicker">Comparado consigo mismo</span>
+              <h3 class="pc-band-title">SU EVOLUCIÓN</h3>
+              <p class="pc-band-sub">${escapePortalHtml(rangoLabel)} · ${physicalRecords} ${physicalRecords === 1 ? 'control registrado' : 'controles registrados'}</p>
+            </header>
+
+            <div class="pc-evo">
+              <div class="pc-evo-cifras">
+                ${atributosHtml || `<p class="pc-evo-vacio">Todavía no hay controles del entrenador. Cuando llegue el primero, aquí aparece su marca de partida.</p>`}
               </div>
+              <div class="pc-evo-graficas">${chartsJuego}</div>
             </div>
-          </div>
-
-          <div class="pc-divider"></div>
-
-          <div class="pc-section-head" id="progreso">
-            <div class="pc-section-head-left">
-              <span>Comparado consigo mismo</span>
-              <h3>SU EVOLUCIÓN</h3>
-            </div>
-            <span class="pc-section-badge">${physicalRecords} ${physicalRecords === 1 ? 'CONTROL' : 'CONTROLES'}</span>
-          </div>
-
-          <p class="pc-lead">${escapePortalHtml(rangoLabel)}. Son sus propias marcas: sirven para ver cómo cambia, no son una nota ni una comparación con otros niños.</p>
-
-          <div class="pc-evo">
-            <div class="pc-evo-cifras">
-              ${cambiosJuegoHtml ? `<div class="pc-compare">${cambiosJuegoHtml}</div>` : ''}
-              <p class="pc-evo-note">Sus propias marcas, del primer control al último. No hay comparación con otros niños.</p>
-            </div>
-            <div class="pc-evo-graficas">${chartsJuego}</div>
-          </div>
+            <p class="pc-evo-note">Son sus propias marcas, del primer control al último: sirven para ver cómo cambia, no son una nota ni una comparación con otros niños.</p>
+          </section>
 
           ${cambiosCuerpoHtml ? `
           <details class="pc-crecimiento">
