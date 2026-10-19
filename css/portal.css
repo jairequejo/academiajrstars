@@ -16,11 +16,14 @@ body {
 *, *::before, *::after { box-sizing: border-box; }
 
 .portal-body { min-width: 320px; }
+/* Lienzo del portal: el mismo azul profundo del "hero" del landing (--deep),
+   con la franja roja inclinada del landing como única mancha de color. */
 .portal-main {
   color: #fff;
   background:
-    radial-gradient(circle at 84% 6%, rgba(229, 25, 27, .16), transparent 44%),
-    linear-gradient(150deg, #131317 0%, #050505 55%, #0d0d11 100%) !important;
+    linear-gradient(180deg, rgba(9, 29, 69, 0) 60%, #091d45 100%),
+    linear-gradient(110deg, transparent 52%, rgba(229, 25, 27, .17) 52.2%, transparent 66%),
+    linear-gradient(100deg, #030c20 0%, #091d45 46%, #0d2757 100%) !important;
 }
 .portal-shell { justify-content: center; }
 
@@ -81,14 +84,18 @@ body {
   letter-spacing: .14em;
 }
 .portal-auth-pill { background: var(--portal-black) !important; color: #fff !important; border-color: var(--portal-black) !important; }
-.portal-search-title { color: #fff !important; text-shadow: 0 10px 30px rgba(0, 0, 0, .55); }
-.portal-search-copy { max-width: 510px; margin: 0 0 28px; color: rgba(255, 255, 255, .74); font-size: 14px; font-weight: 600; line-height: 1.65; }
+.portal-search-title { color: #fff !important; }
+.portal-search-copy { max-width: 510px; margin: 0 0 28px; color: #dfe4ee; font-size: 14px; font-weight: 600; line-height: 1.65; }
+/* La tarjeta del buscador usa la pieza del landing: fondo claro y filo de oro. */
 .portal-search-card {
   position: relative;
   overflow: hidden;
-  background: var(--portal-black) !important;
-  border-color: rgba(255, 255, 255, .12) !important;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .03) inset;
+  color: var(--portal-black);
+  background: rgba(255, 255, 255, .96) !important;
+  border: 0 !important;
+  border-top: 4px solid var(--portal-gold) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, .3);
 }
 .portal-search-card::before {
   content: "";
@@ -146,9 +153,11 @@ body {
   width: 100% !important;
   min-height: 100vh;
   padding: 24px clamp(16px, 4vw, 64px) 64px !important;
+  /* El mismo lienzo azul del buscador: una sola identidad en todo el portal. */
   background:
-    radial-gradient(circle at 12% 15%, rgba(229, 25, 27, .18), transparent 25%),
-    linear-gradient(135deg, #111 0%, #050505 54%, #151515 100%) !important;
+    linear-gradient(180deg, rgba(9, 29, 69, 0) 60%, #091d45 100%),
+    linear-gradient(110deg, transparent 52%, rgba(229, 25, 27, .17) 52.2%, transparent 66%),
+    linear-gradient(100deg, #030c20 0%, #091d45 46%, #0d2757 100%) !important;
 }
 .portal-player-view .portal-topbar {
   display: flex !important;
@@ -476,9 +485,12 @@ body {
   --jr-ink: #050505;
   --jr-gold: #f5a623;
   --jr-burgundy: #76263a;
+  --jr-salmon: #f4847d;
   --jr-muted: #687083;
+  --jr-paper: #f2f4f8;
+  --jr-paper-line: #e0e4ec;
   --jr-line-dark: rgba(255, 255, 255, .14);
-  --jr-nav-h: 72px;
+  --jr-nav-h: 76px;
   --jr-nav-z: 90;
   --jr-font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --jr-font-display: "Bebas Neue", Impact, sans-serif;
@@ -490,6 +502,8 @@ body {
   --portal-deep: var(--jr-deep);
   --portal-blue: var(--jr-blue);
   --portal-burgundy: var(--jr-burgundy);
+  --portal-salmon: var(--jr-salmon);
+  --portal-paper: var(--jr-paper);
 }
 
 html { scroll-behavior: smooth; }
@@ -535,26 +549,28 @@ html { scroll-behavior: smooth; }
 }
 .pt-help a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 
-/* Desde tablet el buscador vive en la tarjeta negra: la nota se aclara. */
+/* Desde tablet la nota vive dentro de la tarjeta clara del buscador. */
 @media (min-width: 768px) {
   .pt-help {
-    color: #c9ccd6;
-    border-color: rgba(255, 255, 255, .14);
-    background: rgba(255, 255, 255, .05);
+    color: #566074;
+    border: 1px solid var(--jr-paper-line);
+    border-radius: 0;
+    background: var(--jr-paper);
   }
-  .pt-help strong { color: var(--jr-gold); }
+  .pt-help strong { color: var(--jr-blue); }
 }
 
-/* Enlace para saltar al contenido: solo aparece con teclado */
+/* Enlace para saltar al contenido: solo aparece con teclado.
+   Mismo tratamiento que el .skip-link del landing. */
 .pt-skip {
   position: absolute;
   top: -80px;
   left: 16px;
   z-index: 300;
   padding: 12px 18px;
-  color: var(--jr-deep);
-  border-radius: 0 0 12px 12px;
-  background: var(--jr-gold);
+  color: var(--jr-ink);
+  border-radius: 0;
+  background: #fff;
   font: 800 12px/1 var(--jr-font-body);
   letter-spacing: .06em;
   text-decoration: none;
@@ -563,10 +579,10 @@ html { scroll-behavior: smooth; }
 
 /* ═══════════════════════════════════════════════════════════════════════
    BARRA DE NAVEGACIÓN DE ESCRITORIO
-   Desde 768px el portal muestra una barra fija con la misma jerarquía que
-   la cabecera del landing —marca, secciones y acciones—, pero con la
-   identidad del portal (negro de cancha, rojo y oro). En móvil se
-   conserva la cabecera compacta del portal, que ya funciona bien.
+   Desde 768px el portal usa la misma pieza que la cabecera del landing:
+   azul profundo traslúcido, enlaces con subrayado rojo al pasar, marca con
+   escudo y subtítulo salmón, y la franja roja inclinada del WhatsApp.
+   En móvil se conserva la cabecera compacta del portal.
    ═══════════════════════════════════════════════════════════════════════ */
 .pt-nav { display: none; }
 
@@ -582,76 +598,68 @@ html { scroll-behavior: smooth; }
   .portal-body > .portal-visual,
   .portal-body > .portal-main { min-height: calc(100vh - var(--jr-nav-h)) !important; }
 
+  /* Igual que .site-header.is-scrolled del landing. */
   .pt-nav {
     position: fixed;
     inset: 0 0 auto;
     z-index: var(--jr-nav-z);
     display: flex;
     align-items: center;
-    gap: clamp(14px, 2.2vw, 34px);
+    gap: clamp(1rem, 2.5vw, 2.6rem);
     height: var(--jr-nav-h);
-    padding: 0 clamp(1rem, 3.2vw, 3rem);
+    padding: 0 clamp(1rem, 4vw, 4.5rem);
     color: #fff;
     font-family: var(--jr-font-body);
-    background: linear-gradient(180deg, rgba(26, 26, 31, .97), rgba(9, 9, 11, .95));
-    border-bottom: 1px solid rgba(255, 255, 255, .09);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, .55);
-    backdrop-filter: blur(18px) saturate(140%);
-  }
-  .pt-nav::after {
-    content: "";
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: min(38%, 420px);
-    height: 2px;
-    background: linear-gradient(90deg, var(--jr-red), rgba(229, 25, 27, 0));
+    background: rgba(9, 29, 69, .96);
+    border-bottom: 1px solid var(--jr-line-dark);
+    box-shadow: 0 8px 34px rgba(0, 0, 0, .2);
+    backdrop-filter: blur(18px);
   }
 
-  /* Marca */
+  /* Marca: escudo + Bebas Neue + subtítulo salmón, como el landing. */
   .pt-nav-brand {
     display: flex;
     flex: 0 0 auto;
     align-items: center;
-    gap: 12px;
+    gap: .7rem;
     color: #fff;
     text-decoration: none;
   }
   .pt-nav-brand img {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 50px;
     object-fit: contain;
-    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .45));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .28));
     transition: transform .25s ease;
   }
-  .pt-nav-brand:hover img { transform: scale(1.06); }
-  .pt-nav-brand-copy { display: flex; flex-direction: column; line-height: 1; }
+  .pt-nav-brand:hover img { transform: scale(1.05); }
+  .pt-nav-brand-copy { display: flex; flex-direction: column; line-height: .86; }
   .pt-nav-brand-copy strong {
     font-family: var(--jr-font-display);
-    font-size: 23px;
-    font-style: italic;
+    font-size: 2rem;
     font-weight: 400;
-    letter-spacing: .07em;
+    letter-spacing: .045em;
   }
   .pt-nav-brand-copy small {
-    margin-top: 5px;
-    color: var(--jr-gold);
-    font-size: 8.5px;
+    margin-top: .3rem;
+    color: #ffb6b3;
+    font-size: .54rem;
     font-weight: 800;
     letter-spacing: .22em;
     text-transform: uppercase;
   }
 
-  /* Secciones: cambian según se esté buscando o viendo una ficha. */
+  /* Secciones: enlaces del landing, con el subrayado rojo al pasar el mouse
+     y en la sección visible. Cambian según se busque o se vea una ficha. */
   .pt-nav-links {
     display: flex;
     flex: 1 1 auto;
     align-items: center;
     justify-content: center;
-    gap: clamp(2px, .5vw, 8px);
+    gap: clamp(1rem, 2.5vw, 2.6rem);
     min-width: 0;
   }
-  .pt-nav-set { display: none; flex: 0 0 auto; align-items: center; gap: clamp(2px, .5vw, 8px); }
+  .pt-nav-set { display: none; flex: 0 0 auto; align-items: center; gap: clamp(1rem, 2.5vw, 2.6rem); }
   .portal-body:not(.portal-player-view) .pt-nav-set[data-pt-set="buscador"],
   .portal-player-view .pt-nav-set[data-pt-set="ficha"] { display: flex; }
 
@@ -661,97 +669,98 @@ html { scroll-behavior: smooth; }
     flex: 0 0 auto;
     align-items: center;
     min-height: 44px;
-    padding: 0 12px;
-    color: rgba(255, 255, 255, .74);
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .13em;
+    padding: .5rem 0;
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .12em;
     text-transform: uppercase;
     text-decoration: none;
     white-space: nowrap;
-    transition: color .2s ease, background-color .2s ease;
   }
-  .pt-nav-link:hover { color: #fff; background: rgba(255, 255, 255, .09); }
-  .pt-nav-link.is-current { color: #fff; }
-  .pt-nav-link.is-current::after {
+  .pt-nav-link::after {
     content: "";
     position: absolute;
-    right: 12px;
-    bottom: 7px;
-    left: 12px;
+    bottom: 6px;
+    left: 0;
+    width: 0;
     height: 2px;
-    border-radius: 2px;
-    background: var(--jr-gold);
+    background: var(--jr-red);
+    transition: width .2s ease;
   }
+  .pt-nav-link:hover::after,
+  .pt-nav-link:focus-visible::after,
+  .pt-nav-link.is-current::after { width: 100%; }
   .pt-nav-link:focus-visible,
   .pt-nav-ghost:focus-visible,
   .pt-nav-cta:focus-visible {
     outline: 3px solid var(--jr-gold);
-    outline-offset: 2px;
+    outline-offset: 4px;
   }
 
   /* Acciones */
-  .pt-nav-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
+  .pt-nav-actions { display: flex; flex: 0 0 auto; align-items: center; gap: .7rem; }
   .pt-nav-who {
     display: inline-flex;
     align-items: center;
-    max-width: 200px;
-    height: 32px;
-    padding: 0 12px;
+    max-width: 220px;
+    height: 38px;
+    padding: 0 .8rem;
     overflow: hidden;
-    color: var(--jr-gold);
-    border: 1px solid rgba(245, 166, 35, .38);
-    border-radius: 999px;
-    background: rgba(245, 166, 35, .12);
-    font-size: 10px;
+    color: #fff;
+    border: 0;
+    border-left: 3px solid var(--jr-red);
+    background: rgba(255, 255, 255, .07);
+    font-size: .68rem;
     font-weight: 800;
-    letter-spacing: .09em;
+    letter-spacing: .08em;
     text-transform: uppercase;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .pt-nav-who[hidden] { display: none; }
 
+  /* Botón fantasma del landing (.button-ghost) */
   .pt-nav-ghost {
     display: none;
     align-items: center;
-    min-height: 40px;
-    padding: 0 16px;
+    min-height: 44px;
+    padding: .7rem .9rem;
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, .3);
-    border-radius: 999px;
-    background: transparent;
+    border: 1px solid rgba(255, 255, 255, .32);
+    background: rgba(255, 255, 255, .07);
     font-family: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .12em;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .08em;
     text-transform: uppercase;
     white-space: nowrap;
     cursor: pointer;
-    transition: background-color .2s ease, border-color .2s ease;
+    backdrop-filter: blur(10px);
+    transition: background-color .2s ease, color .2s ease;
   }
   .portal-player-view .pt-nav-ghost { display: inline-flex; }
-  .pt-nav-ghost:hover { border-color: rgba(255, 255, 255, .55); background: rgba(255, 255, 255, .12); }
+  .pt-nav-ghost:hover { background: #fff; color: var(--jr-ink); }
 
+  /* CTA: la franja roja inclinada del landing (.header-whatsapp) */
   .pt-nav-cta {
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
-    padding: 0 18px;
+    min-height: 44px;
+    padding: .75rem 1rem;
     color: #fff;
-    border-radius: 999px;
+    border: 0;
     background: var(--jr-red);
-    box-shadow: 0 8px 20px rgba(229, 25, 27, .34);
-    font-size: 11px;
+    clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+    font-size: .72rem;
     font-weight: 800;
-    letter-spacing: .12em;
+    letter-spacing: .06em;
     text-transform: uppercase;
     text-decoration: none;
     white-space: nowrap;
-    transition: background-color .2s ease, color .2s ease, box-shadow .2s ease;
+    transition: background-color .2s ease;
   }
-  .pt-nav-cta:hover { color: #fff; background: #ff2a2c; box-shadow: 0 10px 26px rgba(229, 25, 27, .5); }
+  .pt-nav-cta:hover { color: #fff; background: #fa2729; }
 
   /* Anclas de la ficha: no quedan debajo de la barra fija. */
   #ficha-jugador, #asistencia, #progreso, #kiosko, #ranking-card {
@@ -776,28 +785,26 @@ html { scroll-behavior: smooth; }
 }
 
 @media (min-width: 768px) and (max-width: 1279px) {
-  .pt-nav { gap: 10px; padding: 0 16px; }
-  .pt-nav-links, .pt-nav-set { gap: 2px; }
-  .pt-nav-link { padding: 0 8px; font-size: 10px; letter-spacing: .1em; }
-  .pt-nav-link.is-current::after { right: 8px; left: 8px; }
-  .pt-nav-brand-copy strong { font-size: 21px; }
+  .pt-nav { gap: .9rem; padding: 0 1rem; }
+  .pt-nav-links, .pt-nav-set { gap: .8rem; }
+  .pt-nav-link { font-size: .66rem; letter-spacing: .08em; }
+  .pt-nav-brand-copy strong { font-size: 1.7rem; }
   .pt-nav-brand-copy small { letter-spacing: .16em; }
-  .pt-nav-cta { padding: 0 14px; }
   .pt-ghost-largo { display: none; }
   .pt-ghost-corto { display: inline; }
 }
 
-/* Tablet (768–991): solo marca, secciones y volver. El botón de WhatsApp se
+/* Tablet (768–991): solo marca, secciones y volver. La franja de WhatsApp se
    reserva para pantallas con espacio; en el celular queda la cabecera. */
 @media (min-width: 768px) and (max-width: 991px) {
-  .pt-nav { gap: 8px; padding: 0 12px; }
-  .pt-nav-link { padding: 0 6px; font-size: 9.5px; letter-spacing: .07em; }
-  .pt-nav-link.is-current::after { right: 6px; left: 6px; }
-  .pt-nav-brand img { width: 32px; height: 32px; }
-  .pt-nav-brand-copy strong { font-size: 19px; }
-  .pt-nav-brand-copy small { margin-top: 4px; font-size: 7.5px; letter-spacing: .12em; }
+  .pt-nav { gap: .7rem; padding: 0 .75rem; }
+  .pt-nav-links, .pt-nav-set { gap: .7rem; }
+  .pt-nav-link { font-size: .62rem; letter-spacing: .06em; }
+  .pt-nav-brand img { width: 38px; height: 44px; }
+  .pt-nav-brand-copy strong { font-size: 1.6rem; }
+  .pt-nav-brand-copy small { margin-top: .25rem; font-size: .46rem; letter-spacing: .14em; }
   .pt-nav-cta { display: none; }
-  .pt-nav-ghost { min-height: 38px; padding: 0 12px; font-size: 10px; letter-spacing: .1em; }
+  .pt-nav-ghost { min-height: 40px; padding: .5rem .7rem; font-size: .62rem; letter-spacing: .06em; }
 }
 
 /* Mensualidad bloqueada: la navegación no ofrece secciones que no existen. */
@@ -809,4 +816,143 @@ html { scroll-behavior: smooth; }
   .pt-nav-brand img { transition: none; }
   .slant-btn { transition: none; }
   .spinner { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   IDENTIDAD DEL LANDING APLICADA AL PORTAL (desde 768px)
+   El manual (§3) pide que azul/negro/blanco dominen las superficies, que el
+   rojo marque movimiento y CTA, y que el oro sea un acento breve. Estas
+   reglas alinean las piezas del portal con las piezas equivalentes del
+   landing (hero, hero-card, button-primary, promise-card-blue).
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (min-width: 768px) {
+  /* El foco de la franja inclinada se recorta con el clip-path. */
+  .pt-nav-cta:focus-visible { outline-offset: -3px; }
+
+  /* Titular: "DEL JUGADOR" sobre la franja roja inclinada del hero. */
+  .portal-search-title span {
+    position: relative;
+    z-index: 0;
+    color: #fff !important;
+    font-style: inherit;
+  }
+  .portal-search-title span::before {
+    content: "";
+    position: absolute;
+    inset: 11% -4% 4% -3%;
+    z-index: -1;
+    background: var(--jr-red);
+    transform: skewX(-9deg);
+  }
+
+  /* El landing usa piezas planas: fuera el brillo de la tarjeta. */
+  .portal-search-card::before { display: none; }
+
+  /* Dentro de la tarjeta clara todo es tinta sobre blanco. */
+  .portal-search-card .portal-input-label {
+    color: var(--jr-red);
+    font-size: .68rem;
+    letter-spacing: .18em;
+  }
+  .portal-search-card #dni {
+    color: var(--jr-ink) !important;
+    border: 1px solid rgba(5, 5, 5, .18) !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    font-size: 2rem !important;
+    letter-spacing: .14em !important;
+  }
+  .portal-search-card #dni::placeholder { color: #9aa0ac !important; }
+  .portal-search-card .slant-btn { border-radius: 0 !important; }
+  .portal-search-card #btnC {
+    color: #fff !important;
+    background: var(--jr-red) !important;
+    box-shadow: 0 14px 34px rgba(229, 25, 27, .28);
+  }
+  .portal-search-card #btnC:hover { background: #fa2729 !important; }
+  .portal-search-card .portal-scan-trigger {
+    color: var(--jr-ink) !important;
+    border-color: rgba(5, 5, 5, .16) !important;
+    background: rgba(5, 5, 5, .04) !important;
+  }
+  .portal-search-card .portal-scan-trigger:hover { background: rgba(5, 5, 5, .09) !important; }
+  .portal-search-card #ld {
+    color: #566074 !important;
+    border-radius: 0 !important;
+    background: var(--jr-paper) !important;
+  }
+  .portal-search-card #err {
+    border-color: rgba(229, 25, 27, .28) !important;
+    border-radius: 0 !important;
+    background: rgba(229, 25, 27, .06) !important;
+  }
+  .portal-search-card #err .font-display { color: var(--jr-ink) !important; }
+  .portal-search-card #err a {
+    color: #fff !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    background: var(--jr-red) !important;
+  }
+  .portal-search-card #err a:hover { background: #fa2729 !important; }
+
+  /* Portada lateral: el mismo azul del hero del landing. */
+  .portal-visual {
+    color: #fff;
+    background: linear-gradient(100deg, #030c20 0%, #091d45 52%, #0d2757 100%) !important;
+    border-right-color: rgba(255, 255, 255, .12) !important;
+  }
+  /* El rojo sobre azul no alcanza 4,5:1 (§3): la etiqueta va en salmón. */
+  .portal-visual .text-brand { color: var(--jr-salmon) !important; }
+  /* Titular del hero del landing: Bebas Neue recta, sin cursiva. */
+  .portal-visual-copy strong { font-style: normal; }
+  .portal-visual-copy > span { color: #dce6fb; }
+  .portal-visual-copy p { color: #aebad2; }
+
+  /* La ficha es una pieza del landing: sin esquinas redondeadas. */
+  .epic-card { border-radius: 0; }
+  /* Debajo del contenido (overscroll) late el mismo azul, no el negro. */
+  .portal-player-view { background: var(--jr-deep); }
+
+  /* Kiosko y ranking: el azul del uniforme (--blue), como promise-card-blue. */
+  .portal-player-view #p3 .bento-card {
+    background: var(--jr-blue) !important;
+    border: 1px solid rgba(255, 255, 255, .14) !important;
+    border-radius: 0 !important;
+  }
+  /* Rojo sobre azul queda en 2,35:1 (§3 del manual): el acento de texto es oro. */
+  .portal-player-view #p3 .bento-card .text-brand { color: var(--jr-gold) !important; }
+  /* Los grises del tema negro perdían contraste sobre azul (§3, WCAG 2.2). */
+  .portal-player-view #p3 .bento-card .text-gray-400,
+  .portal-player-view #p3 .bento-card .text-gray-500,
+  .portal-player-view #p3 .bento-card .rk-empty { color: #c3cde0 !important; }
+  .portal-player-view #p3 .bento-card .rounded-lg,
+  .portal-player-view #p3 .bento-card .rounded-xl,
+  .portal-player-view #p3 .bento-card .rounded-full { border-radius: 0 !important; }
+  .portal-player-view #p3 .bento-card .slant-btn { border-radius: 0 !important; }
+  .rk-item { border-color: rgba(255, 255, 255, .16); }
+  .rk-item.first {
+    border-color: rgba(245, 166, 35, .5);
+    background: linear-gradient(90deg, rgba(245, 166, 35, .16), rgba(255, 255, 255, .05));
+  }
+
+  /* Modal de recarga: misma pieza que la tarjeta del buscador. */
+  #modal-yape .bento-card {
+    border: 0 !important;
+    border-top: 4px solid var(--jr-gold) !important;
+    border-radius: 0 !important;
+    background: var(--jr-deep) !important;
+  }
+  #modal-yape .bento-card .rounded-xl,
+  #modal-yape .bento-card .rounded-2xl,
+  #modal-yape .bento-card .rounded-lg { border-radius: 0 !important; }
+
+  /* Lector QR: un panel del sistema, no una pastilla. */
+  .portal-scanner-shell { border-radius: 0; }
+  .portal-scanner-stage,
+  .portal-scanner-viewport { border-radius: 0; }
+  .portal-scanner-close,
+  .portal-scanner-cancel { border-radius: 0 !important; }
+
+  /* Botones del portal: esquinas rectas, como todos los del landing. */
+  .portal-main .slant-btn { border-radius: 0 !important; }
 }
