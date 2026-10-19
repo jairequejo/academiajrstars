@@ -953,6 +953,14 @@
   font-size: 11px; line-height: 1.55; color: #4a5160;
 }
 
+/* ── EVOLUCIÓN: cifras y gráficas ── */
+.pc-evo { display: block; }
+.pc-evo-graficas { margin-top: 16px; }
+.pc-evo-note {
+  margin: 12px 0 0;
+  font-size: 11px; line-height: 1.5; color: #8a8f9c;
+}
+
 /* ── MÓVIL (hasta 640px): el panel se apila y el anillo preside ── */
 @media (max-width: 640px) {
   .pc-hero-line { margin-top: 8px; max-width: none; font-size: 11px; text-align: center; }
@@ -1026,3 +1034,186 @@
 }
 #card-wrap.export-mode .pc-crecimiento { display: none !important; }
 #card-wrap.export-mode .pc-charts { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+
+/* -----------------------------------------------------------------------
+   TARJETA PARA COMPARTIR � 1080 � 1350
+   Pieza independiente del portal: se dibuja a tama�o fijo y se fotograf�a.
+   Ocupa el lienzo completo, con el ancho �til de lado a lado: nada de una
+   columna de lectura rodeada de aire.
+   ----------------------------------------------------------------------- */
+.sc {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 1080px;
+  height: 1350px;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 30px;
+  padding: 54px 64px 0;
+  overflow: hidden;
+  background: #05070d;
+  color: #fff;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  pointer-events: none;
+}
+
+/* -- Fondo -- */
+.sc-bg { position: absolute; inset: 0; overflow: hidden; }
+.sc-halo {
+  position: absolute; top: -360px; right: -300px;
+  width: 940px; height: 940px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(229,25,27,.52) 0%, rgba(229,25,27,0) 64%);
+}
+.sc-banda {
+  position: absolute; top: -220px; right: 40px;
+  width: 420px; height: 2000px;
+  transform: rotate(22deg);
+  background: linear-gradient(180deg, rgba(229,25,27,.5) 0%, rgba(229,25,27,.12) 46%, rgba(229,25,27,0) 74%);
+}
+.sc-puntos {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.9) 0 1.6px, transparent 2.2px);
+  background-size: 36px 36px;
+  opacity: .07;
+}
+.sc-aro {
+  position: absolute; right: -220px; bottom: -280px;
+  width: 640px; height: 640px; border-radius: 50%;
+  border: 64px solid rgba(245,166,35,.07);
+}
+.sc-fantasma {
+  position: absolute; right: 10px; bottom: 96px;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 540px; font-weight: 400; line-height: 1;
+  color: #fff; opacity: .07;
+}
+
+/* -- Cabecera -- */
+.sc-top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.sc-marca { display: flex; align-items: center; gap: 18px; }
+.sc-marca img { width: 72px; height: 72px; object-fit: contain; }
+.sc-marca span {
+  display: block; font-size: 13px; font-weight: 800; letter-spacing: .24em;
+  color: rgba(255,255,255,.58);
+}
+.sc-marca strong {
+  display: block; margin-top: 4px;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 38px; font-weight: 400; line-height: 1; letter-spacing: .06em;
+}
+.sc-temporada {
+  padding: 13px 22px; background: #e5191b;
+  font-size: 14px; font-weight: 900; letter-spacing: .18em;
+}
+
+/* -- Identidad -- */
+.sc-id {
+  position: relative;
+  display: grid;
+  grid-template-columns: 246px minmax(0, 1fr) 236px;
+  align-items: center;
+  gap: 34px;
+}
+.sc-foto {
+  display: grid; place-items: center;
+  width: 246px; height: 246px; border-radius: 50%;
+  border: 6px solid #e5191b; overflow: hidden;
+  background: linear-gradient(145deg, #e5191b 0%, #8f0b0e 100%);
+  box-shadow: 0 0 0 14px rgba(229,25,27,.16);
+}
+.sc-foto img { width: 100%; height: 100%; object-fit: cover; }
+.sc-iniciales {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 112px; line-height: 1; letter-spacing: .04em;
+}
+.sc-id-copy { min-width: 0; }
+.sc-kicker { display: block; font-size: 13px; font-weight: 900; letter-spacing: .26em; color: #f5a623; }
+.sc-nombre {
+  margin: 14px 0 18px;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 104px; font-weight: 400; font-style: italic; line-height: 1;
+  letter-spacing: .01em; text-transform: uppercase; overflow-wrap: anywhere;
+}
+.sc-nombre.is-l { font-size: 86px; }
+.sc-nombre.is-xl { font-size: 70px; }
+.sc-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.sc-chip {
+  padding: 8px 14px; border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.07);
+  font-size: 12px; font-weight: 800; letter-spacing: .09em;
+  text-transform: uppercase; color: #dfe6f5;
+}
+
+/* -- Constancia -- */
+.sc-racha {
+  padding: 20px 12px; text-align: center;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+}
+.sc-racha-label { display: block; font-size: 11px; font-weight: 900; letter-spacing: .2em; color: rgba(255,255,255,.5); }
+.sc-racha-valor { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; }
+.sc-llama { font-size: 44px; line-height: 1; }
+.sc-racha-valor strong {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 92px; font-weight: 400; line-height: 1;
+}
+.sc-racha-unidad { display: block; margin-top: 10px; font-size: 11px; font-weight: 900; letter-spacing: .2em; color: #f4847d; }
+.sc-racha-titulo {
+  display: block; margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,.14);
+  font-size: 11px; font-weight: 800; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(255,255,255,.72);
+}
+
+/* -- Pr�xima meta -- */
+.sc-meta {
+  position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center; gap: 24px;
+  padding: 20px 26px;
+  border-left: 6px solid #f5a623;
+  background: rgba(255,255,255,.06);
+}
+.sc-meta-copy span { display: block; font-size: 11px; font-weight: 900; letter-spacing: .2em; color: #f5a623; }
+.sc-meta-copy strong {
+  display: block; margin-top: 3px;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 32px; font-weight: 400; line-height: 1.05; letter-spacing: .02em; white-space: nowrap;
+}
+.sc-meta-barra { height: 8px; background: rgba(255,255,255,.14); }
+.sc-meta-barra i { display: block; height: 100%; background: linear-gradient(90deg, #e5191b 0%, #f5a623 100%); }
+.sc-meta-falta { font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.66); white-space: nowrap; }
+
+/* -- Cifras -- */
+.sc-stats { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 42px; }
+.sc-stat-head { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; padding-bottom: 6px; }
+.sc-stat-label { font-size: 14px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.6); }
+.sc-stat-valor {
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 60px; font-weight: 400; line-height: 1;
+}
+.sc-stat-valor small {
+  margin-left: 6px;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 16px; font-weight: 800; letter-spacing: .06em;
+  color: rgba(255,255,255,.6);
+}
+.sc-stat-barra { height: 10px; margin-top: 14px; background: rgba(255,255,255,.12); }
+.sc-stat-barra i { display: block; height: 100%; background: linear-gradient(90deg, #e5191b 0%, #f5a623 100%); }
+.sc-stat-nota { display: block; margin-top: 12px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.55); }
+
+/* -- Pie -- */
+.sc-pie {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  margin: 0 -64px; padding: 26px 64px;
+  background: #e5191b;
+}
+.sc-pie-marca strong {
+  display: block;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  font-size: 26px; font-weight: 400; letter-spacing: .08em;
+}
+.sc-pie-marca span { display: block; margin-top: 2px; font-size: 12px; font-weight: 700; color: rgba(255,255,255,.86); }
+.sc-pie-datos { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 13px; font-weight: 800; letter-spacing: .08em; }

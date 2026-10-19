@@ -1035,3 +1035,72 @@ html { scroll-behavior: smooth; }
       linear-gradient(155deg, #0f1626 0%, #070a12 58%, #150609 100%);
   }
 }
+
+/* -----------------------------------------------------------------------
+   FICHA A TODO EL ANCHO (desde 1024px)
+   Hasta aquí la ficha era una columna de lectura centrada: en un monitor
+   ancho quedaba un pasillo de aire a cada lado. Desde 1024px la tarjeta
+   ocupa el ancho disponible y cada bloque se reparte en horizontal.
+   El móvil y la tablet conservan su diseño.
+   ----------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  .portal-player-view .portal-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-inline: clamp(24px, 3vw, 72px) !important;
+  }
+  .portal-player-view .portal-shell {
+    display: block !important;
+    width: 100%;
+    max-width: 1680px !important;
+    margin-inline: auto !important;
+    padding-inline: 0 !important;
+  }
+
+  /* Tipografía medida por el ancho de la ventana, no de una tarjeta angosta. */
+  .portal-player-view #card-wrap .pc-name { font-size: clamp(46px, 3.8vw, 68px); }
+  .portal-player-view #card-wrap .pc-section-head-left > h3 { font-size: clamp(38px, 3.2vw, 56px); }
+  .portal-player-view #card-wrap .pc-att-card strong { font-size: clamp(32px, 2.4vw, 44px); }
+  .portal-player-view #card-wrap .pc-avatar,
+  .portal-player-view #card-wrap .pc-avatar-fallback {
+    width: clamp(104px, 8.4vw, 132px);
+    height: clamp(104px, 8.4vw, 132px);
+  }
+  .portal-player-view #card-wrap .pc-hero { padding: clamp(26px, 2.4vw, 44px); }
+  .portal-player-view #card-wrap .pc-body { padding: clamp(28px, 2.8vw, 52px); }
+  .portal-player-view #card-wrap .pc-hero-line { font-size: 13px; max-width: 60ch; }
+
+  /* Su mes: el anillo respira y el reto se lee en una línea. */
+  .portal-player-view .pc-mes {
+    grid-template-columns: 132px minmax(0, 1fr);
+    gap: clamp(24px, 3vw, 56px);
+    margin-bottom: 36px;
+  }
+  .portal-player-view .pc-anillo { width: 132px; height: 132px; }
+  .portal-player-view .pc-anillo-centro strong { font-size: 54px; }
+  .portal-player-view .pc-reto { font-size: clamp(16px, 1.15vw, 19px); max-width: 62ch; margin-bottom: 24px; }
+  .portal-player-view .pc-mes .pc-att-card strong { font-size: clamp(34px, 2.4vw, 46px); }
+
+  /* Evolución: cifras a la izquierda, gráficas a la derecha. */
+  .portal-player-view .pc-evo {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    gap: clamp(24px, 3vw, 56px);
+    align-items: start;
+  }
+  .portal-player-view .pc-evo .pc-compare > div { padding: 14px 2px; }
+  .portal-player-view .pc-compare strong { font-size: 26px; }
+  .portal-player-view .pc-charts { margin-top: 0; }
+
+  /* El botón de compartir no se estira como una barra infinita. */
+  .portal-player-view .pc-share { max-width: 380px; margin-left: auto; }
+
+  /* Cuentas: dos columnas legibles, con el ancho del bloque. */
+  .portal-player-view .pc-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+  .portal-player-view .pc-admin-value { font-size: 40px; }
+}
+
+/* Monitores muy anchos: la ficha no se estira sin freno y el aire vuelve. */
+@media (min-width: 1700px) {
+  .portal-player-view .portal-shell { max-width: 1720px !important; }
+}

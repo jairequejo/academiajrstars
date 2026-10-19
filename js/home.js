@@ -755,6 +755,32 @@ function renderCard(d) {
         ${buildMetricSparkline(historyData, 'peso', 'kg', '⚖️ Peso')}
       </div>` : '';
 
+    // ── Datos de la tarjeta que se comparte ────────────────────────────
+    // La imagen se construye aparte, con medidas fijas, para no heredar la
+    // rejilla de la web ni dejar franjas vacías a los lados.
+    const num = v => (Number.isFinite(v) ? Number(v) : null);
+    const saltoIni = primerControl ? num(primerControl.salto_cm) : null;
+    const saltoFin = ultimoControl ? num(ultimoControl.salto_cm) : null;
+    const sprintIni = primerControl ? num(primerControl.sprint_10m_seg) : null;
+    const sprintFin = ultimoControl ? num(ultimoControl.sprint_10m_seg) : null;
+    window._shareData = {
+        nombre: fullName,
+        iniciales,
+        foto: d.foto_url || null,
+        season,
+        totalSessions,
+        monthSessions,
+        streak,
+        streakTitle,
+        siguienteHito,
+        faltanHito,
+        controles: physicalRecords,
+        chips: [d.category, sedeChip, d.grupo ? `Grupo ${d.grupo}` : null, horarioChip]
+            .filter(Boolean).map(String),
+        salto: (saltoIni !== null && saltoFin !== null) ? { ini: saltoIni, fin: saltoFin } : null,
+        sprint: (sprintIni !== null && sprintFin !== null) ? { ini: sprintIni, fin: sprintFin } : null
+    };
+
     const playerPanel = `
       <div class="pc-hero">
         <div class="pc-topline">
@@ -871,11 +897,13 @@ function renderCard(d) {
 
           <p class="pc-lead">${escapePortalHtml(rangoLabel)}. Son sus propias marcas: sirven para ver cómo cambia, no son una nota ni una comparación con otros niños.</p>
 
-          ${cambiosJuegoHtml ? `<div class="pc-compare">${cambiosJuegoHtml}</div>` : ''}
-          <details class="pc-detail">
-            <summary>Ver las gráficas de evolución</summary>
-            ${chartsJuego}
-          </details>
+          <div class="pc-evo">
+            <div class="pc-evo-cifras">
+              ${cambiosJuegoHtml ? `<div class="pc-compare">${cambiosJuegoHtml}</div>` : ''}
+              <p class="pc-evo-note">Sus propias marcas, del primer control al último. No hay comparación con otros niños.</p>
+            </div>
+            <div class="pc-evo-graficas">${chartsJuego}</div>
+          </div>
 
           ${cambiosCuerpoHtml ? `
           <details class="pc-crecimiento">
@@ -1065,91 +1093,15 @@ function hideShareProgress() {
     window._shareProgressHideTimer = window.setTimeout(() => { overlay.hidden = true; }, 180);
 }
 
-function waitForShareImage(image) {
-    if (image.complete && image.naturalWidth > 0) return Promise.resolve();
-    return new Promise(resolve => {
-        let settled = false;
-        const finish = () => {
-            if (settled) return;
-            settled = true;
-            image.removeEventListener('load', finish);
-            image.removeEventListener('error', finish);
-            resolve();
-        };
-        image.addEventListener('load', finish, { once: true });
-        image.addEventListener('error', finish, { once: true });
-        window.setTimeout(finish, 6000);
-    });
-}
-
-// Las gráficas son SVG con degradados y sombras. html2canvas las dibuja mal
-// (línea fuera de su caja), así que antes de exportar cada sparkline se convierte
-// a un PNG con la misma proporción y se coloca en su lugar.
-async function rasterizarGraficas(wrap) {
-    const svgs = Array.from(wrap.querySelectorAll('svg.ms-svg'));
-    await Promise.all(svgs.map(svg => new Promise(resolve => {
-        if (svg.dataset.rasterizado === '1') return resolve();
-        try {
-            const vb = svg.viewBox && svg.viewBox.baseVal;
-            const w = Math.max(160, Math.round((vb && vb.width) || 300));
-            const h = Math.max(60, Math.round((vb && vb.height) || 110));
-            const clon = svg.cloneNode(true);
-            clon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-            clon.setAttribute('width', String(w));
-            clon.setAttribute('height', String(h));
-            // Las clases de la hoja de estilos no viajan dentro del SVG aislado.
-            clon.querySelectorAll('.ms-grid').forEach(p => {
-                p.setAttribute('fill', 'none');
-                p.setAttribute('stroke', 'rgba(10,10,10,.12)');
-                p.setAttribute('stroke-width', '1');
-            });
-            const fuente = 'data:image/svg+xml;charset=utf-8,' +
-                encodeURIComponent(new XMLSerializer().serializeToString(clon));
-            const img = new Image();
-            img.onload = () => {
-                try {
-                    const escala = 2;
-                    const lienzo = document.createElement('canvas');
-                    lienzo.width = w * escala;
-                    lienzo.height = h * escala;
-                    lienzo.getContext('2d').drawImage(img, 0, 0, lienzo.width, lienzo.height);
-                    const salida = document.createElement('img');
-                    salida.src = lienzo.toDataURL('image/png');
-                    salida.className = 'ms-svg ms-svg-raster';
-                    salida.alt = svg.getAttribute('aria-label') || 'Gráfica de evolución';
-                    salida.dataset.rasterizado = '1';
-                    svg.replaceWith(salida);
-                } catch (error) {
-                    console.warn('No se pudo preparar una gráfica:', error);
-                }
-                resolve();
-            };
-            img.onerror = () => resolve();
-            img.src = fuente;
-        } catch (error) {
-            console.warn('No se pudo rasterizar una gráfica:', error);
-            resolve();
-        }
-    })));
-}
-
-async function prepareShareAssets(wrap) {
-    updateShareProgress(18, 'Cargando tipografías…');
+// Antes de fotografiar la tarjeta hay que esperar a la tipografía y a que el
+// navegador pinte una vez, con tope por si la pestaña está en segundo plano.
+async function esperarFuentesYCuadro() {
     if (document.fonts && document.fonts.ready) {
         await Promise.race([
             document.fonts.ready,
             new Promise(resolve => window.setTimeout(resolve, 5000))
         ]);
     }
-
-    updateShareProgress(38, 'Cargando foto y escudo…');
-    const images = Array.from(wrap.querySelectorAll('img'));
-    await Promise.all(images.map(waitForShareImage));
-
-    updateShareProgress(58, 'Acomodando métricas…');
-    await rasterizarGraficas(wrap);
-    // Se espera al siguiente cuadro para que el navegador aplique el diseño, pero
-    // con un tope por si la pestaña está en segundo plano (ahí rAF no dispara).
     await new Promise(resolve => {
         let listo = false;
         const terminar = () => { if (!listo) { listo = true; resolve(); } };
@@ -1269,6 +1221,149 @@ function shareProgressFileFromUserTap(file) {
     });
 }
 
+// ── TARJETA PARA COMPARTIR ────────────────────────────────────────────
+// Una pieza aparte, de 1080×1350, pensada como carta de jugador: el ancho se
+// usa completo, sin la columna de lectura del portal y sin márgenes muertos.
+// Sólo lleva datos registrados; las barras comparan al niño consigo mismo.
+function construirTarjetaCompartir() {
+    const d = window._shareData || {};
+    const esc = escapePortalHtml;
+    const total = Number(d.totalSessions) || 0;
+    const mes = Number(d.monthSessions) || 0;
+    const racha = Number(d.streak) || 0;
+    const meta = Number(d.siguienteHito) || 5;
+    const faltan = Number(d.faltanHito) || 1;
+    const season = d.season || new Date().getFullYear();
+    const pct = (a, b) => Math.max(0, Math.min(100, Math.round((b > 0 ? a / b : 0) * 100)));
+    const fix = (n, dec) => Number(n).toFixed(dec).replace(/\.0+$/, '');
+
+    const filas = [
+        { k: 'Entrenos este mes', v: String(mes), u: '', n: 'Del total de la temporada', p: pct(mes, Math.max(mes, total)) },
+        { k: 'Entrenos en la temporada', v: String(total), u: '', n: `Siguiente meta: ${meta}`, p: pct(total, meta) }
+    ];
+    if (d.salto) {
+        const dif = +(d.salto.fin - d.salto.ini).toFixed(1);
+        filas.push({
+            k: 'Salto', v: fix(d.salto.fin, 1), u: 'cm', p: pct(d.salto.ini, Math.max(d.salto.ini, d.salto.fin)),
+            n: dif >= 0 ? `+${fix(dif, 1)} cm desde el primer control` : `${fix(dif, 1)} cm desde el primer control`
+        });
+    }
+    if (d.sprint) {
+        const dif = +(d.sprint.ini - d.sprint.fin).toFixed(2);
+        filas.push({
+            k: 'Sprint 10 m', v: fix(d.sprint.fin, 2), u: 's',
+            p: pct(Math.min(d.sprint.ini, d.sprint.fin), d.sprint.ini),
+            n: dif >= 0 ? `${fix(dif, 2)} s menos que al inicio` : `${fix(Math.abs(dif), 2)} s más que al inicio`
+        });
+    }
+    if (filas.length < 4) {
+        filas.push({
+            k: 'Controles registrados', v: String(Number(d.controles) || 0), u: '', n: 'Mediciones del entrenador', p: 0
+        });
+    }
+
+    const chips = (d.chips || []).map(c => `<span class="sc-chip">${esc(c)}</span>`).join('');
+    const largoNombre = String(d.nombre || '').length;
+    const claseNombre = largoNombre > 24 ? ' is-xl' : largoNombre > 17 ? ' is-l' : '';
+    const foto = d.foto
+        ? `<img src="${esc(d.foto)}" alt="">`
+        : `<span class="sc-iniciales">${esc(d.iniciales || 'JR')}</span>`;
+
+    const el = document.createElement('div');
+    el.id = 'share-card';
+    el.className = 'sc';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = `
+      <div class="sc-bg">
+        <span class="sc-halo"></span>
+        <span class="sc-banda"></span>
+        <span class="sc-puntos"></span>
+        <span class="sc-aro"></span>
+        <strong class="sc-fantasma">${total}</strong>
+      </div>
+
+      <header class="sc-top">
+        <div class="sc-marca">
+          <img src="../img/escudo.png" alt="">
+          <div>
+            <span>ACADEMIA DE FÚTBOL</span>
+            <strong>JR STARS</strong>
+          </div>
+        </div>
+        <div class="sc-temporada">TEMPORADA ${season}</div>
+      </header>
+
+      <section class="sc-id">
+        <div class="sc-foto">${foto}</div>
+        <div class="sc-id-copy">
+          <span class="sc-kicker">FICHA DEL JUGADOR</span>
+          <h1 class="sc-nombre${claseNombre}">${esc(d.nombre || 'Jugador JR Stars')}</h1>
+          <div class="sc-chips">${chips}</div>
+        </div>
+        <div class="sc-racha">
+          <span class="sc-racha-label">CONSTANCIA</span>
+          <div class="sc-racha-valor">
+            <span class="sc-llama">🔥</span>
+            <strong>${racha > 0 ? racha : '—'}</strong>
+          </div>
+          <span class="sc-racha-unidad">${racha > 0 ? 'SEGUIDAS' : 'SIN RACHA'}</span>
+          <span class="sc-racha-titulo">${esc(d.streakTitle || '')}</span>
+        </div>
+      </section>
+
+      <section class="sc-meta">
+        <div class="sc-meta-copy">
+          <span>PRÓXIMA META</span>
+          <strong>${meta} entrenamientos de la temporada</strong>
+        </div>
+        <div class="sc-meta-barra"><i style="width:${pct(total, meta)}%"></i></div>
+        <span class="sc-meta-falta">Le faltan ${faltan}</span>
+      </section>
+
+      <section class="sc-stats">
+        ${filas.map(f => `
+          <div class="sc-stat">
+            <div class="sc-stat-head">
+              <span class="sc-stat-label">${esc(f.k)}</span>
+              <span class="sc-stat-valor">${esc(f.v)}${f.u ? `<small>${f.u}</small>` : ''}</span>
+            </div>
+            <div class="sc-stat-barra"><i style="width:${f.p}%"></i></div>
+            <small class="sc-stat-nota">${esc(f.n)}</small>
+          </div>`).join('')}
+      </section>
+
+      <footer class="sc-pie">
+        <div class="sc-pie-marca">
+          <strong>SIGUE SU PROGRESO</strong>
+          <span>academiajrstars.com · Portal del Jugador</span>
+        </div>
+        <div class="sc-pie-datos">
+          <span>955 515 693</span>
+          <span>@academiajrstars</span>
+        </div>
+      </footer>`;
+    return el;
+}
+
+// Monta la tarjeta fuera de pantalla y espera a que sus imágenes carguen.
+async function montarTarjetaCompartir() {
+    const previa = document.getElementById('share-card');
+    if (previa) previa.remove();
+    const el = construirTarjetaCompartir();
+    document.body.appendChild(el);
+    await esperarFuentesYCuadro();
+    await Promise.all(Array.from(el.querySelectorAll('img')).map(img => (
+        img.complete && img.naturalWidth > 0
+            ? Promise.resolve()
+            : new Promise(res => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+                window.setTimeout(res, 6000);
+            })
+    )));
+    return el;
+}
+
 async function compartirProgreso() {
     const btnText = document.getElementById('share-text');
     const btnIcon = document.getElementById('share-icon');
@@ -1289,36 +1384,27 @@ async function compartirProgreso() {
 
     // Se declara fuera del try para que el bloque finally también lo vea.
     let panelAbierto = false;
+    let tarjeta = null;
 
     try {
-        const wrap = document.getElementById('card-wrap');
-        if (!wrap) throw new Error('Tarjeta no encontrada');
         if (typeof html2canvas !== 'function') throw new Error('Generador de imágenes no disponible');
+        if (!window._shareData) throw new Error('Ficha no cargada');
 
-        await prepareShareAssets(wrap);
+        updateShareProgress(34, 'Armando la tarjeta…');
+        tarjeta = await montarTarjetaCompartir();
         updateShareProgress(68, 'Creando imagen para redes…');
 
-        const canvas = await html2canvas(wrap, {
+        const canvas = await html2canvas(tarjeta, {
             scale: 1.2,
-            width: 900,
-            height: 1125,
-            windowWidth: 1100,
-            windowHeight: 1250,
+            width: 1080,
+            height: 1350,
+            windowWidth: 1200,
+            windowHeight: 1450,
             useCORS: true,
             allowTaint: false,
             imageTimeout: 10000,
             logging: false,
-            backgroundColor: '#050505',
-            onclone: clonedDoc => {
-                const clonedWrap = clonedDoc.getElementById('card-wrap');
-                if (!clonedWrap) return;
-                // Las gráficas viven dentro de un <details>: hay que abrirlo en la
-                // copia para que html2canvas las dibuje en la imagen compartida.
-                clonedWrap.querySelectorAll('details').forEach(det => { det.open = true; });
-                clonedWrap.classList.add('export-mode');
-                const clonedButton = clonedWrap.querySelector('#btn-compartir');
-                if (clonedButton) clonedButton.remove();
-            }
+            backgroundColor: '#05070d'
         });
 
         updateShareProgress(90, 'Empaquetando archivo PNG…');
@@ -1346,6 +1432,7 @@ async function compartirProgreso() {
         console.error('Error al compartir progreso:', error);
         showShareResult('No pudimos crear la imagen. Revisa tu conexión e inténtalo nuevamente.', true);
     } finally {
+        if (tarjeta) tarjeta.remove();
         if (!panelAbierto) hideShareProgress();
         window._sharingPlayerProgress = false;
         btnText.textContent = originalText;
