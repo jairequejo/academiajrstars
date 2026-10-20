@@ -65,8 +65,8 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
-  <link rel="stylesheet" href="../css/player-card.css?v=20261019_ficha10">
-  <link rel="stylesheet" href="../css/portal.css?v=20261019_ficha10">
+  <link rel="stylesheet" href="../css/player-card.css?v=20261020">
+  <link rel="stylesheet" href="../css/portal.css?v=20261020">
   <link rel="stylesheet" href="../css/tailwind.css">
 </head>
 
@@ -109,26 +109,6 @@
     </div>
   </header>
 
-  <!-- Hero Visual Izquierdo (Desktop) -->
-  <div class="portal-visual hidden lg:flex relative w-1/2 min-h-screen items-center justify-center bg-[#000] border-r border-white/5 overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-tr from-[#050505] via-transparent to-transparent z-10"></div>
-    <div class="portal-visual-inner relative z-20 flex flex-col items-center text-center p-12">
-      <a href="../" class="portal-brand flex flex-col items-center gap-4 group">
-        <img src="../img/escudo.png" alt="Escudo JR Stars" class="h-24 w-24 transition-transform group-hover:scale-110 drop-shadow-[0_0_20px_rgba(229,25,27,0.3)]" onerror="this.style.display='none'">
-        <div class="flex flex-col leading-none">
-          <span class="font-display text-[3rem] tracking-wider italic">JR STARS</span>
-          <span class="font-body text-[0.65rem] font-bold text-brand uppercase tracking-[0.3em] mt-2">Portal Jugador</span>
-        </div>
-      </a>
-      <div class="portal-visual-copy">
-        <span>PERFIL DE RENDIMIENTO · 2026</span>
-        <strong>LEE.<br>MIDE.<br><em>DOMINA.</em></strong>
-        <p>Tu temporada, tu disciplina y tu evolución en una sola ficha.</p>
-      </div>
-    </div>
-    <div class="portal-season-mark" aria-hidden="true">26</div>
-  </div>
-
   <!-- Contenido Interactivo -->
   <main id="portal-contenido" class="portal-main w-full lg:w-1/2 min-h-screen flex flex-col px-4 py-6 sm:p-12 relative overflow-y-auto bg-[#050505]">
 
@@ -143,7 +123,7 @@
       </a>
       <span class="portal-topbar-season topbar-default">TEMPORADA 26</span>
 
-      <button onclick="volver()" class="topbar-player hidden items-center gap-1.5 text-gray-400 hover:text-white font-bold text-[0.65rem] uppercase tracking-[0.2em] transition-colors bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full" aria-label="Cerrar Ficha">
+      <button type="button" onclick="volver()" class="topbar-player hidden items-center gap-1.5 text-gray-400 hover:text-white font-bold text-[0.65rem] uppercase tracking-[0.2em] transition-colors bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full" aria-label="Cerrar Ficha">
         SALIR
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
@@ -155,26 +135,24 @@
 
     <div class="portal-shell flex-grow flex flex-col w-full max-w-xl mx-auto">
 
-      <!-- BÚSQUEDA -->
-      <section id="p1" class="w-full transition-opacity duration-300">
-        <h1 class="portal-search-title font-display text-5xl sm:text-6xl uppercase italic leading-tight sm:leading-[0.85] mb-4 text-white">
-          DNI <br><span class="text-brand">DEL JUGADOR</span>
-        </h1>
+      <!-- ACCESO -->
+      <section id="p1" class="portal-gate">
+        <div class="portal-gate-copy">
+          <p class="portal-gate-kicker">Portal del jugador · Temporada 2026</p>
+          <h1 class="portal-gate-title">LA FICHA DE TU JUGADOR,<br><em>EN UN SOLO LUGAR.</em></h1>
+          <p class="portal-gate-lead">Consulta la asistencia del mes, la evolución registrada y el estado de la mensualidad con el DNI o el código de la credencial.</p>
+        </div>
 
-        <div class="portal-search-card bento-card p-6 sm:p-8 flex flex-col gap-5">
+        <div class="portal-search-card">
+          <p class="portal-card-kicker">Acceso para familias</p>
           <label for="dni" class="portal-input-label">DNI O CÓDIGO DEL JUGADOR</label>
-          <input type="tel" id="dni" aria-label="DNI o código del jugador" placeholder="76543210" maxlength="8" inputmode="numeric" enterkeyhint="go" autocomplete="off"
-                 class="w-full bg-[#050505] border border-white/20 rounded-xl text-white font-display text-3xl tracking-[0.2em] px-6 py-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand text-center placeholder:text-gray-700 transition-all">
+          <input type="tel" id="dni" aria-label="DNI o código del jugador" placeholder="76543210" maxlength="8" inputmode="numeric" enterkeyhint="go" autocomplete="off" class="portal-input">
 
-          <button type="button" id="btnC" onclick="buscar()" class="slant-btn w-full bg-brand text-white px-8 py-4 rounded-xl border border-transparent">
-            <span class="slant-btn-content font-display text-2xl uppercase tracking-wider">VER ESTATUS</span>
-          </button>
+          <button type="button" id="btnC" onclick="buscar()" class="portal-submit">VER ESTATUS</button>
 
-          <button type="button" onclick="toggleScanner()" class="portal-scan-trigger slant-btn w-full bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 mt-2">
-            <span class="slant-btn-content font-display text-xl uppercase tracking-wider flex items-center justify-center gap-2">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 9h6v6H9z"/></svg>
-              ESCANEAR CÓDIGO QR
-            </span>
+          <button type="button" onclick="toggleScanner()" class="portal-scan-trigger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 9h6v6H9z"/></svg>
+            ESCANEAR CÓDIGO QR
           </button>
 
           <div id="scanner-container" class="portal-scanner-modal hidden" role="dialog" aria-modal="true" aria-labelledby="portal-scanner-title" aria-hidden="true">
@@ -202,16 +180,15 @@
             </div>
           </div>
 
-          <div id="ld" role="status" aria-live="polite" class="hidden flex items-center justify-center gap-3 text-gray-400 font-bold uppercase tracking-widest text-sm mt-4 p-4 rounded-xl bg-white/5">
-            <div class="spinner"></div><span>Procesando...</span>
+          <div id="ld" role="status" aria-live="polite" class="hidden">
+            <div class="spinner"></div><span>Procesando…</span>
           </div>
 
-          <div id="err" role="alert" class="hidden flex flex-col gap-4 mt-4 bg-brand/10 border border-brand/30 rounded-xl p-6">
-            <div class="text-brand font-bold text-xs uppercase tracking-widest border-b border-brand/20 pb-2">Error 404</div>
-            <div class="font-display text-3xl uppercase text-white leading-none">JUGADOR NO REGISTRADO</div>
-            <a href="https://wa.me/51955515693" target="_blank" class="slant-btn bg-white/10 hover:bg-white/20 text-white font-display text-lg px-4 py-2 mt-2 rounded-lg border border-white/10">
-              <span class="slant-btn-content text-center">CONTACTAR ACADEMIA</span>
-            </a>
+          <div id="err" role="alert" class="hidden">
+            <span class="portal-error-kicker">Código no encontrado</span>
+            <strong class="portal-error-title">JUGADOR NO REGISTRADO</strong>
+            <p class="portal-error-copy">Revisa el DNI o el código de la credencial. Si sigue sin aparecer, escríbenos y lo verificamos contigo.</p>
+            <a href="https://wa.me/51955515693" target="_blank" rel="noopener noreferrer" class="portal-error-link">CONTACTAR ACADEMIA</a>
           </div>
 
           <p class="pt-help">
@@ -219,11 +196,20 @@
             Está en la credencial del jugador. Si no la tienes a mano, <a href="https://wa.me/51955515693?text=Hola%2C%20necesito%20el%20c%C3%B3digo%20del%20portal%20para%20un%20jugador%20de%20JR%20Stars." target="_blank" rel="noopener noreferrer">escríbenos por WhatsApp</a> con el nombre del jugador y te ayudamos.
           </p>
         </div>
+
+        <div class="portal-gate-secondary">
+          <ul class="portal-gate-list">
+            <li><strong>Asistencia real</strong><span>Entrenamientos registrados en el mes y en la temporada.</span></li>
+            <li><strong>Evolución</strong><span>Talla, peso, salto y sprint cuando existan controles registrados.</span></li>
+            <li><strong>Cuentas claras</strong><span>Mensualidad y saldo del kiosco, separados de lo deportivo.</span></li>
+          </ul>
+          <p class="portal-gate-note">La ficha se abre con el código de la credencial. No exponemos datos de menores en abierto.</p>
+        </div>
       </section>
 
       <!-- FICHA JUGADOR -->
       <section id="p2" class="hidden w-full transition-opacity duration-300">
-        <button onclick="volver()" class="hidden lg:flex mb-6 items-center gap-2 text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">
+        <button type="button" onclick="volver()" class="hidden lg:flex mb-6 items-center gap-2 text-gray-400 hover:text-white font-bold text-xs uppercase tracking-widest transition-colors">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           VOLVER AL BUSCADOR
         </button>
@@ -269,7 +255,7 @@
   <!-- MODAL RECARGA -->
   <div id="modal-yape" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
     <div class="bento-card bg-[#0a0a0a] border border-white/10 p-8 max-w-sm w-full flex flex-col items-center text-center relative shadow-[0_0_50px_rgba(229,25,27,0.15)]">
-      <button onclick="document.getElementById('modal-yape').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl font-bold transition-colors">✕</button>
+      <button type="button" onclick="document.getElementById('modal-yape').classList.add('hidden')" class="absolute top-4 right-4 text-gray-500 hover:text-white text-2xl font-bold transition-colors">✕</button>
       <div class="font-display text-4xl italic text-white mb-2 mt-4">YAPE / PLIN</div>
       <p class="text-gray-400 font-medium text-sm mb-6">Escanea y envía comprobante al soporte.</p>
 
@@ -288,7 +274,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
   <script src="../js/supabaseClient.js"></script>
   <script src="../js/lib/html2canvas.min.js"></script>
-  <script src="../js/home.js?v=20261019_ficha10"></script>
+  <script src="../js/home.js?v=20261020"></script>
 
   <script>
     // Navegación de escritorio: marca la sección visible y muestra de quién

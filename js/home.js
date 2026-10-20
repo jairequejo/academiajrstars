@@ -568,10 +568,11 @@ function buildMetricSparkline(history, key, unit, label) {
     const prev = points[points.length - 2];
     const diff = prev ? (last[key] - prev[key]) : 0;
     const trendArrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
-    const trendColor = diff > 0 ? '#4ade80' : diff < 0 ? '#f87171' : '#a1a1aa';
+    // Paleta de la academia: azul para la mejora, rojo para el retroceso.
+    const trendColor = diff > 0 ? '#153a79' : diff < 0 ? '#c41315' : '#6b7488';
     // For sprint, lower is better — invert trend color
     const isInverse = key === 'sprint_10m_seg';
-    const finalColor = isInverse ? (diff < 0 ? '#4ade80' : diff > 0 ? '#f87171' : '#a1a1aa') : trendColor;
+    const finalColor = isInverse ? (diff < 0 ? '#153a79' : diff > 0 ? '#c41315' : '#6b7488') : trendColor;
 
     // El cambio se muestra en la unidad que la familia entiende:
     // estatura en cm (no "0.0 m") y sprint con 2 decimales (no "0.0 s").
@@ -592,8 +593,8 @@ function buildMetricSparkline(history, key, unit, label) {
     const colors = {
         talla: { line: '#e5191b', glow: 'rgba(229,25,27,.55)', fill: 'rgba(229,25,27,.15)' },
         peso:  { line: '#f5a623', glow: 'rgba(245,166,35,.5)',  fill: 'rgba(245,166,35,.12)' },
-        salto_cm:      { line: '#4ade80', glow: 'rgba(74,222,128,.5)', fill: 'rgba(74,222,128,.12)' },
-        sprint_10m_seg: { line: '#818cf8', glow: 'rgba(129,140,248,.5)', fill: 'rgba(129,140,248,.12)' },
+        salto_cm:      { line: '#153a79', glow: 'rgba(21,58,121,.45)', fill: 'rgba(21,58,121,.12)' },
+        sprint_10m_seg: { line: '#76263a', glow: 'rgba(118,38,58,.45)', fill: 'rgba(118,38,58,.12)' },
     };
     const c = colors[key] || colors.talla;
 
@@ -878,7 +879,7 @@ function renderCard(d) {
               <div class="epic-report-head"><div><span>REPORTE DE TEMPORADA</span><h3>PROGRESO</h3></div><strong>${season}</strong></div>
               <div class="epic-lock">
                 <div class="epic-lock-mark" aria-hidden="true">PENDIENTE</div>
-                <div class="epic-lock-icon" aria-hidden="true">×</div>
+                <div class="epic-lock-icon" aria-hidden="true">!</div>
                 <h3>HISTORIAL EN PAUSA</h3>
                 <p>La evolución de <strong>${firstName}</strong> sigue guardada. La mensualidad se registra dentro de los primeros 15 días del mes y todavía figura pendiente${vencText ? ` (mes anterior cubierto hasta el ${escapePortalHtml(vencText)})` : ''}. Regularízala para volver a ver sus métricas e historial.</p>
                 <button class="epic-pay" onclick="document.getElementById('modal-yape').classList.remove('hidden')">COORDINAR PAGO · YAPE / PLIN</button>
