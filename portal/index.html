@@ -65,8 +65,8 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
-  <link rel="stylesheet" href="../css/player-card.css?v=20261019_ficha9">
-  <link rel="stylesheet" href="../css/portal.css?v=20261019_ficha9">
+  <link rel="stylesheet" href="../css/player-card.css?v=20261019_ficha10">
+  <link rel="stylesheet" href="../css/portal.css?v=20261019_ficha10">
   <link rel="stylesheet" href="../css/tailwind.css">
 </head>
 
@@ -231,34 +231,34 @@
       </section>
 
       <!-- ADMINISTRACIÓN: mensualidad y kiosko, al final y separados de lo deportivo -->
-      <section id="p3" class="hidden w-full mt-10">
+      <section id="p3" class="hidden w-full mt-10" aria-labelledby="cuentas-titulo">
         <div id="cuentas" class="bento-card p-6 sm:p-8">
 
-          <div class="pc-admin-head">
-            <span class="pc-admin-kicker">Administración</span>
-            <h2 class="font-display text-4xl uppercase text-white">MENSUALIDAD <span class="text-brand">Y KIOSKO</span></h2>
+          <header class="pc-admin-head">
+            <p class="pc-admin-kicker">Administración</p>
+            <h2 id="cuentas-titulo" class="font-display text-4xl uppercase text-white">MENSUALIDAD <span class="text-brand">Y KIOSKO</span></h2>
             <p class="pc-admin-sub">Las cuentas van aparte de lo deportivo: aquí están el estado de la mensualidad y el saldo de batidos.</p>
-          </div>
+          </header>
 
           <div class="pc-admin-grid">
 
-            <div class="pc-admin-row">
-              <span class="pc-admin-label">Mensualidad</span>
-              <strong id="admin-pago" class="pc-admin-value">—</strong>
+            <article class="pc-admin-row">
+              <h3 class="pc-admin-label">Mensualidad</h3>
+              <p id="admin-pago" class="pc-admin-value">—</p>
               <p id="admin-pago-sub" class="pc-admin-note">—</p>
               <button type="button" onclick="document.getElementById('modal-yape').classList.remove('hidden')" class="slant-btn bg-brand text-white px-6 py-3 w-full border border-transparent">
                 <span class="slant-btn-content font-display text-lg uppercase tracking-wider">COORDINAR PAGO</span>
               </button>
-            </div>
+            </article>
 
-            <div class="pc-admin-row" id="kiosko">
-              <span class="pc-admin-label">Kiosko JR · batidos</span>
-              <strong id="kiosk-credit-balance" class="pc-admin-value">0 CRÉDITOS</strong>
+            <article class="pc-admin-row" id="kiosko">
+              <h3 class="pc-admin-label">Kiosko JR · batidos</h3>
+              <p id="kiosk-credit-balance" class="pc-admin-value">0 CRÉDITOS</p>
               <p class="pc-admin-note">El saldo se usa en el kiosco durante los entrenamientos.</p>
               <button type="button" onclick="document.getElementById('modal-yape').classList.remove('hidden')" class="slant-btn bg-white text-black px-6 py-3 w-full border border-transparent">
                 <span class="slant-btn-content font-display text-lg uppercase tracking-wider">COORDINAR RECARGA</span>
               </button>
-            </div>
+            </article>
 
           </div>
         </div>
@@ -288,7 +288,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
   <script src="../js/supabaseClient.js"></script>
   <script src="../js/lib/html2canvas.min.js"></script>
-  <script src="../js/home.js?v=20261019_ficha9"></script>
+  <script src="../js/home.js?v=20261019_ficha10"></script>
 
   <script>
     // Navegación de escritorio: marca la sección visible y muestra de quién

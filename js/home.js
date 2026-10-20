@@ -598,15 +598,15 @@ function buildMetricSparkline(history, key, unit, label) {
     const c = colors[key] || colors.talla;
 
     return `
-      <article class="ms-card ms-card--${key}" onclick="openMetricModal('${key}', '${unit}', '${label}')" style="cursor:pointer;" role="button" aria-label="Ver historial de ${label}">
-        <div class="ms-head">
-          <div class="ms-head-left">
+      <button type="button" class="ms-card ms-card--${key}" onclick="openMetricModal('${key}', '${unit}', '${label}')" aria-label="Ver historial de ${escapePortalHtml(label.replace(/[^\p{L}\p{N}\s.]/gu, '').trim())}">
+        <span class="ms-head">
+          <span class="ms-head-left">
             <span class="ms-label">${escapePortalHtml(label)}</span>
             <span class="ms-value">${escapePortalHtml(last[key])}${realUnit}</span>
-          </div>
+          </span>
           <span class="ms-trend" style="color:${finalColor};">${trendArrow} ${deltaText}${smallUnit}</span>
-        </div>
-        <svg viewBox="0 0 ${W} ${H}" class="ms-svg" role="img" aria-label="Evolución de ${escapePortalHtml(label.toLowerCase())}">
+        </span>
+        <svg viewBox="0 0 ${W} ${H}" class="ms-svg" role="img" aria-label="Evolución de ${escapePortalHtml(label.replace(/[^\p{L}\p{N}\s.]/gu, '').trim().toLowerCase())}">
           <defs>
             <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="${c.line}" stop-opacity=".35"/>
@@ -621,12 +621,12 @@ function buildMetricSparkline(history, key, unit, label) {
             : `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="${c.line}" opacity=".6"/>`
           ).join('')}
         </svg>
-        <div class="ms-foot">
+        <span class="ms-foot">
           <span>${escapePortalHtml(points[0].fecha || 'Inicio')}</span>
           <span class="ms-minmax">MIN ${min}${realUnit} · MAX ${max}${realUnit}</span>
           <span>${escapePortalHtml(last.fecha || 'Hoy')}</span>
-        </div>
-      </article>`;
+        </span>
+      </button>`;
 }
 
 function renderCard(d) {
@@ -682,7 +682,7 @@ function renderCard(d) {
     const horarioChip = [d.turno, d.horario].map(v => (v ? String(v).trim() : '')).filter(Boolean).join(' · ') || null;
     const metaChips = [d.category, sedeChip, d.grupo ? `Grupo ${d.grupo}` : null, horarioChip]
       .filter(Boolean)
-      .map(i => `<span class="pc-chip">${escapePortalHtml(i)}</span>`)
+      .map(i => `<li class="pc-chip">${escapePortalHtml(i)}</li>`)
       .join('');
     const nameLengthClass = fullName.length > 30
       ? ' is-xlong'
@@ -754,7 +754,7 @@ function renderCard(d) {
 
     // Lo deportivo se compara consigo mismo. El cuerpo va aparte y plegado.
     const cuerpoKeys = ['Estatura', 'Peso'];
-    const filaCambio = ([k, v]) => `<div><span>${escapePortalHtml(k)}</span><strong>${v}</strong></div>`;
+    const filaCambio = ([k, v]) => `<div><dt>${escapePortalHtml(k)}</dt><dd>${v}</dd></div>`;
     const cambiosCuerpoHtml = cambios.filter(c => cuerpoKeys.includes(c[0])).map(filaCambio).join('');
 
     const chartsJuego = historyData.length ? `
@@ -800,92 +800,60 @@ function renderCard(d) {
 
     // ── Ritmo por mes: la asistencia real, en columnas ────────────────
     const CORTOS = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DIC'];
+    const LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'setiembre', 'octubre', 'noviembre', 'diciembre'];
     const mesesData = Array.isArray(d.meses) ? d.meses : [];
     const maxMes = Math.max(1, ...mesesData.map(m => Number(m.n) || 0));
     const mesHoy = new Date().getMonth();
+    // Resumen hablado del gráfico: el dibujo solo no dice nada a un lector de pantalla.
+    const ariaMeses = mesesData.length
+        ? mesesData.map(m => `${LARGOS[m.m]}: ${m.n} ${m.n === 1 ? 'día' : 'días'}`).join('; ')
+        : 'sin registros';
     const mesesHtml = mesesData.map(m => {
         const n = Number(m.n) || 0;
         const alto = n ? Math.max(8, Math.round((n / maxMes) * 80)) : 0;
         return `
           <div class="pc-ritmo-col${m.m === mesHoy ? ' is-actual' : ''}" style="--h:${alto}%">
             <span class="pc-ritmo-pista">
-              ${n ? '<i></i>' : ''}
+              ${n ? '<span class="pc-ritmo-relleno"></span>' : ''}
               <span class="pc-ritmo-num">${n}</span>
             </span>
             <span class="pc-ritmo-mes">${CORTOS[m.m]}</span>
           </div>`;
     }).join('');
 
-    // ── Marcas: dónde cae su último control dentro de su propio historial ──
-    const serie = key => historyData.map(r => Number(r[key])).filter(v => Number.isFinite(v));
-    const posicion = (valores, mayorEsMejor) => {
-        if (valores.length < 2) return 100;
-        const min = Math.min(...valores);
-        const max = Math.max(...valores);
-        if (max === min) return 100;
-        const actual = valores[0];
-        const p = mayorEsMejor ? (actual - min) / (max - min) : (max - actual) / (max - min);
-        return Math.max(8, Math.min(100, Math.round(p * 100)));
-    };
-    const f1 = n => Number(n).toFixed(1).replace(/\.0$/, '');
-    const f2 = n => Number(n).toFixed(2);
-    const atrHtml = (etiqueta, valor, unidad, p, nota) => `
-        <div class="pc-atr">
-          <div class="pc-atr-head">
-            <span class="pc-atr-label">${escapePortalHtml(etiqueta)}</span>
-            <strong class="pc-atr-valor">${valor}<small>${unidad}</small></strong>
-          </div>
-          <span class="pc-atr-pista" aria-hidden="true"><i style="width:${p}%"></i></span>
-          <small class="pc-atr-nota">${nota}</small>
-        </div>`;
-    const atrs = [];
-    const saltoVals = serie('salto_cm');
-    if (saltoVals.length) {
-        const mejor = Math.max(...saltoVals);
-        atrs.push(atrHtml('Salto', f1(saltoVals[0]), 'cm', posicion(saltoVals, true),
-            saltoVals[0] >= mejor ? 'Su mejor marca registrada' : `Su mejor marca: ${f1(mejor)} cm`));
-    }
-    const sprintVals = serie('sprint_10m_seg');
-    if (sprintVals.length) {
-        const mejor = Math.min(...sprintVals);
-        atrs.push(atrHtml('Sprint 10 m', f2(sprintVals[0]), 's', posicion(sprintVals, false),
-            sprintVals[0] <= mejor ? 'Su mejor tiempo registrado' : `Su mejor tiempo: ${f2(mejor)} s`));
-    }
-    const atributosHtml = atrs.length ? `<div class="pc-atrs">${atrs.join('')}</div>` : '';
-
     const playerPanel = `
-      <div class="pc-hero">
+      <header class="pc-hero">
         <div class="pc-topline">
-          <span class="pc-kicker">Ficha del jugador · Temporada ${season}</span>
+          <p class="pc-kicker">Ficha del jugador · Temporada ${season}</p>
           ${estadoPago === 'bloqueado'
-            ? '<span class="pc-status-locked">Mensualidad vencida</span>'
+            ? '<p class="pc-status-locked">Mensualidad vencida</p>'
             : estadoPago === 'en-plazo'
-              ? '<span class="pc-status-pending">Pago pendiente</span>'
-              : '<span class="pc-status-active">Al día</span>'}
+              ? '<p class="pc-status-pending">Pago pendiente</p>'
+              : '<p class="pc-status-active">Al día</p>'}
         </div>
         <div class="pc-hero-body">
           ${d.foto_url
             ? `<img class="pc-avatar" src="${escapePortalHtml(d.foto_url)}" alt="Foto de ${name}">`
             : `<div class="pc-avatar pc-avatar-fallback" role="img" aria-label="Iniciales de ${name}">${iniciales}</div>`}
           <div class="pc-identity">
-            <h2 class="pc-name${nameLengthClass}">${name}</h2>
-            <div class="pc-meta">${metaChips}</div>
+            <h1 class="pc-name${nameLengthClass}" id="ficha-nombre">${name}</h1>
+            <ul class="pc-meta">${metaChips}</ul>
             <p class="pc-hero-line">${resumenLinea}</p>
           </div>
-          <div class="pc-streak">
-            <span class="pc-streak-label">Constancia</span>
-            <div class="pc-streak-value">
-              <div class="pc-streak-flame" aria-hidden="true">🔥</div>
-              <div class="pc-streak-number">${streak > 0 ? streak : '—'}</div>
-              <div class="pc-streak-unit">${streak > 0 ? 'SEGUIDAS' : 'SIN RACHA'}</div>
-            </div>
+          <aside class="pc-streak" aria-label="Constancia">
+            <p class="pc-streak-label">Constancia</p>
+            <p class="pc-streak-value">
+              <span class="pc-streak-flame" aria-hidden="true">🔥</span>
+              <strong class="pc-streak-number">${streak > 0 ? streak : '—'}</strong>
+              <span class="pc-streak-unit">${streak > 0 ? 'seguidas' : 'sin racha'}</span>
+            </p>
             <div class="pc-streak-info">
-              <div class="pc-streak-title">${streakTitle}</div>
+              <p class="pc-streak-title">${streakTitle}</p>
               <p class="pc-streak-copy">${streakCopy}</p>
             </div>
-          </div>
+          </aside>
         </div>
-      </div>`;
+      </header>`;
 
     // Administración al final y separada de lo deportivo.
     const adminPago = $('admin-pago');
@@ -924,62 +892,61 @@ function renderCard(d) {
     window._currentHistoryData = historyData;
 
     wrap.innerHTML = `
-      <article class="epic-card" id="ficha-jugador">
+      <article class="epic-card" id="ficha-jugador" aria-labelledby="ficha-nombre">
         ${playerPanel}
         <div class="pc-body">
 
-          <!-- BANDA 1 · LA TEMPORADA: ritmo de asistencia, dato real -->
-          <section class="pc-band pc-band--ritmo" id="asistencia">
+          <!-- RITMO: asistencia real por mes -->
+          <section class="pc-band pc-band--ritmo" id="asistencia" aria-labelledby="ritmo-titulo">
             <header class="pc-band-head">
-              <span class="pc-band-kicker">La temporada</span>
-              <h3 class="pc-band-title">SU RITMO DE ENTRENAMIENTO</h3>
+              <p class="pc-band-kicker">La temporada</p>
+              <h2 class="pc-band-title" id="ritmo-titulo">Su ritmo de entrenamiento</h2>
               <p class="pc-band-sub">${retoTexto}</p>
             </header>
 
             <div class="pc-ritmo">
-              <div class="pc-ritmo-grafica" role="img" aria-label="Días entrenados en cada uno de los últimos seis meses">
-                ${mesesHtml}
-              </div>
+              <figure class="pc-ritmo-fig">
+                <div class="pc-ritmo-grafica" role="img" aria-label="Días entrenados por mes: ${escapePortalHtml(ariaMeses)}">
+                  ${mesesHtml}
+                </div>
+              </figure>
+
               <div class="pc-ritmo-lado">
-                <div class="pc-anillo" role="img" aria-label="${totalSessions} entrenamientos en la temporada">
+                <figure class="pc-anillo">
                   <svg viewBox="0 0 120 120" aria-hidden="true">
                     <circle class="pc-anillo-track" cx="60" cy="60" r="52"></circle>
                     <circle class="pc-anillo-fill" cx="60" cy="60" r="52"
                             style="--aro-fin:${anilloFin};stroke-dasharray:${anilloLargo.toFixed(2)};stroke-dashoffset:${anilloLargo.toFixed(2)}"></circle>
                   </svg>
-                  <div class="pc-anillo-centro">
-                    <strong data-contar="${totalSessions}">0</strong>
-                    <span>ENTRENOS</span>
-                  </div>
-                </div>
+                  <figcaption class="pc-anillo-centro">
+                    <strong data-contar="${totalSessions}">${totalSessions}</strong>
+                    <span>entrenos</span>
+                  </figcaption>
+                </figure>
                 <div class="pc-ritmo-copy">
                   <dl class="pc-ritmo-datos">
-                    <div><dt>Este mes</dt><dd data-contar="${monthSessions}">0</dd></div>
+                    <div><dt>Este mes</dt><dd data-contar="${monthSessions}">${monthSessions}</dd></div>
                     <div><dt>Último entreno</dt><dd>${escapePortalHtml(d.ultima_sesion || '—')}</dd></div>
                   </dl>
                   <div class="pc-ritmo-hito">
-                    <span class="pc-ritmo-hito-pista" aria-hidden="true"><i style="width:${Math.round(anilloPct * 100)}%"></i></span>
-                    <small>Siguiente hito: <strong>${siguienteHito}</strong> entrenos de la temporada</small>
+                    <progress class="pc-ritmo-hito-pista" value="${totalSessions}" max="${siguienteHito}">${totalSessions} de ${siguienteHito}</progress>
+                    <p>Siguiente hito: <strong>${siguienteHito}</strong> entrenos de la temporada</p>
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- BANDA 2 · SU EVOLUCIÓN: marcas propias y gráficas -->
-          <section class="pc-band pc-band--evolucion" id="progreso">
+          <!-- EVOLUCIÓN: sus marcas y su tendencia -->
+          <section class="pc-band pc-band--evolucion" id="progreso" aria-labelledby="evo-titulo">
             <header class="pc-band-head">
-              <span class="pc-band-kicker">Comparado consigo mismo</span>
-              <h3 class="pc-band-title">SU EVOLUCIÓN</h3>
+              <p class="pc-band-kicker">Comparado consigo mismo</p>
+              <h2 class="pc-band-title" id="evo-titulo">Su evolución</h2>
               <p class="pc-band-sub">${escapePortalHtml(rangoLabel)} · ${physicalRecords} ${physicalRecords === 1 ? 'control registrado' : 'controles registrados'}</p>
             </header>
 
-            <div class="pc-evo">
-              <div class="pc-evo-cifras">
-                ${atributosHtml || `<p class="pc-evo-vacio">Todavía no hay controles del entrenador. Cuando llegue el primero, aquí aparece su marca de partida.</p>`}
-              </div>
-              <div class="pc-evo-graficas">${chartsJuego}</div>
-            </div>
+            ${chartsJuego}
+
             <p class="pc-evo-note">Son sus propias marcas, del primer control al último: sirven para ver cómo cambia, no son una nota ni una comparación con otros niños.</p>
           </section>
 
@@ -987,28 +954,12 @@ function renderCard(d) {
           <details class="pc-crecimiento">
             <summary>Crecimiento (registro del entrenador)</summary>
             <p class="pc-aviso">Medidas de acompañamiento del desarrollo, tomadas hasta dos veces por trimestre. No evalúan su rendimiento ni su salud y no se comparan con otros niños.</p>
-            <div class="pc-compare">${cambiosCuerpoHtml}</div>
+            <dl class="pc-compare">${cambiosCuerpoHtml}</dl>
             ${chartsCuerpo}
           </details>` : ''}
 
-          <!-- FOOTER PUBLICITARIO (Solo visible al compartir) -->
-          <div class="pc-export-footer">
-            <div class="pc-export-brand">
-              <img src="../img/escudo.png" alt="Escudo de la Academia JR Stars">
-              <div>
-                <span>ACADEMIA DE FÚTBOL</span>
-                <strong>JR STARS</strong>
-                <small>Disciplina que se convierte en progreso.</small>
-              </div>
-            </div>
-            <div class="pc-export-contact">
-              <strong>academiajrstars.com</strong>
-              <span>955 515 693 · @academiajrstars</span>
-            </div>
-          </div>
-
-          <button onclick="compartirProgreso()" class="pc-share" id="btn-compartir">
-            <span id="share-text">COMPARTIR PROGRESO</span><b id="share-icon">↗</b>
+          <button type="button" onclick="compartirProgreso()" class="pc-share" id="btn-compartir">
+            <span id="share-text">COMPARTIR PROGRESO</span><b id="share-icon" aria-hidden="true">↗</b>
           </button>
         </div>
       </article>`;

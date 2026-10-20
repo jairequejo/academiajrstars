@@ -968,7 +968,7 @@ html { scroll-behavior: smooth; }
 }
 .pc-admin-head { margin-bottom: 18px; }
 .pc-admin-kicker {
-  display: block; margin-bottom: 6px;
+  display: block; margin: 0 0 6px;
   font-size: .65rem; font-weight: 800; letter-spacing: .12em;
   text-transform: uppercase; color: var(--jr-salmon, #f4847d);
 }
@@ -983,10 +983,12 @@ html { scroll-behavior: smooth; }
   background: rgba(255, 255, 255, .04);
 }
 .pc-admin-label {
+  margin: 0;
   font-size: .6rem; font-weight: 800; letter-spacing: .14em;
   text-transform: uppercase; color: #c3cde0;
 }
 .pc-admin-value {
+  margin: 0;
   font-family: "Bebas Neue", Impact, sans-serif;
   font-size: 34px; font-weight: 400; line-height: 1; letter-spacing: .04em;
   color: #fff;
@@ -1052,66 +1054,104 @@ html { scroll-behavior: smooth; }
   .portal-player-view .portal-shell {
     display: block !important;
     width: 100%;
-    max-width: 1680px !important;
+    max-width: 1560px !important;
     margin-inline: auto !important;
     padding-inline: 0 !important;
   }
 
   /* Tipografía medida por el ancho de la ventana, no de una tarjeta angosta. */
-  .portal-player-view #card-wrap .pc-name { font-size: clamp(46px, 3.8vw, 68px); }
+  .portal-player-view #card-wrap .pc-name { font-size: clamp(44px, 3.4vw, 62px); }
   .portal-player-view #card-wrap .pc-avatar,
   .portal-player-view #card-wrap .pc-avatar-fallback {
-    width: clamp(104px, 8.4vw, 132px);
-    height: clamp(104px, 8.4vw, 132px);
+    width: clamp(96px, 7.4vw, 120px);
+    height: clamp(96px, 7.4vw, 120px);
   }
-  .portal-player-view #card-wrap .pc-hero { padding: clamp(26px, 2.4vw, 44px); }
-  .portal-player-view #card-wrap .pc-body { padding: clamp(30px, 3vw, 56px); }
+  .portal-player-view #card-wrap .pc-hero { padding: clamp(24px, 2.1vw, 38px); }
   .portal-player-view #card-wrap .pc-hero-line { font-size: 13px; max-width: 60ch; }
 
-  /* Las bandas respiran: el encabezado va grande y la línea separa, no enmarca. */
-  .portal-player-view .pc-band { padding-bottom: clamp(32px, 3vw, 52px); }
-  .portal-player-view .pc-band + .pc-band { padding-top: clamp(32px, 3vw, 52px); }
-  .portal-player-view .pc-band-head { margin-bottom: clamp(22px, 2.2vw, 36px); }
-  .portal-player-view .pc-band-title { font-size: clamp(38px, 3.4vw, 62px); }
-  .portal-player-view .pc-band-sub { font-size: clamp(14px, 1.05vw, 16px); }
-
-  /* Ritmo: el gráfico manda y el anillo lo acompaña. */
-  .portal-player-view .pc-ritmo {
-    grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
-    gap: clamp(30px, 4vw, 76px);
-    align-items: center;
-  }
-  .portal-player-view .pc-ritmo-grafica { height: clamp(190px, 15vw, 250px); }
-  .portal-player-view .pc-ritmo-num { font-size: 26px; }
-  .portal-player-view .pc-ritmo-lado { flex-direction: row; align-items: center; justify-content: flex-start; gap: 30px; }
-  .portal-player-view .pc-ritmo-datos { flex-direction: column; gap: 20px; }
-  .portal-player-view .pc-anillo { width: 128px; height: 128px; }
-  .portal-player-view .pc-anillo-centro strong { font-size: 52px; }
-  .portal-player-view .pc-anillo-centro span { font-size: 9px; }
-
-  /* Evolución: marcas a la izquierda, gráficas a la derecha. */
-  .portal-player-view .pc-evo {
+  /* El cuerpo se parte en dos paneles densos separados por una línea fina:
+     asistencia a la izquierda, marcas a la derecha. Antes cada bloque era una
+     banda a 1400px con 50px de aire dentro; en un monitor eso se lee como un
+     cuadro estirado, no como un panel de trabajo. */
+  .portal-player-view #card-wrap .pc-body {
+    --pc-pad: clamp(22px, 1.8vw, 34px);
     display: grid;
-    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
-    gap: clamp(28px, 3.4vw, 64px);
-    align-items: start;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: stretch;
+    padding: 0;
   }
-  .portal-player-view .pc-atr-valor { font-size: clamp(34px, 2.6vw, 46px); }
-  .portal-player-view .pc-atr-nota { font-size: 12px; }
+  .portal-player-view .pc-band,
+  .portal-player-view .pc-band + .pc-band {
+    padding: var(--pc-pad);
+    border-top: 0;
+    border-left: 1px solid #e9ebf1;
+  }
+  .portal-player-view .pc-band--ritmo { border-left: 0; }
 
-  /* Las gráficas dejan de ser cajas: pasan a ser una tira de datos. */
-  .portal-player-view .pc-charts { margin-top: 0; gap: 0; border-top: 1px solid #e9ebf1; }
-  .portal-player-view .ms-card {
+  .portal-player-view .pc-band-head { margin-bottom: 18px; }
+  .portal-player-view .pc-band-title { font-size: clamp(26px, 1.9vw, 34px); }
+  .portal-player-view .pc-band-sub { margin-top: 8px; font-size: clamp(13px, .9vw, 15px); }
+
+  /* Ritmo: las barras arriba; anillo, cifras y hito debajo, en una sola fila. */
+  .portal-player-view .pc-ritmo { gap: 28px; }
+  .portal-player-view .pc-ritmo-grafica { height: clamp(210px, 14.5vw, 256px); gap: clamp(8px, 1.1vw, 16px); }
+  .portal-player-view .pc-ritmo-pista { max-width: min(100%, 104px); }
+  .portal-player-view .pc-ritmo-num { font-size: 20px; }
+  .portal-player-view .pc-ritmo-lado { flex-direction: row; align-items: center; justify-content: flex-start; gap: 22px; }
+  .portal-player-view .pc-anillo { width: 96px; height: 96px; }
+  .portal-player-view .pc-anillo-centro strong { font-size: 38px; }
+  .portal-player-view .pc-anillo-centro span { font-size: 8px; }
+  .portal-player-view .pc-ritmo-copy { flex: 1 1 auto; gap: 14px; }
+  .portal-player-view .pc-ritmo-datos { flex-direction: row; gap: 28px; }
+  .portal-player-view .pc-ritmo-hito { max-width: none; }
+
+  /* Evolución (panel de la derecha): cada control se lee como una fila, cifra
+     a la izquierda y curva a la derecha. La barra de "posición en su
+     historial" se retiró: duplicaba el dato y estiraba un relleno de lado a
+     lado sin decir nada nuevo. */
+  .portal-player-view .pc-band--evolucion .pc-charts { grid-template-columns: 1fr; margin: 0; gap: 0; border-top: 1px solid #e9ebf1; }
+  .portal-player-view .pc-band--evolucion .ms-card {
+    display: grid;
+    grid-template-columns: minmax(120px, 168px) minmax(0, 1fr);
+    grid-template-areas: "cabeza curva" "cabeza pie";
+    align-items: center;
+    column-gap: clamp(14px, 1.4vw, 24px);
     border: 0; border-radius: 0; background: transparent;
-    padding: 24px 2px 4px;
+    padding: 14px 2px;
   }
-  .portal-player-view .ms-card + .ms-card { border-left: 1px solid #e9ebf1; padding-left: 26px; }
-  .portal-player-view .ms-card:hover { transform: none; box-shadow: none; }
-  .portal-player-view .ms-value { font-size: clamp(34px, 2.7vw, 46px); }
-  .portal-player-view .pc-evo-note { max-width: 92ch; }
+  .portal-player-view .pc-band--evolucion .ms-head {
+    grid-area: cabeza;
+    flex-direction: column; align-items: flex-start; gap: 3px;
+  }
+  .portal-player-view .pc-band--evolucion .ms-svg {
+    grid-area: curva;
+    height: auto; aspect-ratio: 3 / 1;
+    margin-top: 0;
+  }
+  .portal-player-view .pc-band--evolucion .ms-foot { grid-area: pie; }
+  .portal-player-view .pc-band--evolucion .ms-card + .ms-card { border-top: 1px solid #e9ebf1; }
+  .portal-player-view .pc-band--evolucion .ms-card:hover { transform: none; box-shadow: none; }
+  .portal-player-view .pc-band--evolucion .ms-value { font-size: clamp(26px, 2vw, 34px); }
+  .portal-player-view .pc-evo-note { margin-top: 14px; max-width: none; }
 
-  /* El botón de compartir no se estira como una barra infinita. */
-  .portal-player-view .pc-share { max-width: 380px; margin-left: auto; }
+  /* Crecimiento desplegado: dos curvas, sin estirar a todo el ancho. */
+  .portal-player-view .pc-crecimiento .pc-compare { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 44px; }
+  .portal-player-view .pc-crecimiento .pc-compare > div { border-bottom: 1px solid #ececec; }
+  .portal-player-view .pc-crecimiento .pc-charts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 6px; }
+  .portal-player-view .pc-crecimiento .ms-svg { height: 128px; }
+
+  /* Plegado y botón: a todo el ancho, alineados con el margen de los paneles. */
+  .portal-player-view .pc-crecimiento,
+  .portal-player-view .pc-share { grid-column: 1 / -1; }
+  .portal-player-view .pc-crecimiento {
+    margin: 0;
+    padding: 0 var(--pc-pad) 4px;
+    border-top: 1px solid #e9ebf1;
+  }
+  .portal-player-view .pc-crecimiento > summary { margin-top: 18px; }
+  .portal-player-view .pc-crecimiento[open] { padding-bottom: var(--pc-pad); }
+  .portal-player-view .pc-crecimiento .pc-charts { margin-top: 4px; }
+  .portal-player-view .pc-share { max-width: none; margin: var(--pc-pad); margin-top: 18px; }
 
   /* Cuentas: dos columnas legibles, con el ancho del bloque. */
   .portal-player-view .pc-admin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
@@ -1120,5 +1160,5 @@ html { scroll-behavior: smooth; }
 
 /* Monitores muy anchos: la ficha no se estira sin freno y el aire vuelve. */
 @media (min-width: 1700px) {
-  .portal-player-view .portal-shell { max-width: 1720px !important; }
+  .portal-player-view .portal-shell { max-width: 1600px !important; }
 }

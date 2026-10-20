@@ -105,7 +105,7 @@
 .pc-kicker {
   display: block;
   font-size: 9px; font-weight: 900; letter-spacing: .22em; text-transform: uppercase;
-  color: var(--portal-gold); margin-bottom: 5px;
+  color: var(--portal-gold); margin: 0 0 5px;
 }
 .pc-name {
   margin: 0;
@@ -115,7 +115,7 @@
   text-transform: uppercase; overflow-wrap: anywhere;
   text-shadow: 0 8px 28px rgba(0,0,0,.5);
 }
-.pc-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.pc-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
 .pc-chip {
   padding: 5px 10px;
   border: 1px solid rgba(255,255,255,.13); border-radius: 999px;
@@ -136,10 +136,11 @@
 }
 .pc-streak-value {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
+  margin: 0;
 }
 .pc-streak-label {
   font-size: 8px; font-weight: 900; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(255,255,255,.38);
+  color: rgba(255,255,255,.38); margin: 0;
 }
 .pc-streak-flame {
   font-size: clamp(1.8rem, 3.2vw, 2.4rem); line-height: 1;
@@ -150,14 +151,16 @@
   font-size: clamp(42px, 5.4vw, 60px); font-weight: 400; line-height: .8; color: #fff;
 }
 .pc-streak-unit {
-  font-size: 9px; font-weight: 900; letter-spacing: .2em; color: var(--portal-red);
+  font-size: 9px; font-weight: 900; letter-spacing: .18em; text-transform: uppercase;
+  color: rgba(255, 255, 255, .72);
 }
 .pc-streak-title {
   font-family: "Bebas Neue", Impact, sans-serif;
-  font-size: 14px; letter-spacing: .05em; color: #fff; margin-top: 8px;
+  font-size: 14px; letter-spacing: .05em; color: #fff; margin: 8px 0 0;
 }
 .pc-streak-copy {
   display: none;
+  margin: 0;
 }
 
 /* ── CUERPO BLANCO ── */
@@ -210,11 +213,12 @@
   padding: 11px 2px; border-bottom: 1px solid #ececec;
 }
 .pc-compare > div:last-child { border-bottom: 0; }
-.pc-compare span {
+.pc-compare dt {
   font-size: 11px; font-weight: 900; letter-spacing: .05em;
   text-transform: uppercase; color: #6a6a70;
 }
-.pc-compare strong {
+.pc-compare dd {
+  margin: 0;
   font-family: "Bebas Neue", Impact, sans-serif;
   font-size: 22px; font-weight: 400; letter-spacing: .02em; color: #0a0a0a;
 }
@@ -261,12 +265,14 @@
 .pc-charts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 18px 0; }
 
 .ms-card {
+  display: block; width: 100%; text-align: left;
+  font: inherit; color: #0a0a0a;
+  cursor: pointer;
   min-width: 0;
   padding: 15px 16px 12px;
   border-radius: 16px;
   background: #fafaf8;
   border: 1px solid #e8e8e6;
-  color: #0a0a0a;
   overflow: hidden;
   transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
 }
@@ -885,7 +891,7 @@
 
 /* Anillo de progreso: el número grande sale del registro, no de un cálculo
    inventado. La meta es el siguiente hito de entrenamientos de la temporada. */
-.pc-anillo { position: relative; width: 112px; height: 112px; }
+.pc-anillo { position: relative; width: 112px; height: 112px; margin: 0; flex-shrink: 0; }
 .pc-anillo svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
 .pc-anillo-track { fill: none; stroke: #eaecf2; stroke-width: 7; }
 .pc-anillo-fill {
@@ -983,6 +989,7 @@
 
 /* ── RITMO DE ENTRENAMIENTO: columnas por mes (asistencia real) ── */
 .pc-ritmo { display: grid; gap: 24px; }
+.pc-ritmo-fig { margin: 0; min-width: 0; }
 .pc-ritmo-grafica {
   display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: clamp(6px, 2vw, 18px);
@@ -1005,7 +1012,7 @@
   width: 100%; max-width: 68%;
   border-bottom: 1px solid #e3e5ec;
 }
-.pc-ritmo-pista i {
+.pc-ritmo-pista .pc-ritmo-relleno {
   display: block; width: 100%; height: var(--h, 0%);
   background: linear-gradient(180deg, #e5191b 0%, #8f0b0e 100%);
   transition: height .7s cubic-bezier(.2, .8, .2, 1);
@@ -1017,7 +1024,7 @@
 /* El mes en curso se distingue del historial: azul, no rojo. */
 .pc-ritmo-col.is-actual .pc-ritmo-num { color: #0a0a0a; }
 .pc-ritmo-col.is-actual .pc-ritmo-pista { box-shadow: 0 1px 0 0 #153a79; }
-.pc-ritmo-col.is-actual .pc-ritmo-pista i { background: linear-gradient(180deg, #153a79 0%, #091d45 100%); }
+.pc-ritmo-col.is-actual .pc-ritmo-pista .pc-ritmo-relleno { background: linear-gradient(180deg, #153a79 0%, #091d45 100%); }
 .pc-ritmo-col.is-actual .pc-ritmo-mes { color: #0a0a0a; }
 
 .pc-ritmo-lado { display: flex; align-items: center; gap: 24px; }
@@ -1035,40 +1042,23 @@
 
 /* Camino al siguiente hito de la temporada. */
 .pc-ritmo-hito { max-width: 280px; }
-.pc-ritmo-hito-pista { display: block; height: 8px; background: #f1f2f6; }
-.pc-ritmo-hito-pista i {
-  display: block; height: 100%;
-  background: linear-gradient(90deg, #e5191b 0%, #f5a623 100%);
-  transition: width .7s cubic-bezier(.2, .8, .2, 1);
-}
-.pc-ritmo-hito small { display: block; margin-top: 9px; font-size: 11px; line-height: 1.4; color: #8a91a3; }
-.pc-ritmo-hito small strong { color: #0a0a0a; }
+.pc-ritmo-hito-pista { margin: 0; }
+.pc-ritmo-hito p { margin: 9px 0 0; font-size: 11px; line-height: 1.4; color: #8a91a3; }
+.pc-ritmo-hito p strong { color: #0a0a0a; }
 
-/* ── MARCAS PROPIAS: dato, barra y referencia ── */
-.pc-atrs { display: grid; gap: 22px; }
-.pc-atr-head { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
-.pc-atr-label {
-  font-size: 10px; font-weight: 900; letter-spacing: .16em;
-  text-transform: uppercase; color: #6a6a70;
-}
-.pc-atr-valor {
-  font-family: "Bebas Neue", Impact, sans-serif;
-  font-size: clamp(30px, 8vw, 40px); font-weight: 400; line-height: 1;
-  color: #0a0a0a;
-}
-.pc-atr-valor small {
-  margin-left: 5px;
-  font-family: "Inter", system-ui, sans-serif;
-  font-size: 12px; font-weight: 800; letter-spacing: .04em; color: #8a91a3;
-}
-.pc-atr-pista { display: block; margin-top: 9px; height: 8px; background: #f1f2f6; }
-.pc-atr-pista i {
-  display: block; height: 100%;
-  background: linear-gradient(90deg, #153a79 0%, #e5191b 100%);
-  transition: width .7s cubic-bezier(.2, .8, .2, 1);
-}
-.pc-atr-nota { display: block; margin-top: 8px; font-size: 11px; color: #8a91a3; }
+/* ── VARIACIÓN: el aviso sin controles ── */
 .pc-evo-vacio { margin: 0; font-size: 13px; line-height: 1.6; color: #6a6a70; }
+
+/* Barra de progreso nativa, con la paleta de la academia. */
+progress.pc-ritmo-hito-pista {
+  appearance: none; -webkit-appearance: none;
+  display: block; width: 100%; height: 8px;
+  border: 0; border-radius: 0; background: #f1f2f6;
+  overflow: hidden;
+}
+progress.pc-ritmo-hito-pista::-webkit-progress-bar { background: #f1f2f6; }
+progress.pc-ritmo-hito-pista::-webkit-progress-value { background: linear-gradient(90deg, #e5191b 0%, #f5a623 100%); }
+progress.pc-ritmo-hito-pista::-moz-progress-bar { background: linear-gradient(90deg, #e5191b 0%, #f5a623 100%); }
 
 /* ── MÓVIL (hasta 640px): el panel se apila y el anillo preside ── */
 @media (max-width: 640px) {
