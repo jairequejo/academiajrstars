@@ -106,6 +106,35 @@ function marcarDemo(activo, estado) {
 }
 
 // ── INIT ─────────────────────────────────────────────
+// ── SESIÓN DEL JUGADOR ───────────────────────────────
+// La sesión queda abierta en el dispositivo para que el jugador no tenga
+// que escribir su código cada vez. Caduca sola y se cierra con "Salir".
+const PORTAL_SESSION_DAYS = 30;
+
+function guardarSesion(code) {
+    try {
+        localStorage.setItem('jrstars_portal_session', JSON.stringify({ code: String(code), t: Date.now() }));
+    } catch (e) { /* sin almacenamiento */ }
+}
+
+function leerSesion() {
+    let raw = null;
+    try { raw = localStorage.getItem('jrstars_portal_session'); } catch (e) { return null; }
+    if (!raw) return null;
+    if (!raw.trim().startsWith('{')) return raw; // sesiones antiguas, solo el código
+    try {
+        const data = JSON.parse(raw);
+        if (!data || !data.code) return null;
+        if (Date.now() - Number(data.t || 0) > PORTAL_SESSION_DAYS * 86400000) {
+            localStorage.removeItem('jrstars_portal_session');
+            return null;
+        }
+        return String(data.code);
+    } catch (e) {
+        return null;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Leer ?code= de la URL (viene de chip NFC)
     const urlParams = new URLSearchParams(window.location.search);
@@ -114,10 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState({}, '', window.location.pathname);
         handleScanCode(nfcCode.trim());
     } else {
-        const storedDni = localStorage.getItem('jrstars_portal_session');
-        if (storedDni) {
+        const storedCode = leerSesion();
+        if (storedCode) {
             const dniEl = document.getElementById('dni');
-            if (dniEl) dniEl.value = storedDni;
+            if (dniEl) dniEl.value = storedCode;
             setTimeout(buscar, 100);
         }
     }
@@ -334,7 +363,7 @@ async function buscar() {
         renderCard(data);
         mostrarPaneles('ficha');
         // El código demo no se recuerda: en la próxima visita el portal arranca limpio.
-        if (!demoMode) localStorage.setItem('jrstars_portal_session', dni_or_id);
+        if (!demoMode) guardarSesion(dni_or_id);
         dniEl.value = '';
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -406,11 +435,85 @@ function closeMetricModal() {
     if (modal) modal.classList.add('hidden');
 }
 
+// ── NOVEDADES DE LA SESIÓN ───────────────────────────
+const PORTAL_NOTIF_SEEN = 'jrstars_portal_notif_seen';
+
+function publicarNotif(items) {
+    window._portalNotifs = Array.isArray(items) ? items : [];
+    const seen = (() => {
+        try { return new Set(JSON.parse(localStorage.getItem(PORTAL_NOTIF_SEEN) || '[]')); }
+        catch { return new Set(); }
+    })();
+    const pendientes = window._portalNotifs.filter(n => !seen.has(n.id)).length;
+    document.querySelectorAll('[data-notif-dot]').forEach(dot => { dot.hidden = pendientes === 0; });
+    const panel = $('portal-notif');
+    if (panel && !panel.classList.contains('hidden')) pintarNotif();
+}
+
+function pintarNotif() {
+    const list = $('portal-notif-list');
+    if (!list) return;
+    const items = Array.isArray(window._portalNotifs) ? window._portalNotifs : [];
+    if (!items.length) {
+        list.innerHTML = '<p class="portal-notif-empty">Todavía no hay novedades. Cuando se registre un control, una racha o un cambio en la mensualidad, aparecerá aquí.</p>';
+        return;
+    }
+    list.innerHTML = items.map(n => `
+        <article class="portal-notif-item" data-tone="${escapePortalHtml(n.tone || 'info')}">
+          <span class="portal-notif-bullet" aria-hidden="true"></span>
+          <div>
+            <strong>${escapePortalHtml(n.title)}</strong>
+            <p>${escapePortalHtml(n.body)}</p>
+            ${n.tag ? `<small>${escapePortalHtml(n.tag)}</small>` : ''}
+          </div>
+        </article>`).join('');
+}
+
+function marcarNotifVistas() {
+    const items = Array.isArray(window._portalNotifs) ? window._portalNotifs : [];
+    try { localStorage.setItem(PORTAL_NOTIF_SEEN, JSON.stringify(items.map(n => n.id))); } catch (e) { /* sin almacenamiento */ }
+    document.querySelectorAll('[data-notif-dot]').forEach(dot => { dot.hidden = true; });
+}
+
+function abrirNotif() {
+    const panel = $('portal-notif');
+    if (!panel) return;
+    window._notifReturnFocus = document.activeElement;
+    pintarNotif();
+    panel.classList.remove('hidden');
+    $('portal-notif-backdrop')?.classList.remove('hidden');
+    document.body.classList.add('portal-notif-open');
+    document.querySelectorAll('[aria-controls="portal-notif"]').forEach(b => b.setAttribute('aria-expanded', 'true'));
+    marcarNotifVistas();
+    panel.querySelector('.portal-notif-close')?.focus({ preventScroll: true });
+}
+
+function cerrarNotif() {
+    const panel = $('portal-notif');
+    if (!panel || panel.classList.contains('hidden')) return;
+    panel.classList.add('hidden');
+    $('portal-notif-backdrop')?.classList.add('hidden');
+    document.body.classList.remove('portal-notif-open');
+    document.querySelectorAll('[aria-controls="portal-notif"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    const back = window._notifReturnFocus;
+    window._notifReturnFocus = null;
+    if (back && typeof back.focus === 'function') back.focus({ preventScroll: true });
+}
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') cerrarNotif();
+});
+
 function volver() {
     localStorage.removeItem('jrstars_portal_session');
     marcarDemo(false);
+    cerrarNotif();
+    window._portalNotifs = [];
+    const who = $('pt-nav-who');
+    if (who) { who.textContent = ''; who.hidden = true; }
     document.body.classList.remove('portal-locked-view');
     mostrarPaneles('buscar');
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -870,6 +973,75 @@ function renderCard(d) {
 
     // La barra de escritorio oculta las secciones que no existen en esta vista.
     document.body.classList.toggle('portal-locked-view', estadoPago === 'bloqueado');
+
+    // ── Novedades: solo datos que ya están en la ficha ─────────────────
+    const notifs = [];
+    if (estadoPago === 'al-dia') {
+        notifs.push({
+            id: `pago-al-dia-${d.valid_until || 'sin-fecha'}`,
+            tone: 'ok',
+            tag: 'Mensualidad',
+            title: 'Mensualidad al día',
+            body: vencText ? `Cubierta hasta el ${vencText}.` : 'Según el registro de la academia.'
+        });
+    } else if (estadoPago === 'en-plazo') {
+        notifs.push({
+            id: `pago-plazo-${d.limite_plazo || 'mes'}`,
+            tone: 'warn',
+            tag: 'Mensualidad',
+            title: 'Mensualidad pendiente',
+            body: `Se registra dentro de los primeros 15 días del mes. Plazo: ${plazoText}.`
+        });
+    } else {
+        notifs.push({
+            id: `pago-vencido-${d.valid_until || 'sin-fecha'}`,
+            tone: 'warn',
+            tag: 'Mensualidad',
+            title: 'Mensualidad vencida',
+            body: 'El historial sigue guardado. Regulariza el pago para volver a verlo.'
+        });
+    }
+    if (streak > 0) {
+        notifs.push({
+            id: `racha-${streak}`,
+            tone: 'ok',
+            tag: 'Asistencia',
+            title: `Racha de ${streak} ${streak === 1 ? 'entrenamiento' : 'entrenamientos'}`,
+            body: `${streakTitle}.`
+        });
+    } else {
+        notifs.push({
+            id: 'racha-0',
+            tone: 'info',
+            tag: 'Asistencia',
+            title: 'Sin racha activa',
+            body: 'El próximo entrenamiento cuenta para empezar una nueva.'
+        });
+    }
+    if (ultimoControl && ultimoControl.fecha) {
+        notifs.push({
+            id: `control-${ultimoControl.fecha}`,
+            tone: 'info',
+            tag: 'Evolución',
+            title: 'Último control registrado',
+            body: `${mesLabel(ultimoControl.fecha)}. Talla, peso, salto y sprint están en su evolución.`
+        });
+    }
+    if (totalSessions > 0) {
+        notifs.push({
+            id: `hito-${siguienteHito}`,
+            tone: 'info',
+            tag: 'Temporada',
+            title: `${totalSessions} de ${siguienteHito} entrenos`,
+            body: `Le faltan ${faltanHito} ${faltanHito === 1 ? 'entrenamiento' : 'entrenamientos'} para el siguiente hito.`
+        });
+    }
+    // La clave separa las novedades de cada jugador en el mismo dispositivo.
+    let playerKey = 0;
+    for (const ch of fullName) playerKey = (playerKey * 31 + ch.charCodeAt(0)) | 0;
+    playerKey = (playerKey >>> 0).toString(36);
+    notifs.forEach(n => { n.id = `${playerKey}-${n.id}`; });
+    publicarNotif(notifs);
 
     if (estadoPago === 'bloqueado') {
         wrap.innerHTML = `
