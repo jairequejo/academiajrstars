@@ -1,0 +1,14 @@
+# JR Stars Cajamarca
+
+> Academia de fútbol formativo para niños y jóvenes en Cajamarca, Perú. Aprendizaje con balón, pertenencia al equipo y familias informadas. La información de grupo, sede, horario y costo se confirma por WhatsApp antes de agendar.
+
+## Páginas
+
+- [Inicio](https://jairequejo.github.io/academiajrstars/): propuesta de fútbol formativo, primera visita y preguntas frecuentes. Contacto por WhatsApp +51 955 515 693.
+- [Cómo elegir una academia de fútbol en Cajamarca](https://jairequejo.github.io/academiajrstars/guia-academia-futbol-cajamarca/): guía para familias con criterios de grupo, sede, horario, costo total, entrenador y seguridad.
+
+## Notas
+
+- No se publican precios, horarios, sedes ni número de alumnos que no estén confirmados por la academia.
+- Las imágenes de menores solo se usan con permiso verificable del apoderado.
+- Los datos de contacto verificados son el teléfono +51 955 515 693 y la página de Facebook Academia de Fútbol JR Stars Cajamarca.

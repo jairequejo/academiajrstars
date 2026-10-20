@@ -1,2 +1,13 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /portal/
+Disallow: /entrenador/
+Disallow: /scanner/
+Disallow: /caja/
+Disallow: /migrations/
+Disallow: /scripts/
+Disallow: /docs/
+Disallow: /*.md$
+
+Sitemap: https://jairequejo.github.io/academiajrstars/sitemap.xml

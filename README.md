@@ -19,6 +19,7 @@ Abre `http://127.0.0.1:5501/`. Utiliza HTTP; los iconos SVG y algunas funciones 
 | Ruta | Uso |
 | --- | --- |
 | `/` | Landing de la academia |
+| `/guia-academia-futbol-cajamarca/` | Guía pública para familias sobre cómo elegir academia |
 | `/admin/` | Administración de alumnos, inscripciones, pagos y asistencia |
 | `/admin/login.html` | Acceso de administración |
 | `/entrenador/` | PWA del entrenador: escaneo, asistencia y biometría |
@@ -35,7 +36,7 @@ Abre `http://127.0.0.1:5501/`. Utiliza HTTP; los iconos SVG y algunas funciones 
 - `img/`: identidad y recursos visuales; los iconos de navegador viven en `img/favicons/`.
 - `migrations/`: cambios SQL versionados para Supabase.
 - `scripts/`: consultas manuales de mantenimiento y auditoría.
-- `docs/`: documentación técnica y convenciones del repositorio.
+- `docs/`: documentación técnica y convenciones del repositorio. El SEO público está documentado en `docs/SEO.md`.
 
 `js/supabaseClient.js` contiene la URL y la clave pública del proyecto Supabase. La autorización de datos depende de las políticas del servicio. No se deben incluir claves privadas o `service_role` en el frontend.
 
