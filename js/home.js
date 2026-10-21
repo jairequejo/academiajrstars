@@ -1043,6 +1043,10 @@ function renderCard(d) {
     notifs.forEach(n => { n.id = `${playerKey}-${n.id}`; });
     publicarNotif(notifs);
 
+    // En escritorio el tablero muestra el crecimiento desplegado; en móvil
+    // sigue siendo un bloque plegable para no alargar la ficha.
+    const crecimientoAbierto = window.matchMedia('(min-width: 1024px)').matches ? ' open' : '';
+
     if (estadoPago === 'bloqueado') {
         wrap.innerHTML = `
           <article class="epic-card is-locked" id="ficha-jugador">
@@ -1068,6 +1072,38 @@ function renderCard(d) {
       <article class="epic-card" id="ficha-jugador" aria-labelledby="ficha-nombre">
         ${playerPanel}
         <div class="pc-body">
+
+          <!-- TABLERO: los datos clave, de un vistazo -->
+          <div class="pc-kpis" role="group" aria-label="Resumen del jugador">
+            <div class="pc-kpi">
+              <span>Este mes</span>
+              <strong data-contar="${monthSessions}">${monthSessions}</strong>
+              <small>entrenos</small>
+            </div>
+            <div class="pc-kpi">
+              <span>Temporada</span>
+              <strong data-contar="${totalSessions}">${totalSessions}</strong>
+              <small>entrenos</small>
+            </div>
+            <div class="pc-kpi">
+              <span>Racha</span>
+              <strong data-contar="${streak}">${streak}</strong>
+              <small>${streak === 1 ? 'seguida' : 'seguidas'}</small>
+            </div>
+            <div class="pc-kpi">
+              <span>Último entreno</span>
+              <strong class="pc-kpi-text">${escapePortalHtml(d.ultima_sesion || '—')}</strong>
+            </div>
+            <div class="pc-kpi">
+              <span>Controles</span>
+              <strong data-contar="${physicalRecords}">${physicalRecords}</strong>
+              <small>registrados</small>
+            </div>
+            <div class="pc-kpi">
+              <span>Mensualidad</span>
+              <strong class="pc-kpi-text">${estadoPago === 'al-dia' ? 'Al día' : estadoPago === 'en-plazo' ? 'Pendiente' : 'Vencida'}</strong>
+            </div>
+          </div>
 
           <!-- RITMO: asistencia real por mes -->
           <section class="pc-band pc-band--ritmo" id="asistencia" aria-labelledby="ritmo-titulo">
@@ -1124,7 +1160,7 @@ function renderCard(d) {
           </section>
 
           ${cambiosCuerpoHtml ? `
-          <details class="pc-crecimiento">
+          <details class="pc-crecimiento"${crecimientoAbierto}>
             <summary>Crecimiento (registro del entrenador)</summary>
             <p class="pc-aviso">Medidas de acompañamiento del desarrollo, tomadas hasta dos veces por trimestre. No evalúan su rendimiento ni su salud y no se comparan con otros niños.</p>
             <dl class="pc-compare">${cambiosCuerpoHtml}</dl>

@@ -2266,3 +2266,212 @@ body,
 }
 
 body.portal-notif-open { overflow: hidden; }
+
+/* Indicadores del tablero: base móvil en dos columnas. */
+.pc-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.pc-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 12px;
+  border: 1px solid #e6eaf1;
+  background: #fbfcfe;
+}
+
+.pc-kpi > span {
+  color: #6b7488;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pc-kpi strong {
+  color: #091d45;
+  font-family: var(--jr-font-display, "Bebas Neue", Impact, sans-serif);
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.pc-kpi strong.pc-kpi-text {
+  margin-top: auto;
+  font-size: 16px;
+  line-height: 1.15;
+}
+
+.pc-kpi small {
+  color: #6b7488;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .pc-kpis {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ── Tablero del jugador en escritorio ──────────────────────────────── */
+@media (min-width: 1024px) {
+  .portal-player-view .portal-shell {
+    max-width: 1240px !important;
+  }
+
+  /* Cabecera compacta: la racha pasa a los indicadores. */
+  .portal-player-view #card-wrap .pc-hero {
+    padding: 20px 26px;
+  }
+
+  .portal-player-view #card-wrap .pc-topline {
+    margin-bottom: 12px;
+  }
+
+  .portal-player-view #card-wrap .pc-hero-body {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .portal-player-view #card-wrap .pc-avatar,
+  .portal-player-view #card-wrap .pc-avatar-fallback {
+    width: 76px;
+    height: 76px;
+    border-width: 2px;
+  }
+
+  .portal-player-view #card-wrap .pc-avatar-fallback { font-size: 30px; }
+
+  .portal-player-view #card-wrap .pc-name {
+    font-size: clamp(34px, 2.8vw, 44px);
+    line-height: 0.9;
+  }
+
+  .portal-player-view #card-wrap .pc-kicker { font-size: 8px; margin-bottom: 4px; }
+  .portal-player-view #card-wrap .pc-meta { margin-top: 6px; gap: 5px; }
+  .portal-player-view #card-wrap .pc-chip { font-size: 8px; padding: 3px 8px; }
+  .portal-player-view #card-wrap .pc-hero-line { font-size: 12px; margin-top: 6px; }
+  .portal-player-view #card-wrap .pc-streak { display: none; }
+
+  /* Lienzo del tablero. */
+  .portal-player-view #card-wrap .pc-body {
+    --pc-pad: 20px;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 14px;
+    padding: 14px;
+    background: #eef1f6;
+  }
+
+  .portal-player-view .pc-kpis {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .portal-player-view .pc-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 92px;
+    padding: 12px 14px;
+    border: 1px solid #e2e7f0;
+    background: #fff;
+  }
+
+  .portal-player-view .pc-kpi > span {
+    color: #6b7488;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .portal-player-view .pc-kpi strong {
+    color: #091d45;
+    font-family: var(--jr-font-display, "Bebas Neue", Impact, sans-serif);
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 0.95;
+  }
+
+  .portal-player-view .pc-kpi strong.pc-kpi-text {
+    margin-top: auto;
+    font-size: 20px;
+    line-height: 1.1;
+  }
+
+  .portal-player-view .pc-kpi small {
+    color: #6b7488;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Tarjetas del tablero. */
+  .portal-player-view .pc-band,
+  .portal-player-view .pc-band + .pc-band {
+    padding: 20px;
+    border: 1px solid #e2e7f0;
+    background: #fff;
+  }
+
+  .portal-player-view .pc-band--ritmo { grid-column: span 7; }
+  .portal-player-view .pc-band--evolucion { grid-column: span 5; }
+  .portal-player-view .pc-band-head { margin-bottom: 14px; }
+  .portal-player-view .pc-band-title { font-size: clamp(24px, 1.6vw, 30px); }
+
+  .portal-player-view .pc-crecimiento {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 0 20px 18px;
+    border: 1px solid #e2e7f0;
+    background: #fff;
+  }
+
+  .portal-player-view .pc-crecimiento > summary {
+    margin: 0;
+    padding: 16px 0 12px;
+    border: 0;
+    border-bottom: 1px solid #e9edf4;
+    background: transparent;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    color: #091d45;
+  }
+
+  .portal-player-view .pc-crecimiento[open] > summary { margin-bottom: 14px; }
+
+  .portal-player-view .pc-crecimiento .pc-compare {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 44px;
+    margin-bottom: 12px;
+  }
+
+  .portal-player-view .pc-crecimiento .pc-charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+    margin-top: 8px;
+  }
+
+  .portal-player-view .pc-share {
+    grid-column: 1 / -1;
+    max-width: 340px;
+    min-height: 46px;
+    margin: 2px auto 4px;
+    font-size: 18px;
+  }
+
+  .portal-player-view .pc-ritmo-grafica {
+    height: clamp(190px, 14vw, 220px);
+  }
+}
