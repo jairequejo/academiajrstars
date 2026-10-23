@@ -65,8 +65,8 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
   </style>
-  <link rel="stylesheet" href="../css/player-card.css?v=20261020g">
-  <link rel="stylesheet" href="../css/portal.css?v=20261020g">
+  <link rel="stylesheet" href="../css/player-card.css?v=20261020h">
+  <link rel="stylesheet" href="../css/portal.css?v=20261020h">
   <link rel="stylesheet" href="../css/tailwind.css">
 </head>
 
@@ -86,8 +86,9 @@
 
     <nav class="pt-nav-links" aria-label="Secciones del portal">
       <div class="pt-nav-set" data-pt-set="buscador">
-        <a class="pt-nav-link is-current" href="#p1" aria-current="true">Iniciar sesión</a>
-        <a class="pt-nav-link" href="../">Ir al inicio</a>
+        <a class="pt-nav-link is-current" href="#p1" aria-current="true">Buscar jugador</a>
+        <a class="pt-nav-link" href="../#propuesta">Propuesta</a>
+        <a class="pt-nav-link" href="../#primera-visita">Primera visita</a>
         <a class="pt-nav-link" href="../#preguntas">Preguntas</a>
       </div>
       <div class="pt-nav-set" data-pt-set="ficha">
@@ -108,6 +109,26 @@
       <a class="pt-nav-cta" href="https://wa.me/51955515693?text=Hola%2C%20tengo%20una%20consulta%20sobre%20el%20portal%20del%20jugador%20de%20JR%20Stars." target="_blank" rel="noopener noreferrer">Escríbenos</a>
     </div>
   </header>
+
+  <!-- Hero Visual Izquierdo (Desktop): portada publicada del portal -->
+  <div class="portal-visual hidden lg:flex relative w-1/2 min-h-screen items-center justify-center bg-[#000] border-r border-white/5 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-tr from-[#050505] via-transparent to-transparent z-10"></div>
+    <div class="portal-visual-inner relative z-20 flex flex-col items-center text-center p-12">
+      <a href="../" class="portal-brand flex flex-col items-center gap-4 group">
+        <img src="../img/escudo.png" alt="Escudo JR Stars" class="h-24 w-24 transition-transform group-hover:scale-110 drop-shadow-[0_0_20px_rgba(229,25,27,0.3)]" onerror="this.style.display='none'">
+        <div class="flex flex-col leading-none">
+          <span class="font-display text-[3rem] tracking-wider italic">JR STARS</span>
+          <span class="font-body text-[0.65rem] font-bold text-brand uppercase tracking-[0.3em] mt-2">Portal Jugador</span>
+        </div>
+      </a>
+      <div class="portal-visual-copy">
+        <span>PERFIL DE RENDIMIENTO · 2026</span>
+        <strong>LEE.<br>MIDE.<br><em>DOMINA.</em></strong>
+        <p>Tu temporada, tu disciplina y tu evolución en una sola ficha.</p>
+      </div>
+    </div>
+    <div class="portal-season-mark" aria-hidden="true">26</div>
+  </div>
 
   <!-- Contenido Interactivo -->
   <main id="portal-contenido" class="portal-main w-full lg:w-1/2 min-h-screen flex flex-col px-4 py-6 sm:p-12 relative overflow-y-auto bg-[#050505]">
@@ -141,34 +162,26 @@
 
     <div class="portal-shell flex-grow flex flex-col w-full max-w-xl mx-auto">
 
-      <!-- ACCESO -->
-      <section id="p1" class="portal-gate">
-        <div class="portal-gate-visual">
-          <div class="portal-gate-copy">
-            <p class="portal-gate-kicker">Portal del jugador · Temporada 2026</p>
-            <h1 class="portal-gate-title">ENTRA A<br><em>TU FICHA.</em></h1>
-            <p class="portal-gate-lead">Tu DNI o el código de tu credencial. La sesión queda abierta en este dispositivo hasta que pulses Salir.</p>
-          </div>
-          <div class="portal-gate-foot">
-            <img src="../img/escudo-128.webp" alt="" width="42" height="48" loading="lazy">
-            <span>
-              <strong>JR STARS</strong>
-              <small>Cajamarca · Sangre de Campeón</small>
-            </span>
-          </div>
-        </div>
+      <!-- BÚSQUEDA -->
+      <section id="p1" class="w-full transition-opacity duration-300">
+        <h1 class="portal-search-title font-display text-5xl sm:text-6xl uppercase italic leading-tight sm:leading-[0.85] mb-4 text-white">
+          DNI <br><span class="text-brand">DEL JUGADOR</span>
+        </h1>
 
-        <div class="portal-gate-access">
-          <div class="portal-search-card">
-          <p class="portal-card-kicker">Iniciar sesión</p>
+        <div class="portal-search-card bento-card p-6 sm:p-8 flex flex-col gap-5">
           <label for="dni" class="portal-input-label">DNI O CÓDIGO DEL JUGADOR</label>
-          <input type="tel" id="dni" aria-label="DNI o código del jugador" placeholder="76543210" maxlength="8" inputmode="numeric" enterkeyhint="go" autocomplete="off" class="portal-input">
+          <input type="tel" id="dni" aria-label="DNI o código del jugador" placeholder="76543210" maxlength="8" inputmode="numeric" enterkeyhint="go" autocomplete="off"
+                 class="w-full bg-[#050505] border border-white/20 rounded-xl text-white font-display text-3xl tracking-[0.2em] px-6 py-4 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand text-center placeholder:text-gray-700 transition-all">
 
-          <button type="button" id="btnC" onclick="buscar()" class="portal-submit">ENTRAR</button>
+          <button type="button" id="btnC" onclick="buscar()" class="slant-btn w-full bg-brand text-white px-8 py-4 rounded-xl border border-transparent">
+            <span class="slant-btn-content font-display text-2xl uppercase tracking-wider">VER ESTATUS</span>
+          </button>
 
-          <button type="button" onclick="toggleScanner()" class="portal-scan-trigger">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 9h6v6H9z"/></svg>
-            ESCANEAR CÓDIGO QR
+          <button type="button" onclick="toggleScanner()" class="portal-scan-trigger slant-btn w-full bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl transition-colors border border-white/10 mt-2">
+            <span class="slant-btn-content font-display text-xl uppercase tracking-wider flex items-center justify-center gap-2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M9 9h6v6H9z"/></svg>
+              ESCANEAR CÓDIGO QR
+            </span>
           </button>
 
           <div id="scanner-container" class="portal-scanner-modal hidden" role="dialog" aria-modal="true" aria-labelledby="portal-scanner-title" aria-hidden="true">
@@ -196,24 +209,22 @@
             </div>
           </div>
 
-          <div id="ld" role="status" aria-live="polite" class="hidden">
-            <div class="spinner"></div><span>Procesando…</span>
+          <div id="ld" role="status" aria-live="polite" class="hidden flex items-center justify-center gap-3 text-gray-400 font-bold uppercase tracking-widest text-sm mt-4 p-4 rounded-xl bg-white/5">
+            <div class="spinner"></div><span>Procesando...</span>
           </div>
 
-          <div id="err" role="alert" class="hidden">
-            <span class="portal-error-kicker">Código no encontrado</span>
-            <strong class="portal-error-title">JUGADOR NO REGISTRADO</strong>
-            <p class="portal-error-copy">Revisa el DNI o el código de la credencial. Si sigue sin aparecer, escríbenos y lo verificamos contigo.</p>
-            <a href="https://wa.me/51955515693" target="_blank" rel="noopener noreferrer" class="portal-error-link">CONTACTAR ACADEMIA</a>
+          <div id="err" role="alert" class="hidden flex flex-col gap-4 mt-4 bg-brand/10 border border-brand/30 rounded-xl p-6">
+            <div class="text-brand font-bold text-xs uppercase tracking-widest border-b border-brand/20 pb-2">Error 404</div>
+            <div class="font-display text-3xl uppercase text-white leading-none">JUGADOR NO REGISTRADO</div>
+            <a href="https://wa.me/51955515693" target="_blank" class="slant-btn bg-white/10 hover:bg-white/20 text-white font-display text-lg px-4 py-2 mt-2 rounded-lg border border-white/10">
+              <span class="slant-btn-content text-center">CONTACTAR ACADEMIA</span>
+            </a>
           </div>
 
           <p class="pt-help">
             <strong>¿Dónde encuentro el código?</strong>
             Está en la credencial del jugador. Si no la tienes a mano, <a href="https://wa.me/51955515693?text=Hola%2C%20necesito%20el%20c%C3%B3digo%20del%20portal%20para%20un%20jugador%20de%20JR%20Stars." target="_blank" rel="noopener noreferrer">escríbenos por WhatsApp</a> con el nombre del jugador y te ayudamos.
           </p>
-          </div>
-
-          <p class="portal-gate-note">Acceso personal. La ficha se abre solo con tu DNI o el código de tu credencial y no publicamos datos de menores en abierto.</p>
         </div>
       </section>
 
@@ -294,7 +305,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
   <script src="../js/supabaseClient.js"></script>
   <script src="../js/lib/html2canvas.min.js"></script>
-  <script src="../js/home.js?v=20261020g"></script>
+  <script src="../js/home.js?v=20261020h"></script>
 
   <script>
     // Navegación de escritorio: marca la sección visible y muestra de quién
