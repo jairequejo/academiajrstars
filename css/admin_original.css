@@ -4,6 +4,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ── TOPBAR MOBILE ── */
@@ -59,6 +60,7 @@ body {
   grid-template-columns: 220px 1fr;
   flex: 1;
   min-height: calc(100vh - 57px);
+  min-height: calc(100dvh - 57px);
 }
 
 /* ── SIDEBAR ── */
@@ -71,6 +73,7 @@ body {
   position: sticky;
   top: 57px;
   height: calc(100vh - 57px);
+  height: calc(100dvh - 57px);
   overflow-y: auto;
 }
 

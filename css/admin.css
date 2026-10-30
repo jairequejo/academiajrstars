@@ -581,3 +581,45 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
   .cobranza-timing .cobranza-status { grid-row: auto; justify-self: start; }
   .config-nav-fields { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ── Interacción táctil (móvil) ─────────────────────────────────────────
+   No hay hover en pantallas táctiles: el feedback es :active. Con
+   touch-action: manipulation se elimina el doble toque fantasma y el
+   retardo de 300 ms. Aplicado sólo a dispositivos de puntero grueso para
+   no ensuciar el escritorio. */
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .bottom-nav-item,
+  .sidebar-item,
+  .filtro-chip,
+  .month-btn,
+  .cobranza-action,
+  .alumno-action,
+  .hamburger-btn {
+    touch-action: manipulation;
+  }
+
+  .btn:active,
+  .bottom-nav-item:active,
+  .sidebar-item:active,
+  .filtro-chip:active,
+  .month-btn:active,
+  .cobranza-action:active,
+  .alumno-action:active {
+    transform: scale(0.97);
+    transition: transform 0.08s ease;
+  }
+}
+
+/* Objetivo de toque: 44×44 px para el menú en móvil. */
+.hamburger-btn {
+  width: 44px;
+  height: 44px;
+}
+
+/* En la PWA instalada, respeta el notch superior con safe-area. */
+@media (display-mode: standalone) {
+  .topbar {
+    padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+  }
+}

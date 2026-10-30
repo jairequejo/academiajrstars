@@ -10,7 +10,7 @@
 //      cuando lleguen desde el servidor.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ADMIN_VERSION = '20261029e';
+const ADMIN_VERSION = '20261029f';
 const CACHE_PREFIX = 'jr-admin-shell-';
 const ADMIN_CACHE = CACHE_PREFIX + ADMIN_VERSION;
 const NETWORK_TIMEOUT_MS = 5000;
@@ -26,8 +26,8 @@ const ADMIN_SHELL = [
   './icons/red-white/pwa-admin-512.png',
   './icons/red-white/pwa-admin-maskable-512.png',
   '../css/theme.css',
-  '../css/admin.css?v=20260916_alumnos',
-  '../css/admin_original.css?v=20260904',
+  '../css/admin.css?v=20261029a',
+  '../css/admin_original.css?v=20261029a',
   '../css/admin-icons.css?v=20260904',
   '../js/supabaseClient.js',
   '../js/admin.js?v=20260916_alumnos',
