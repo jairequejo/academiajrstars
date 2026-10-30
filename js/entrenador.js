@@ -31,8 +31,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (nameEl) nameEl.textContent = coachName;
     if (avatarEl) avatarEl.textContent = shortName.charAt(0).toUpperCase() || 'P';
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(error => {
-            console.warn('PWA entrenador no disponible:', error.message);
+        let recargandoPorVersion = false;
+
+        navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' })
+            .then(reg => {
+                // Buscar actualización en cada arranque: si el SW instalado es
+                // viejo, se detecta aquí y no cuando el profe ya está en cancha.
+                reg.update().catch(() => {});
+
+                reg.addEventListener('updatefound', () => {
+                    const nuevo = reg.installing;
+                    if (!nuevo) return;
+                    nuevo.addEventListener('statechange', () => {
+                        // Sólo activar la versión nueva si ya había un SW controlando;
+                        // si es la primera instalación no hay nada que reemplazar.
+                        if (nuevo.state === 'installed' && navigator.serviceWorker.controller) {
+                            nuevo.postMessage({ type: 'SKIP_WAITING' });
+                        }
+                    });
+                });
+
+                setInterval(() => reg.update().catch(() => {}), 5 * 60 * 1000);
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') reg.update().catch(() => {});
+                });
+            })
+            .catch(error => {
+                console.warn('PWA entrenador no disponible:', error.message);
+            });
+
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            // Una sola recarga al cambiar de versión; evita bucles.
+            if (recargandoPorVersion) return;
+            recargandoPorVersion = true;
+            if (document.visibilityState === 'visible') location.reload();
         });
     }
 });

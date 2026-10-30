@@ -19,21 +19,32 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js', { scope: './' })
+            let recargando = false;
+
+            navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' })
                 .then(reg => {
                     reg.update();
                     reg.addEventListener('updatefound', () => {
                         const sw = reg.installing;
+                        if (!sw) return;
                         sw.addEventListener('statechange', () => {
                             if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-                                sw.postMessage('SKIP_WAITING');
+                                sw.postMessage({ type: 'SKIP_WAITING' });
                             }
                         });
+                    });
+                    // Revisa si hay versión nueva cada 5 minutos y al volver a
+                    // primer plano, sin recargar si el kiosko está escaneando.
+                    setInterval(() => reg.update().catch(() => {}), 5 * 60 * 1000);
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'visible') reg.update().catch(() => {});
                     });
                 })
                 .catch(err => console.warn('[SW] Error:', err));
 
             navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (recargando) return;
+                recargando = true;
                 location.reload();
             });
         }
@@ -90,11 +101,15 @@
 
     <div class="history-strip" id="history-strip"></div>
 
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="../js/lib/html5-qrcode-2.3.8.min.js"></script>
     <script>
         (function () {
+            // Versión fija (no Date.now()): con un sello por carga el service
+            // worker nunca podía cachear scanner.js y el kiosko quedaba sin
+            // funcionar cuando se caía la red. Para publicar cambios, sube este
+            // valor y el de scanner/sw.js (SW_VERSION).
             var s = document.createElement('script');
-            s.src = '../js/scanner.js?_=' + Date.now();
+            s.src = '../js/scanner.js?v=20261029a';
             document.body.appendChild(s);
         })();
     </script>
@@ -123,7 +138,7 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.115.0"></script>
+    <script src="../js/lib/supabase-2.115.0.js"></script>
     <script src="../js/supabaseClient.js"></script>
 </body>
 </html>
