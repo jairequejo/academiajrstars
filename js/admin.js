@@ -565,7 +565,12 @@ async function crearAlumno() {
   const categoria = document.getElementById('a-categoria')?.value || null;
   const pagoMes = parseFloat(document.getElementById('a-pago-mes').value) || 0;
   const pagoMat = parseFloat(document.getElementById('a-pago-mat').value) || 0;
-  const pagoUni = parseFloat(document.getElementById('a-pago-uni').value) || 0;
+  const uniformeQuiere = document.getElementById('a-uniforme-quiere')?.value === 'si';
+  const uniformeTipo = document.getElementById('a-uniforme-tipo')?.value || 'completo';
+  const uniformeNombre = (document.getElementById('a-uniforme-nombre')?.value || '').trim();
+  const uniformeNumeroRaw = (document.getElementById('a-uniforme-numero')?.value || '').trim();
+  const uniformeNumero = uniformeNumeroRaw ? Math.round(Number(uniformeNumeroRaw)) : null;
+  const pagoUni = uniformeQuiere ? (parseFloat(document.getElementById('a-pago-uni').value) || 0) : 0;
   const pagoPrimerMes = parseFloat(document.getElementById('a-pago-primer').value) || 0;
   const metodo = document.getElementById('a-metodo').value;
   const horario = document.getElementById('a-horario').value;
@@ -637,19 +642,28 @@ async function crearAlumno() {
           if (pagoErr) throw pagoErr;
       }
       
-      // Si hay cobro de uniforme, registrarlo en uniform_orders si existe, o solo como nota.
-      if (pagoUni > 0) {
+      // Uniforme: solo si la familia lo pidió. Usa las columnas reales de
+      // uniform_orders (uniform_type, dorsal_name, dorsal_number, color_variant,
+      // amount, is_paid, status) según el esquema de 20260915_uniform_orders.sql.
+      if (uniformeQuiere) {
           try {
-             await window.supabaseClient.from('uniform_orders').insert({
-                 student_id: nuevo_alumno.id,
-                 kit_type: 'Completo',
-                 size: 'Por definir',
-                 name_on_shirt: firstNames.split(' ')[0],
-                 is_paid: true,
-                 total_price: pagoUni,
-                 is_delivered: false
-             });
-          } catch(e) { console.error('No se pudo guardar orden de uniforme', e); }
+              const tipoNecesitaNombre = (uniformeTipo === 'completo' || uniformeTipo === 'polo');
+              const tipoNecesitaNumero = (uniformeTipo === 'completo' || uniformeTipo === 'polo' || uniformeTipo === 'short');
+              const dorsalName = tipoNecesitaNombre
+                  ? (uniformeNombre || firstNames.split(' ')[0] || nombre)
+                  : null;
+              const dorsalNumber = tipoNecesitaNumero ? uniformeNumero : null;
+              await window.supabaseClient.from('uniform_orders').insert({
+                  student_id: nuevo_alumno.id,
+                  uniform_type: uniformeTipo,
+                  dorsal_name: dorsalName,
+                  dorsal_number: dorsalNumber,
+                  color_variant: 'salmon_granate',
+                  amount: pagoUni,
+                  is_paid: pagoUni > 0,
+                  status: 'pendiente'
+              });
+          } catch (e) { console.error('No se pudo guardar orden de uniforme', e); }
       }
 
       // Enviar WhatsApp al apoderado

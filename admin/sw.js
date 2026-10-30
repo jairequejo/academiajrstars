@@ -10,7 +10,7 @@
 //      cuando lleguen desde el servidor.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ADMIN_VERSION = '20261029g';
+const ADMIN_VERSION = '20261030a';
 const CACHE_PREFIX = 'jr-admin-shell-';
 const ADMIN_CACHE = CACHE_PREFIX + ADMIN_VERSION;
 const NETWORK_TIMEOUT_MS = 5000;
@@ -30,7 +30,7 @@ const ADMIN_SHELL = [
   '../css/admin_original.css?v=20261029a',
   '../css/admin-icons.css?v=20260904',
   '../js/supabaseClient.js',
-  '../js/admin.js?v=20260916_alumnos',
+  '../js/admin.js?v=20261030a',
   '../js/admin-cobranzas.js?v=20261029a',
   '../js/lib/supabase-2.115.0.js',
   '../js/lib/html5-qrcode-2.3.8.min.js'

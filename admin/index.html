@@ -1077,15 +1077,42 @@
             <div><dt>Apoderado</dt><dd id="inscripcion-resumen-apoderado"></dd></div>
             <div><dt>Observación</dt><dd id="inscripcion-resumen-observacion"></dd></div>
             <div><dt>Entrenamiento</dt><dd id="inscripcion-resumen-deporte"></dd></div>
+            <div><dt>Uniforme</dt><dd id="inscripcion-resumen-uniforme"></dd></div>
           </dl>
           <div class="inscripcion-fields">
             <div class="form-group">
               <label class="form-label" for="a-pago-mat">Matrícula (S/)</label>
               <input class="input-jr" id="a-pago-mat" name="matricula" type="number" min="0" step="0.01" value="20.00" inputmode="decimal">
             </div>
-            <div class="form-group">
-              <label class="form-label" for="a-pago-uni">Uniforme (S/)</label>
-              <input class="input-jr" id="a-pago-uni" name="uniforme" type="number" min="0" step="0.01" value="70.00" inputmode="decimal">
+            <div class="form-group inscripcion-field-wide">
+              <label class="form-label" for="a-uniforme-quiere">¿Quiere uniforme?</label>
+              <select class="select-jr" id="a-uniforme-quiere" name="uniforme_quiere">
+                <option value="no">No</option>
+                <option value="si">Sí</option>
+              </select>
+            </div>
+            <div id="inscripcion-uniforme-detalle" hidden>
+              <div class="form-group">
+                <label class="form-label" for="a-uniforme-tipo">Tipo de uniforme</label>
+                <select class="select-jr" id="a-uniforme-tipo" name="uniforme_tipo">
+                  <option value="completo">Completo (polo + short + medias)</option>
+                  <option value="polo">Solo polo</option>
+                  <option value="short">Solo short</option>
+                  <option value="medias">Solo medias</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="a-uniforme-nombre">Nombre en el polo</label>
+                <input class="input-jr" id="a-uniforme-nombre" name="uniforme_nombre" placeholder="Apellido o nombre corto">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="a-uniforme-numero">Número (dorsal)</label>
+                <input class="input-jr" id="a-uniforme-numero" name="uniforme_numero" type="number" min="0" max="99" step="1" inputmode="numeric" placeholder="Ej. 10">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="a-pago-uni">Uniforme (S/)</label>
+                <input class="input-jr" id="a-pago-uni" name="uniforme" type="number" min="0" step="0.01" value="60.00" inputmode="decimal">
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label" for="a-pago-primer">Días de Entrenamiento (Mes Actual)</label>
@@ -1129,9 +1156,9 @@
 
   <script src="../js/admin-icons.js?v=20260915_uniformes"></script>
   <script src="../js/admin-sedes.js?v=20260904"></script>
-  <script src="../js/admin.js?v=20260916_alumnos"></script>
+  <script src="../js/admin.js?v=20261030a"></script>
   <script src="../js/alumno-ficha.js?v=20260916_alumnos"></script>
-  <script src="../js/inscripcion.js?v=20260916_alumnos"></script>
+  <script src="../js/inscripcion.js?v=20261030a"></script>
   <script src="../js/admin-configuracion.js?v=20260915_uniformes"></script>
   <script src="../js/admin-cobranzas.js?v=20261029a"></script>
   <script src="../js/admin-uniformes.js?v=20260916_alumnos"></script>

@@ -64,6 +64,42 @@
       pagoMesFijoInput.addEventListener('input', recalculatePrimerMes);
   }
 
+  // ── Uniforme: se pregunta si lo quiere, y recién ahí se pide tipo, nombre y número ──
+  const uniformeQuiere = document.getElementById('a-uniforme-quiere');
+  const uniformeDetalle = document.getElementById('inscripcion-uniforme-detalle');
+  const uniformeTipo = document.getElementById('a-uniforme-tipo');
+  const uniformeNombre = document.getElementById('a-uniforme-nombre');
+  const uniformeNumero = document.getElementById('a-uniforme-numero');
+  const uniformePago = document.getElementById('a-pago-uni');
+  const UNIFORM_PRECIO = { completo: 60, polo: 40, short: 20, medias: 10 };
+  const UNIFORM_LABEL = { completo: 'Completo', polo: 'Polo', short: 'Short', medias: 'Medias' };
+  const UNIFORM_NECESITA = {
+      completo: { nombre: true,  numero: true },
+      polo:     { nombre: true,  numero: true },
+      short:    { nombre: false, numero: true },
+      medias:   { nombre: false, numero: false }
+  };
+
+  function updateUniformeUI() {
+      const quiere = uniformeQuiere?.value === 'si';
+      if (uniformeDetalle) uniformeDetalle.hidden = !quiere;
+
+      const tipo = uniformeTipo?.value || 'completo';
+      const necesita = UNIFORM_NECESITA[tipo] || { nombre: false, numero: false };
+      if (uniformeNombre) uniformeNombre.required = quiere && necesita.nombre;
+      if (uniformeNumero) uniformeNumero.required = quiere && necesita.numero;
+  }
+
+  if (uniformeQuiere) {
+      uniformeQuiere.addEventListener('change', updateUniformeUI);
+      uniformeTipo?.addEventListener('change', () => {
+          const precio = UNIFORM_PRECIO[uniformeTipo.value] ?? 60;
+          if (uniformePago) uniformePago.value = precio.toFixed(2);
+          updateUniformeUI();
+      });
+      updateUniformeUI();
+  }
+
   function setMessage(text = '') {
     message.textContent = text;
     message.hidden = !text;
@@ -86,6 +122,14 @@
       choice('a-sede'), choice('a-categoria') && 'Categoría ' + choice('a-categoria'),
       choice('a-horario'), choice('a-turno'), choice('a-grupo') && 'Grupo ' + choice('a-grupo')
     ].filter(Boolean).join(' · ');
+    const quiereUniforme = document.getElementById('a-uniforme-quiere')?.value === 'si';
+    document.getElementById('inscripcion-resumen-uniforme').textContent = quiereUniforme
+      ? [
+          UNIFORM_LABEL[document.getElementById('a-uniforme-tipo')?.value] || 'Uniforme',
+          document.getElementById('a-uniforme-numero')?.value && '#' + document.getElementById('a-uniforme-numero').value,
+          document.getElementById('a-uniforme-nombre')?.value
+        ].filter(Boolean).join(' · ')
+      : 'No';
   }
 
   function renderStep(focus = true) {
