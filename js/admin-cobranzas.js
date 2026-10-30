@@ -16,9 +16,31 @@ function escapeCobranzasHtml(value) {
 }
 
 function getCobranzasLimit() {
-    const limit = new Date();
-    limit.setDate(limit.getDate() + 2);
-    return `${limit.getFullYear()}-${String(limit.getMonth() + 1).padStart(2, '0')}-${String(limit.getDate()).padStart(2, '0')}`;
+    // Último día del mes en curso. Sirve para traer a quienes aún deben el mes:
+    // si valid_until llega hasta (o antes de) fin de mes, debe algo del mes.
+    const now = new Date();
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return `${monthEnd.getFullYear()}-${String(monthEnd.getMonth() + 1).padStart(2, '0')}-${String(monthEnd.getDate()).padStart(2, '0')}`;
+}
+
+// ── Regla de pago (mes calendario) ────────────────────────────────────────
+// Todos pagan la cuota del mes dentro de los primeros 15 días. El corte es el
+// día 15, igual para todos. Si valid_until llega al menos a fin del mes en
+// curso, el alumno está al día; si no, debe el mes (en plazo hasta el 15, en
+// mora desde el 16).
+
+function jrsUltimoDiaMes(now = new Date()) {
+    return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+}
+
+function jrsPagadoEsteMes(valid_until, now = new Date()) {
+    if (!valid_until) return false;
+    const vu = new Date(`${valid_until}T00:00:00`);
+    return vu >= jrsUltimoDiaMes(now);
+}
+
+function jrsCorteMes(now = new Date()) {
+    return new Date(now.getFullYear(), now.getMonth(), 15);
 }
 
 function getLocalDateKey(now = new Date()) {
@@ -217,9 +239,9 @@ async function refreshCobranzasNavState() {
         .from('students')
         .select('id, full_name, valid_until, historial_notificaciones(fecha_envio)')
         .eq('is_active', true)
-        .lte('valid_until', getCobranzasLimit());
+        .or(`valid_until.lte.${getCobranzasLimit()},valid_until.is.null`);
 
-    const rows = data || [];
+    const rows = (data || []).filter(student => !jrsPagadoEsteMes(student.valid_until));
     setCobranzasNavState(error ? null : rows.length);
     if (!error) maybeNotifyCobranzas(rows).catch(console.warn);
 }
@@ -243,16 +265,17 @@ function getCobranzaDayDifference(value, now = new Date()) {
 }
 
 function getCobranzaDueMeta(value, now = new Date()) {
-    const days = getCobranzaDayDifference(value, now);
-    const shortDate = formatCobranzasDate(value, { day: 'numeric', month: 'short' });
-    const fullDate = formatCobranzasDate(value, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    // El corte es el día 15 del mes en curso. `value` (valid_until) ya no marca
+    // la fecha de vencimiento individual: solo sirve para saber si pagó el mes.
+    const corte = jrsCorteMes(now);
+    const hoy = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const days = Math.round((corte - hoy) / 864e5);
 
-    // Regla de negocio: 15 días de gracia desde el inicio del nuevo mes (es decir, valid_until + 15 días)
-    if (days < -15) return { days, state: 'expired', headline: `¡En Mora! (Venció el ${shortDate})`, phrase: `venció el ${shortDate} y expiró su periodo de gracia`, fullDate };
-    if (days < 0 && days >= -15) {
-        const diasRestantes = 15 + days;
-        return { days, state: 'today', headline: `Plazo de gracia: ${diasRestantes} días`, phrase: `tiene ${diasRestantes} días restantes para pagar este mes`, fullDate };
-    }
+    const corteStr = `${corte.getFullYear()}-${String(corte.getMonth() + 1).padStart(2, '0')}-${String(corte.getDate()).padStart(2, '0')}`;
+    const shortDate = formatCobranzasDate(corteStr, { day: 'numeric', month: 'short' });
+    const fullDate = formatCobranzasDate(corteStr, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+    if (days < 0) return { days, state: 'expired', headline: `Venció el ${shortDate}`, phrase: `venció el ${shortDate} y está en mora`, fullDate };
     if (days === 0) return { days, state: 'today', headline: 'Vence hoy', phrase: 'vence hoy', fullDate };
     if (days === 1) return { days, state: 'tomorrow', headline: 'Vence mañana', phrase: 'vence mañana', fullDate };
     return { days, state: 'upcoming', headline: `Vence el ${shortDate}`, phrase: `vence el ${shortDate}`, fullDate };
@@ -302,14 +325,16 @@ async function loadCobranzas() {
             .from('students')
             .select('id, full_name, first_names, last_names, dni, codigo_legacy, valid_until, parent_name, parent_phone, parent_phone_secondary, tarifa_mensual, notes, historial_notificaciones(fecha_envio)')
             .eq('is_active', true)
-            .lte('valid_until', getCobranzasLimit())
+            .or(`valid_until.lte.${getCobranzasLimit()},valid_until.is.null`)
             .order('valid_until', { ascending: true });
 
         if (error) throw error;
 
         cobranzasReferenceNow = new Date();
-        cobranzasRows = (data || []).map(prepareCobranzaStudent);
-        const expired = cobranzasRows.filter(student => student._due.days < -15).length;
+        cobranzasRows = (data || [])
+            .map(prepareCobranzaStudent)
+            .filter(student => !jrsPagadoEsteMes(student.valid_until, cobranzasReferenceNow));
+        const expired = cobranzasRows.filter(student => student._due.days < 0).length;
 
         setCobranzasMetrics(cobranzasRows.length, expired);
         setCobranzasNavState(cobranzasRows.length);
