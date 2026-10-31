@@ -684,3 +684,173 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
   .cobranza-obs { grid-template-columns: minmax(0, 1fr) auto; }
   .cobranza-obs > span { grid-column: 1 / -1; }
 }
+
+/* ── Avisar a todos: envío guiado de recordatorios por WhatsApp ─────────── */
+.cobranzas-hero-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.cobranzas-bulk-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.7rem 0.95rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px !important;
+  font: 800 0.86rem/1 var(--font-body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.cobranzas-bulk-open:hover { background: rgba(255, 255, 255, 0.22); }
+.cobranzas-bulk-open:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+.alumno-dialog.cobranzas-bulk-dialog {
+  width: min(560px, calc(100vw - 2rem));
+}
+
+.cobranzas-bulk-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.cobranzas-bulk-lead {
+  margin: 0;
+  color: #334155;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.cobranzas-bulk-note {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.cobranzas-bulk-scopes {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.cobranzas-bulk-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.8rem 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.cobranzas-bulk-option:has(input:checked) {
+  background: #fff7e6;
+  border-color: #f0b429;
+}
+.cobranzas-bulk-option input {
+  margin-top: 0.2rem;
+  width: 18px;
+  height: 18px;
+  accent-color: #da1212;
+  flex-shrink: 0;
+}
+.cobranzas-bulk-option strong {
+  display: block;
+  color: #111827;
+  font: 700 0.9rem/1.35 var(--font-body);
+}
+.cobranzas-bulk-option small {
+  display: block;
+  margin-top: 0.15rem;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+.cobranzas-bulk-option.is-empty { opacity: 0.55; }
+
+.cobranzas-bulk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.cobranzas-bulk-actions .btn {
+  flex: 1 1 140px;
+  min-height: 46px;
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.cobranzas-bulk-progress {
+  display: grid;
+  gap: 0.4rem;
+}
+.cobranzas-bulk-progress > span {
+  color: #475569;
+  font: 800 0.75rem/1 var(--font-body);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.cobranzas-bulk-track {
+  height: 8px;
+  background: #e9edf2;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.cobranzas-bulk-track > span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #da1212;
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+.cobranzas-bulk-person h3 {
+  margin: 0;
+  color: #111827;
+  font: 800 1.05rem/1.3 var(--font-body);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.cobranzas-bulk-person p {
+  margin: 0.2rem 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+.cobranzas-bulk-preview {
+  margin: 0.7rem 0 0;
+  padding: 0.8rem 0.9rem;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #1f2937;
+  font: 500 0.82rem/1.5 var(--font-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+@media (max-width: 700px) {
+  .cobranzas-hero { grid-template-columns: minmax(0, 1fr) auto; }
+  .cobranzas-bulk-open {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    gap: 0;
+    border-radius: 12px !important;
+    font-size: 0;
+  }
+  .cobranzas-bulk-open .admin-icon { width: 19px; height: 19px; }
+  .cobranzas-bulk-actions .btn { flex: 1 1 100%; }
+  .alumno-dialog.cobranzas-bulk-dialog { width: calc(100vw - 1rem); }
+}

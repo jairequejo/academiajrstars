@@ -8,7 +8,7 @@
   <title>JR Stars — Admin Panel</title>
   <link rel="stylesheet" href="../css/theme.css">
   <link rel="stylesheet" href="../css/admin_original.css?v=20261029a">
-  <link rel="stylesheet" href="../css/admin.css?v=20261031a">
+  <link rel="stylesheet" href="../css/admin.css?v=20261031b">
   <link rel="stylesheet" href="../css/admin-uniformes.css?v=20260916_mobile">
   <link rel="stylesheet" href="../css/inscripcion.css?v=20260916_alumnos">
   <link rel="stylesheet" href="../css/alumno-ficha.css?v=20260904">
@@ -166,10 +166,16 @@
               <h1 id="cobranzas-title">Cobros por atender</h1>
               <p>Contacta al apoderado, registra el pago y mantén la cartera al día desde un solo lugar.</p>
             </div>
-            <button class="cobranzas-refresh" id="cobranzas-refresh" type="button">
-              <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#refresh"></use></svg>
-              Actualizar
-            </button>
+            <div class="cobranzas-hero-actions">
+              <button class="cobranzas-bulk-open" id="cobranzas-bulk-open" type="button">
+                <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#message"></use></svg>
+                <span>Avisar a todos</span>
+              </button>
+              <button class="cobranzas-refresh" id="cobranzas-refresh" type="button">
+                <svg class="admin-icon" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#refresh"></use></svg>
+                Actualizar
+              </button>
+            </div>
           </header>
 
           <div class="cobranzas-metrics" aria-label="Resumen de cobranzas">
@@ -915,6 +921,61 @@
     </div>
   </div>
 
+  <dialog id="cobranzas-bulk" class="alumno-dialog cobranzas-bulk-dialog" aria-labelledby="cobranzas-bulk-title">
+    <header class="alumno-dialog-header">
+      <div><p class="ficha-eyebrow">Recordatorios por WhatsApp</p><h2 id="cobranzas-bulk-title">Avisar a los apoderados</h2></div>
+      <button type="button" class="alumno-dialog-close" id="cobranzas-bulk-close" aria-label="Cerrar recordatorios"><svg class="admin-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="../img/admin-icons.svg#close"></use></svg></button>
+    </header>
+    <div class="alumno-dialog-content cobranzas-bulk-content">
+
+      <section id="cobranzas-bulk-setup">
+        <p class="cobranzas-bulk-lead">Elige a quién avisar. Se abre WhatsApp con el mensaje ya escrito y pasas al siguiente con un toque.</p>
+        <div class="cobranzas-bulk-scopes" role="radiogroup" aria-label="A quién avisar">
+          <label class="cobranzas-bulk-option">
+            <input type="radio" name="cobranzas-bulk-scope" value="pending" checked>
+            <span><strong>Sin recordatorio de este mes</strong><small id="cobranzas-bulk-pending-count">0 apoderados</small></span>
+          </label>
+          <label class="cobranzas-bulk-option">
+            <input type="radio" name="cobranzas-bulk-scope" value="filtered">
+            <span><strong>Los que ves con el filtro actual</strong><small id="cobranzas-bulk-filtered-count">0 apoderados</small></span>
+          </label>
+        </div>
+        <p class="cobranzas-bulk-note">WhatsApp no permite enviar a varios contactos de una sola vez. Este modo te ahorra escribir el mensaje y buscar a cada apoderado: solo abres la conversación y vuelves.</p>
+        <div class="cobranzas-bulk-actions">
+          <button type="button" class="btn btn-gold" id="cobranzas-bulk-start">Comenzar</button>
+        </div>
+      </section>
+
+      <section id="cobranzas-bulk-run" hidden>
+        <div class="cobranzas-bulk-progress">
+          <span id="cobranzas-bulk-step">1 de 1</span>
+          <div class="cobranzas-bulk-track" id="cobranzas-bulk-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+        </div>
+        <article class="cobranzas-bulk-person">
+          <h3 id="cobranzas-bulk-name">Alumno</h3>
+          <p id="cobranzas-bulk-meta"></p>
+          <pre class="cobranzas-bulk-preview" id="cobranzas-bulk-preview"></pre>
+        </article>
+        <div class="cobranzas-bulk-actions">
+          <button type="button" class="btn btn-gold" id="cobranzas-bulk-send">Abrir WhatsApp</button>
+          <button type="button" class="btn btn-outline" id="cobranzas-bulk-skip">Omitir</button>
+          <button type="button" class="btn btn-outline" id="cobranzas-bulk-finish">Terminar</button>
+        </div>
+        <p class="cobranzas-bulk-note">Envía el mensaje en WhatsApp y vuelve aquí. Al abrir la conversación, este apoderado queda marcado como notificado.</p>
+      </section>
+
+      <section id="cobranzas-bulk-done" hidden>
+        <p class="cobranzas-bulk-lead" id="cobranzas-bulk-done-text">Listo.</p>
+        <p class="cobranzas-bulk-note" id="cobranzas-bulk-done-detail"></p>
+        <div class="cobranzas-bulk-actions">
+          <button type="button" class="btn btn-outline" id="cobranzas-bulk-retry" hidden>Enviar a los omitidos</button>
+          <button type="button" class="btn btn-gold" id="cobranzas-bulk-done-close">Cerrar</button>
+        </div>
+      </section>
+
+    </div>
+  </dialog>
+
   <dialog id="alumno-ficha" class="alumno-dialog" aria-labelledby="ficha-title">
     <header class="alumno-dialog-header">
       <div><p class="ficha-eyebrow">JR Stars · Alumnos</p><h2 id="ficha-title">Ficha del alumno</h2></div>
@@ -1160,7 +1221,7 @@
   <script src="../js/alumno-ficha.js?v=20260916_alumnos"></script>
   <script src="../js/inscripcion.js?v=20261030a"></script>
   <script src="../js/admin-configuracion.js?v=20260915_uniformes"></script>
-  <script src="../js/admin-cobranzas.js?v=20261031a"></script>
+  <script src="../js/admin-cobranzas.js?v=20261031b"></script>
   <script src="../js/admin-uniformes.js?v=20260916_alumnos"></script>
 </body>
 

@@ -522,15 +522,30 @@ function toggleCobranzaRenotify(studentId, forceClose = false) {
     if (selected) selected.hidden = forceClose ? true : !selected.hidden;
 }
 
+function buildCobranzaWhatsAppMessage(student, due) {
+    const phrase = due?.phrase || 'está pendiente';
+    return typeof buildCobranzaMessage === 'function'
+        ? buildCobranzaMessage(student, phrase)
+        : `Hola ${student.parent_name || 'apoderado'}. Te recordamos que la mensualidad de ${student.full_name} ${phrase}.`;
+}
+
+function registrarCobranzaNotificacion(student, message) {
+    window.supabaseClient
+        .from('historial_notificaciones')
+        .insert({ alumno_id: student.id, tipo_aviso: 'WhatsApp', mensaje: message })
+        .then(({ error }) => {
+            if (error) console.error('No se pudo guardar el historial de la notificacion', error);
+        })
+        .catch(error => console.error('No se pudo guardar el historial de la notificacion', error));
+}
+
 async function sendCobranzaWhatsApp(studentId, resend = false) {
     const student = cobranzasById.get(String(studentId));
     const phone = normalizePeruPhone(student?.parent_phone);
     if (!student || !phone) return showToast('Registra un teléfono válido para el apoderado', 'error');
 
     const due = student._due || getCobranzaDueMeta(student.valid_until);
-    const message = typeof buildCobranzaMessage === 'function'
-        ? buildCobranzaMessage(student, due.phrase)
-        : `Hola ${student.parent_name || 'apoderado'}. Te recordamos que la mensualidad de ${student.full_name} ${due.phrase}.`;
+    const message = buildCobranzaWhatsAppMessage(student, due);
     const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
     // La navegación debe ocurrir durante el toque. Si esperamos la base de datos,
@@ -648,6 +663,195 @@ async function editarObservacion(studentId) {
     showToast('Observación actualizada');
     renderFilteredCobranzas();
 }
+
+// ── Avisar a todos ─────────────────────────────────────────────────────────
+// WhatsApp no permite enviar a varios contactos de una sola vez sin la API de
+// WhatsApp Business. Este modo guiado abre una conversación por vez con el
+// mensaje ya escrito y marca al apoderado como notificado al abrirla.
+let cobranzasBulkQueue = [];
+let cobranzasBulkIndex = 0;
+let cobranzasBulkSent = 0;
+let cobranzasBulkSkipped = [];
+let cobranzasBulkScope = 'pending';
+
+function cobranzasBulkCandidates(scope) {
+    const base = scope === 'filtered'
+        ? getFilteredCobranzas()
+        : cobranzasRows.filter(student => !student._last_notified_at);
+    return base.filter(student => Boolean(normalizePeruPhone(student.parent_phone)));
+}
+
+function setCobranzasBulkView(view) {
+    const setup = document.getElementById('cobranzas-bulk-setup');
+    const run = document.getElementById('cobranzas-bulk-run');
+    const done = document.getElementById('cobranzas-bulk-done');
+    if (setup) setup.hidden = view !== 'setup';
+    if (run) run.hidden = view !== 'run';
+    if (done) done.hidden = view !== 'done';
+}
+
+function refreshCobranzasBulkSetup() {
+    const pending = cobranzasBulkCandidates('pending').length;
+    const filtered = cobranzasBulkCandidates('filtered').length;
+    const pendingLabel = document.getElementById('cobranzas-bulk-pending-count');
+    const filteredLabel = document.getElementById('cobranzas-bulk-filtered-count');
+    if (pendingLabel) pendingLabel.textContent = pending === 1 ? '1 apoderado' : `${pending} apoderados`;
+    if (filteredLabel) filteredLabel.textContent = filtered === 1 ? '1 apoderado' : `${filtered} apoderados`;
+    document.querySelectorAll('.cobranzas-bulk-option').forEach(option => {
+        const value = option.querySelector('input')?.value;
+        const count = value === 'filtered' ? filtered : pending;
+        option.classList.toggle('is-empty', count === 0);
+    });
+    const start = document.getElementById('cobranzas-bulk-start');
+    if (start) start.disabled = cobranzasBulkCandidates(cobranzasBulkScope).length === 0;
+}
+
+function seleccionarCobranzasBulkScope(value) {
+    cobranzasBulkScope = value === 'filtered' ? 'filtered' : 'pending';
+    const input = document.querySelector(`input[name="cobranzas-bulk-scope"][value="${cobranzasBulkScope}"]`);
+    if (input) input.checked = true;
+    refreshCobranzasBulkSetup();
+}
+
+function abrirCobranzasBulk() {
+    const dialog = document.getElementById('cobranzas-bulk');
+    if (!dialog) return;
+    cobranzasBulkQueue = [];
+    cobranzasBulkIndex = 0;
+    cobranzasBulkSent = 0;
+    cobranzasBulkSkipped = [];
+    setCobranzasBulkView('setup');
+    // Si nadie quedó sin recordatorio, ofrecemos directamente el filtro actual.
+    const pending = cobranzasBulkCandidates('pending').length;
+    const filtered = cobranzasBulkCandidates('filtered').length;
+    seleccionarCobranzasBulkScope(pending === 0 && filtered > 0 ? 'filtered' : 'pending');
+    if (!dialog.open) dialog.showModal();
+    if (!cobranzasRows.length) {
+        loadCobranzas().then(() => { if (dialog.open) refreshCobranzasBulkSetup(); });
+    }
+}
+
+function mostrarCobranzasBulkActual() {
+    const student = cobranzasBulkQueue[cobranzasBulkIndex];
+    if (!student) return finalizarCobranzasBulk();
+
+    const total = cobranzasBulkQueue.length;
+    const phone = normalizePeruPhone(student.parent_phone);
+    const due = student._due || getCobranzaDueMeta(student.valid_until);
+    const step = document.getElementById('cobranzas-bulk-step');
+    const bar = document.getElementById('cobranzas-bulk-bar');
+    const name = document.getElementById('cobranzas-bulk-name');
+    const meta = document.getElementById('cobranzas-bulk-meta');
+    const preview = document.getElementById('cobranzas-bulk-preview');
+
+    if (step) step.textContent = `${cobranzasBulkIndex + 1} de ${total}`;
+    if (bar) {
+        const percent = Math.round((cobranzasBulkIndex / total) * 100);
+        bar.setAttribute('aria-valuenow', String(percent));
+        const fill = bar.firstElementChild;
+        if (fill) fill.style.width = `${percent}%`;
+    }
+    if (name) name.textContent = student.full_name || 'Alumno sin nombre';
+    if (meta) meta.textContent = `${student.parent_name || 'Apoderado no registrado'} · +${phone}`;
+    if (preview) preview.textContent = buildCobranzaWhatsAppMessage(student, due);
+}
+
+function iniciarCobranzasBulk() {
+    cobranzasBulkQueue = cobranzasBulkCandidates(cobranzasBulkScope);
+    cobranzasBulkIndex = 0;
+    cobranzasBulkSent = 0;
+    cobranzasBulkSkipped = [];
+    if (!cobranzasBulkQueue.length) {
+        showToast('No hay apoderados con teléfono en ese grupo.', 'error');
+        return;
+    }
+    setCobranzasBulkView('run');
+    mostrarCobranzasBulkActual();
+}
+
+function enviarCobranzasBulkActual() {
+    const student = cobranzasBulkQueue[cobranzasBulkIndex];
+    if (!student) return;
+    const phone = normalizePeruPhone(student.parent_phone);
+    if (!phone) return omitirCobranzasBulkActual();
+
+    const due = student._due || getCobranzaDueMeta(student.valid_until);
+    const message = buildCobranzaWhatsAppMessage(student, due);
+
+    // Igual que en el envío individual: abrimos durante el toque para que el
+    // navegador móvil no lo bloquee como ventana emergente.
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
+    registrarCobranzaNotificacion(student, message);
+
+    student._last_notified_at = new Date().toISOString();
+    cobranzasBulkSent += 1;
+    cobranzasBulkIndex += 1;
+    mostrarCobranzasBulkActual();
+}
+
+function omitirCobranzasBulkActual() {
+    const student = cobranzasBulkQueue[cobranzasBulkIndex];
+    if (student) cobranzasBulkSkipped.push(student);
+    cobranzasBulkIndex += 1;
+    mostrarCobranzasBulkActual();
+}
+
+function finalizarCobranzasBulk() {
+    setCobranzasBulkView('done');
+    const total = cobranzasBulkQueue.length;
+    const text = document.getElementById('cobranzas-bulk-done-text');
+    const detail = document.getElementById('cobranzas-bulk-done-detail');
+    const retry = document.getElementById('cobranzas-bulk-retry');
+    if (text) {
+        text.textContent = cobranzasBulkSent
+            ? `Avisaste a ${cobranzasBulkSent} de ${total} apoderados.`
+            : 'No se envió ningún recordatorio.';
+    }
+    if (detail) {
+        detail.textContent = cobranzasBulkSkipped.length
+            ? `Omitiste ${cobranzasBulkSkipped.length}. Puedes enviarles el recordatorio ahora.`
+            : 'Los apoderados notificados ya quedan marcados en su tarjeta.';
+    }
+    if (retry) retry.hidden = cobranzasBulkSkipped.length === 0;
+    renderFilteredCobranzas();
+    refreshCobranzasNavState();
+}
+
+function reintentarCobranzasBulkOmitidos() {
+    const pendientes = cobranzasBulkSkipped.filter(student => normalizePeruPhone(student.parent_phone));
+    if (!pendientes.length) return;
+    cobranzasBulkQueue = pendientes;
+    cobranzasBulkIndex = 0;
+    cobranzasBulkSent = 0;
+    cobranzasBulkSkipped = [];
+    setCobranzasBulkView('run');
+    mostrarCobranzasBulkActual();
+}
+
+function cerrarCobranzasBulk() {
+    const dialog = document.getElementById('cobranzas-bulk');
+    if (dialog?.open) dialog.close();
+}
+
+document.getElementById('cobranzas-bulk-open')?.addEventListener('click', abrirCobranzasBulk);
+document.getElementById('cobranzas-bulk-close')?.addEventListener('click', cerrarCobranzasBulk);
+document.getElementById('cobranzas-bulk-start')?.addEventListener('click', iniciarCobranzasBulk);
+document.getElementById('cobranzas-bulk-send')?.addEventListener('click', enviarCobranzasBulkActual);
+document.getElementById('cobranzas-bulk-skip')?.addEventListener('click', omitirCobranzasBulkActual);
+document.getElementById('cobranzas-bulk-finish')?.addEventListener('click', finalizarCobranzasBulk);
+document.getElementById('cobranzas-bulk-retry')?.addEventListener('click', reintentarCobranzasBulkOmitidos);
+document.getElementById('cobranzas-bulk-done-close')?.addEventListener('click', cerrarCobranzasBulk);
+document.querySelectorAll('input[name="cobranzas-bulk-scope"]').forEach(input => {
+    input.addEventListener('change', () => {
+        if (input.checked) seleccionarCobranzasBulkScope(input.value);
+    });
+});
+document.getElementById('cobranzas-bulk')?.addEventListener('close', () => {
+    if (cobranzasBulkSent > 0) {
+        renderFilteredCobranzas();
+        refreshCobranzasNavState();
+    }
+});
 
 registerAdminPwa().then(() => refreshCobranzasNavState());
 document.addEventListener('visibilitychange', () => {
