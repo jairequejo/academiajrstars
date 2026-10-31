@@ -323,7 +323,7 @@ async function loadCobranzas() {
     try {
         const { data, error } = await window.supabaseClient
             .from('students')
-            .select('id, full_name, first_names, last_names, dni, codigo_legacy, valid_until, parent_name, parent_phone, parent_phone_secondary, tarifa_mensual, notes, historial_notificaciones(fecha_envio)')
+            .select('id, full_name, first_names, last_names, dni, codigo_legacy, valid_until, parent_name, parent_phone, parent_phone_secondary, tarifa_mensual, categoria, sede, horario, notes, historial_notificaciones(fecha_envio)')
             .eq('is_active', true)
             .or(`valid_until.lte.${getCobranzasLimit()},valid_until.is.null`)
             .order('valid_until', { ascending: true });
@@ -449,6 +449,17 @@ function renderCobranzaCard(student, now) {
         ? 'Falta teléfono'
         : wasNotified ? `Notificado · ${notificationAge}` : 'Notificar por WhatsApp';
 
+    // Datos del alumno a la vista y estado de mora.
+    const identificador = student.dni ? `DNI ${student.dni}` : (student.codigo_legacy ? `Código ${student.codigo_legacy}` : 'Sin DNI ni código');
+    const datosAlumno = [
+        identificador,
+        student.categoria ? `Cat. ${student.categoria}` : null,
+        student.sede ? student.sede : null,
+        student.horario || null
+    ].filter(Boolean).join(' · ');
+    const enMora = due.days < 0;
+    const observacion = (student.notes || '').trim();
+
     return `
         <article class="cobranza-card is-${due.state} ${wasNotified ? 'is-notified' : ''}">
             <div class="cobranza-timing">
@@ -460,6 +471,7 @@ function renderCobranzaCard(student, now) {
                 <span class="cobranza-avatar" aria-hidden="true">${escapeCobranzasHtml(rawName.charAt(0).toUpperCase())}</span>
                 <div>
                     <h2>${fullName}</h2>
+                    <p class="cobranza-alumno-meta">${escapeCobranzasHtml(datosAlumno)}</p>
                     <p class="cobranza-notification-state">${escapeCobranzasHtml(notificationText)}</p>
                 </div>
                 <strong class="cobranza-amount">S/ ${amount}</strong>
@@ -467,20 +479,25 @@ function renderCobranzaCard(student, now) {
             <div class="cobranza-contact">
                 <span>Apoderado</span><strong>${parentName}</strong><small>${escapeCobranzasHtml(phoneDisplay)}</small>
             </div>
-            <div class="cobranza-obs" style="margin: 0 15px 10px; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1); font-size: 0.7rem; color: var(--gray); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                <div style="line-height: 1.2; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><i>Nota: ${escapeCobranzasHtml(student.notes || '—')}</i></div>
-                <button type="button" data-cobranza-action="edit-obs" data-student-id="${id}" style="background:none; border:none; color:rgba(255,255,255,0.4); padding:4px; cursor:pointer; display:flex; align-items:center;" aria-label="Editar nota" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="../img/admin-icons.svg#edit"></use></svg>
+            <div class="cobranza-obs">
+                <span>Observaciones</span>
+                <p>${observacion ? escapeCobranzasHtml(observacion) : '<i>Sin observaciones.</i>'}</p>
+                <button type="button" data-cobranza-action="edit-obs" data-student-id="${id}" aria-label="Editar observación">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="../img/admin-icons.svg#edit"></use></svg>
                 </button>
             </div>
             <div class="cobranza-actions">
+                <button class="cobranza-action cobranza-action--view" type="button" data-cobranza-action="view" data-student-id="${id}">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="../img/admin-icons.svg#users"></use></svg>
+                    <span>Ver ficha</span>
+                </button>
                 <button class="cobranza-action cobranza-action--notify ${wasNotified ? 'is-sent' : ''}" type="button" data-cobranza-action="${wasNotified ? 'review-notify' : 'notify'}" data-student-id="${id}" ${phone ? '' : 'disabled'}>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-.9-.3-.1-.5-.2-.7.1-.2.3-.8 1-.9 1.2-.2.2-.4.2-.7.1-1.7-.8-2.9-1.7-3.8-3.5-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5L9.3 6.7c-.2-.6-.5-.5-.7-.5H8c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.8 1.2 3c.2.2 2.1 3.2 5 4.5 1.9.8 2.6.9 3.6.8.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4-.1 0-.4-.1-.7-.2ZM12 22a10 10 0 0 1-5-1.3L2 22l1.3-4.9A10 10 0 1 1 12 22Z"/></svg>
                     <span>${escapeCobranzasHtml(notifyLabel)}</span>
                 </button>
-                <button class="cobranza-action cobranza-action--disable" type="button" data-cobranza-action="disable" data-student-id="${id}">
+                ${enMora ? `<button class="cobranza-action cobranza-action--disable" type="button" data-cobranza-action="disable" data-student-id="${id}">
                     <span>Inhabilitar</span>
-                </button>
+                </button>` : ''}
             </div>
             ${wasNotified ? `
                 <div class="cobranza-renotify" data-renotify-for="${id}" hidden>
@@ -553,6 +570,19 @@ async function inhabilitarMoroso(studentId) {
     loadCobranzas();
 }
 
+async function verFichaCobranza(studentId) {
+    const id = String(studentId);
+    // La ficha lee de `alumnosData`; si el directorio aún no se cargó, lo pedimos.
+    if (!alumnosData.some(a => String(a.id) === id)) {
+        try { await loadAlumnos(); } catch (e) { console.error(e); }
+    }
+    if (window.adminAlumnoUI && typeof window.adminAlumnoUI.abrir === 'function') {
+        window.adminAlumnoUI.abrir(id);
+    } else {
+        showToast('La ficha del alumno no está disponible.', 'error');
+    }
+}
+
 function toggleCobranzasFilters() {
     const panel = document.getElementById('cobranzas-filters');
     const button = document.getElementById('cobranzas-filter-button');
@@ -601,6 +631,7 @@ document.getElementById('cobranzas-list')?.addEventListener('click', event => {
     if (button.dataset.cobranzaAction === 'confirm-renotify') sendCobranzaWhatsApp(studentId, true);
     if (button.dataset.cobranzaAction === 'disable') inhabilitarMoroso(studentId);
     if (button.dataset.cobranzaAction === 'edit-obs') editarObservacion(studentId);
+    if (button.dataset.cobranzaAction === 'view') verFichaCobranza(studentId);
 });
 
 async function editarObservacion(studentId) {
