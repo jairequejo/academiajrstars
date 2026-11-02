@@ -2,7 +2,7 @@
 
 **Última revisión:** 19 de octubre de 2026.
 
-Sitio estático servido en GitHub Pages: `https://jairequejo.github.io/academiajrstars/`. La raíz del repositorio es la raíz pública del sitio.
+Sitio estático servido en GitHub Pages: `https://academiajrstars.com/`. La raíz del repositorio es la raíz pública del sitio.
 
 ## Qué se hizo (19/10/2026)
 

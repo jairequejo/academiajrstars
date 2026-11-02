@@ -4,8 +4,8 @@
 
 ## Páginas
 
-- [Inicio](https://jairequejo.github.io/academiajrstars/): propuesta de fútbol formativo, primera visita y preguntas frecuentes. Contacto por WhatsApp +51 955 515 693.
-- [Cómo elegir una academia de fútbol en Cajamarca](https://jairequejo.github.io/academiajrstars/guia-academia-futbol-cajamarca/): guía para familias con criterios de grupo, sede, horario, costo total, entrenador y seguridad.
+- [Inicio](https://academiajrstars.com/): propuesta de fútbol formativo, primera visita y preguntas frecuentes. Contacto por WhatsApp +51 955 515 693.
+- [Cómo elegir una academia de fútbol en Cajamarca](https://academiajrstars.com/guia-academia-futbol-cajamarca/): guía para familias con criterios de grupo, sede, horario, costo total, entrenador y seguridad.
 
 ## Notas
 

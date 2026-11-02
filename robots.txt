@@ -10,4 +10,4 @@ Disallow: /scripts/
 Disallow: /docs/
 Disallow: /*.md$
 
-Sitemap: https://jairequejo.github.io/academiajrstars/sitemap.xml
+Sitemap: https://academiajrstars.com/sitemap.xml
