@@ -786,6 +786,61 @@
   box-shadow: 0 24px 70px rgba(0,0,0,.6);
 }
 .share-progress-card > img { width: 72px; height: 72px; object-fit: contain; filter: drop-shadow(0 8px 15px rgba(0,0,0,.55)); }
+
+/* Estado de descarga: la tarjeta pasa de "cargando" a visor centrado de la
+   imagen ya generada. Sin esto la imagen (1080x1350) desborda y se ve torcida. */
+.share-progress-card.is-download {
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+  width: min(100%, 320px);
+  max-height: min(92vh, 780px);
+  padding: 14px;
+  border-color: rgba(245,166,35,.35);
+  background: linear-gradient(165deg, #0c1f3c 0%, #050b16 55%, #0a1526 100%);
+  overflow: auto;
+}
+.share-progress-card.is-download > img { display: none; }
+.share-progress-card.is-download .share-progress-copy > span,
+.share-progress-card.is-download .share-progress-copy > strong,
+.share-progress-card.is-download .share-progress-copy > small,
+.share-progress-card.is-download .share-progress-track,
+.share-progress-card.is-download .share-ready-actions { display: none; }
+.share-download { display: grid; gap: 12px; }
+.share-download[hidden] { display: none; }
+.share-download > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(245,166,35,.35);
+  box-shadow: 0 24px 60px rgba(0,0,0,.55);
+  background: #050b16;
+}
+.share-download-actions { display: grid; gap: 8px; }
+.share-download-actions a {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 46px;
+  border-radius: 12px;
+  font: 900 11px/1 Inter, sans-serif;
+  letter-spacing: .08em;
+  text-decoration: none;
+  cursor: pointer;
+}
+.share-download-actions a#share-download-link {
+  color: #111; background: linear-gradient(90deg, #f5a623, #ffc04d);
+  box-shadow: 0 10px 24px rgba(245,166,35,.22);
+}
+.share-download-actions a#share-open-link {
+  color: #f3dcae; background: rgba(245,166,35,.10);
+  border: 1px solid rgba(245,166,35,.4);
+}
+.share-download-actions button {
+  min-height: 42px; border: 0; border-radius: 12px;
+  color: #d8dbe2; background: transparent;
+  font: 800 11px/1 Inter, sans-serif; letter-spacing: .06em; cursor: pointer;
+}
+.share-download > small { color: #9aa0aa; font-size: 10px; line-height: 1.55; text-align: center; }
 .share-progress-copy { min-width: 0; }
 .share-progress-copy > span { display: block; color: #f5a623; font-size: 8px; font-weight: 900; letter-spacing: .17em; }
 .share-progress-copy > strong { display: block; margin-top: 5px; font-size: 13px; line-height: 1.35; }
@@ -1246,7 +1301,7 @@ progress.pc-ritmo-hito-pista::-moz-progress-bar { background: linear-gradient(90
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 246px minmax(0, 1fr) 230px;
+  grid-template-columns: 238px minmax(0, 1fr) 238px;
   align-items: center;
   gap: 34px;
 }
