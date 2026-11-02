@@ -1514,10 +1514,12 @@ function construirTarjetaCompartir() {
     el.innerHTML = `
       <div class="sc-bg">
         <span class="sc-halo"></span>
+        <span class="sc-halo-oro"></span>
         <span class="sc-banda"></span>
         <span class="sc-puntos"></span>
         <span class="sc-aro"></span>
-        <strong class="sc-fantasma">${total}</strong>
+        <span class="sc-filete"></span>
+        <img class="sc-sello" src="../img/escudo.png" alt="">
       </div>
 
       <header class="sc-top">
@@ -1526,6 +1528,7 @@ function construirTarjetaCompartir() {
           <div>
             <span>ACADEMIA DE FÚTBOL</span>
             <strong>JR STARS</strong>
+            <small class="sc-lema">SANGRE DE CAMPEÓN</small>
           </div>
         </div>
         <div class="sc-temporada">TEMPORADA ${season}</div>
@@ -1544,7 +1547,7 @@ function construirTarjetaCompartir() {
             <span class="sc-llama">🔥</span>
             <strong>${racha > 0 ? racha : '—'}</strong>
           </div>
-          <span class="sc-racha-unidad">${racha > 0 ? 'SEGUIDAS' : 'SIN RACHA'}</span>
+          <span class="sc-racha-unidad">${racha > 0 ? 'ENTRENOS SEGUIDOS' : 'SIN RACHA'}</span>
           <span class="sc-racha-titulo">${esc(d.streakTitle || '')}</span>
         </div>
       </section>
