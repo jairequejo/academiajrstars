@@ -681,6 +681,82 @@ function cobranzasBulkCandidates(scope) {
     return base.filter(student => Boolean(normalizePeruPhone(student.parent_phone)));
 }
 
+function escapeVCardValue(value) {
+    return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/\r?\n/g, '\\n')
+        .replace(/,/g, '\\,')
+        .replace(/;/g, '\\;')
+        .trim();
+}
+
+function foldVCardLine(line) {
+    if (line.length <= 75) return line;
+    const parts = [line.slice(0, 75)];
+    for (let i = 75; i < line.length; i += 74) parts.push(` ${line.slice(i, i + 74)}`);
+    return parts.join('\r\n');
+}
+
+function cobranzasVcfContacts(students) {
+    const groups = new Map();
+    students.forEach(student => {
+        const phone = normalizePeruPhone(student.parent_phone);
+        if (!phone) return;
+        if (!groups.has(phone)) groups.set(phone, { phone, parents: [], students: [] });
+        const group = groups.get(phone);
+        const parent = String(student.parent_name || '').trim();
+        if (parent && !group.parents.includes(parent)) group.parents.push(parent);
+        const alumno = String(student.full_name || [student.first_names, student.last_names].filter(Boolean).join(' ')).trim();
+        if (alumno && !group.students.includes(alumno)) group.students.push(alumno);
+    });
+    return [...groups.values()];
+}
+
+function buildCobranzasVcf(students) {
+    const contacts = cobranzasVcfContacts(students);
+    const lines = [];
+    contacts.forEach(contact => {
+        const parentLabel = contact.parents.join(' / ') || 'Apoderado';
+        const alumnoLabel = contact.students.join(' / ');
+        const display = alumnoLabel
+            ? `JR Stars - ${parentLabel} (${alumnoLabel})`
+            : `JR Stars - ${parentLabel}`;
+        lines.push(
+            'BEGIN:VCARD',
+            'VERSION:3.0',
+            foldVCardLine(`FN:${escapeVCardValue(display)}`),
+            `N:${escapeVCardValue(parentLabel)};;;;`,
+            `TEL;TYPE=CELL:+${contact.phone}`,
+            'END:VCARD'
+        );
+    });
+    return { text: `${lines.join('\r\n')}\r\n`, count: contacts.length };
+}
+
+function descargarCobranzasVcf() {
+    const candidates = cobranzasBulkCandidates(cobranzasBulkScope);
+    const { text, count } = buildCobranzasVcf(candidates);
+    if (!count) {
+        showToast('No hay apoderados con teléfono en ese grupo.', 'error');
+        return;
+    }
+
+    const now = new Date();
+    const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+    const blob = new Blob([text], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `jr-stars-contactos-${stamp}.vcf`;
+    link.rel = 'noopener';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+
+    showToast(count === 1 ? 'Contacto descargado' : `${count} contactos descargados`);
+}
+
 function setCobranzasBulkView(view) {
     const setup = document.getElementById('cobranzas-bulk-setup');
     const run = document.getElementById('cobranzas-bulk-run');
@@ -704,6 +780,8 @@ function refreshCobranzasBulkSetup() {
     });
     const start = document.getElementById('cobranzas-bulk-start');
     if (start) start.disabled = cobranzasBulkCandidates(cobranzasBulkScope).length === 0;
+    const vcf = document.getElementById('cobranzas-bulk-vcf');
+    if (vcf) vcf.disabled = cobranzasBulkCandidates(cobranzasBulkScope).length === 0;
 }
 
 function seleccionarCobranzasBulkScope(value) {
@@ -834,6 +912,7 @@ function cerrarCobranzasBulk() {
 }
 
 document.getElementById('cobranzas-bulk-open')?.addEventListener('click', abrirCobranzasBulk);
+document.getElementById('cobranzas-bulk-vcf')?.addEventListener('click', descargarCobranzasVcf);
 document.getElementById('cobranzas-bulk-close')?.addEventListener('click', cerrarCobranzasBulk);
 document.getElementById('cobranzas-bulk-start')?.addEventListener('click', iniciarCobranzasBulk);
 document.getElementById('cobranzas-bulk-send')?.addEventListener('click', enviarCobranzasBulkActual);

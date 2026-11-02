@@ -788,6 +788,43 @@ body { font-size: 1rem; font-weight: 600; color: #000; }
   letter-spacing: 0;
 }
 
+.cobranzas-bulk-diffusion {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.85rem 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.cobranzas-bulk-diffusion strong {
+  display: block;
+  color: #111827;
+  font: 700 0.86rem/1.35 var(--font-body);
+}
+.cobranzas-bulk-diffusion p {
+  margin: 0.25rem 0 0;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+.cobranzas-bulk-vcf {
+  min-height: 44px;
+  padding: 0.6rem 0.8rem;
+  color: #1f2937;
+  background: #fff;
+  border: 1px solid #d8dde5;
+  border-radius: 10px !important;
+  font: 800 0.8rem/1.2 var(--font-body);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.cobranzas-bulk-vcf:hover { background: #f1f5f9; }
+.cobranzas-bulk-vcf:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.cobranzas-bulk-vcf:disabled:hover { background: #fff; }
+
 .cobranzas-bulk-progress {
   display: grid;
   gap: 0.4rem;
