@@ -1,6 +1,6 @@
 # SEO del sitio público — JR Stars
 
-**Última revisión:** 19 de octubre de 2026.
+**Última revisión:** 3 de noviembre de 2026.
 
 Sitio estático servido en GitHub Pages: `https://academiajrstars.com/`. La raíz del repositorio es la raíz pública del sitio.
 
@@ -14,6 +14,14 @@ Sitio estático servido en GitHub Pages: `https://academiajrstars.com/`. La raí
 - **Contenido nuevo:** página `guia-academia-futbol-cajamarca/` con criterios para elegir academia, checklist y preguntas frecuentes; se ampliaron las FAQ del inicio y se añadió una sección de criterios.
 - **Rastreo:** `robots.txt` con `Sitemap:` y exclusión de paneles privados; `sitemap.xml` con las dos páginas públicas; `llms.txt` para motores de IA.
 - **NAP:** nombre, ciudad y teléfono verificados en el pie de ambas páginas.
+
+## Escudo e iconos (03/11/2026)
+
+- Se exportó el escudo oficial transparente desde `Curva.png` (803 × 1050), facilitado por Jair en su carpeta de diseño y conservado en los activos de la guía de marca. Se mantienen sus proporciones y colores, con un margen transparente del 4 % en un lienzo cuadrado; no se añade un disco ni fondo blanco.
+- PNG públicos: `img/escudo-192.png` y `img/escudo-512.png`; icono pequeño: `img/favicons/jr-stars-48.png`; Apple: `img/favicons/apple-touch-icon.png` (180 × 180). `favicon.ico` incluye 16, 32, 48, 64, 128 y 256 px. Las variantes WebP y `img/escudo.png` se exportaron con el mismo escudo.
+- Inicio y guía declaran los mismos iconos. El `logo` de los datos estructurados apunta al PNG de 512 × 512 y declara sus dimensiones reales.
+- Google decide la presentación del resultado. El PNG transparente no elimina un posible contenedor circular del buscador. Tras publicar, el nuevo rastreo puede tardar días o semanas; se puede solicitar la indexación del inicio en Search Console. No se garantiza la fecha ni la aparición del icono.
+- Referencia: https://developers.google.com/search/docs/appearance/favicon-in-search
 
 ## Cómo verificar en local
 
