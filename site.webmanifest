@@ -1,0 +1,30 @@
+{
+  "name": "Academia de Fútbol JR Stars Cajamarca",
+  "short_name": "JR Stars",
+  "description": "Academia de fútbol formativo para niños y jóvenes en Cajamarca, Perú.",
+  "lang": "es-PE",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#06142d",
+  "theme_color": "#153A79",
+  "icons": [
+    {
+      "src": "/img/escudo-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/escudo-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/img/favicons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
